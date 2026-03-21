@@ -1,0 +1,55 @@
+{
+
+    "O1": {
+      "description": "Capacidad para identificar, formular y resolver problemas complejos de ingeniería aplicando principios de ingeniería, ciencia y matemáticas",
+      "indicadores": {
+        "1.1": "Analiza un problema de ingeniería identificando el contexto, las variables y los datos relevantes, así como los principios de ingeniería, ciencia y matemáticas aplicables.",
+        "1.2": "Formula el problema de ingeniería estableciendo objetivos, supuestos y restricciones, coherentes con el contexto del problema.",
+        "1.3": "Resuelve un problema complejo con base en principios de ingeniería, ciencia y matemáticas."
+      }
+    },
+    "O2": {
+      "description": "Capacidad para aplicar el diseño de ingeniería para producir soluciones que satisfagan las necesidades especificadas teniendo en cuenta la salud pública, la seguridad y el bienestar, así como los factores globales, culturales, sociales, ambientales y económicos.",
+      "indicadores": {
+        "2.1": "Define especificaciones y restricciones de diseño a partir de las necesidades específicas, considerando la salud pública, la seguridad y el bienestar, así como factores globales, culturales, sociales, ambientales y económicos.",
+        "2.2": "Propone alternativas de diseño del componente, sistema o proceso considerando requisitos y restricciones especificas.",
+        "2.3": "Evalúa que el diseño del componente, sistema o proceso cumpla con las especificaciones y restricciones especificas."
+      }
+    },
+    "O3": {
+        "description": "Capacidad para comunicarse eficazmente con una serie de audiencias",
+        "indicadores": {
+          "3.1": "Redacta informes técnicos usando tablas, gráficos o diagramas pertinentes para sustentar la explicación y facilitar la comprensión de la audiencia objetivo.",
+          "3.2": "Realiza presentaciones orales organizadas, ajustando el contenido y el lenguaje a la audiencia objetivo."
+        }
+      },
+      "O4": {
+        "description": "Capacidad para reconocer las responsabilidades éticas y profesionales en situaciones de ingeniería y hacer juicios informados, que deben considerar el impacto de las soluciones de ingeniería en contextos globales, económicos, ambientales y sociales.",
+        "indicadores": {
+          "4.1": "Reconoce las responsabilidades éticas y profesionales en casos o situciones de ingeniería en contextos globales, económicos ambientales o sociales.",
+          "4.2": "Emite juicios fundamentados acerca del impacto de las soluciones de ingeniería aplicada en contextos globales, económicos, ambientales o sociales."
+        }
+      },
+      "O5": {
+        "description": "Capacidad para funcionar eficazmente en un equipo cuyos miembros conjuntamente proporcionan liderazgo, crean un entorno colaborativo e inclusivo, establecen metas, planifican tareas y cumplen objetivos.",
+        "indicadores": {
+          "5.1": "Contribuye en la elaboración de un plan de trabajo en equipo que incluye objetivos, roles, y tareas, asignando responsabilidades según capacidades y disponibilidad del equipo.",
+          "5.2": "Participa y se comunica de forma efectiva con su equipo de trabajo, contribuyendo activamente al cumplimiento de los objetivos comunes."
+        }
+      },
+      "O6": {
+        "description": "Capacidad para desarrollar y llevar a cabo la experimentación adecuada, analizar e interpretar los datos y utilizar el juicio de ingeniería para sacar conclusiones",
+        "indicadores": {
+          "6.1": "Desarrolla experimentos pertinentes al problema, utilizando procedimientos, instrumentos o herramientas de ingeniería adecuadas.",
+          "6.2": "Aplica métodos de análisis e interpretación de datos a resultados experimentales.",
+          "6.3": "Elabora conclusiones sustentadas derivadas de experimentos realizados empleando el juicio ingenieril."
+        }
+      },
+      "O7": {
+        "description": "Capacidad para adquirir y aplicar nuevos conocimientos según sea necesario, utilizando estrategias de aprendizaje adecuadas",
+        "indicadores": {
+          "7.1": "Demuestra la capacidad de identificar y aplicar nuevo conocimiento aplicando estrategias de aprendizaje autónomo."
+        }
+      }
+
+  }
