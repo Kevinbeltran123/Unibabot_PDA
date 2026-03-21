@@ -1,0 +1,252 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\begin{document}
+
+\title{UnibaBot PDA: An Intelligent Agent for Automated Compliance Verification of Academic Development Plans Using RAG and Fine-Tuned LLMs}
+
+\author{
+\IEEEauthorblockN{Kevin Beltr\'{a}n Mart\'{i}nez}
+\IEEEauthorblockA{Code: 2220221003\\
+Systems Engineering\\
+Faculty of Engineering\\
+University of Ibagu\'{e}\\
+Ibagu\'{e}, Colombia}
+\and
+\IEEEauthorblockN{Jeryleefth Lasso Motta}
+\IEEEauthorblockA{Code: 2220231074\\
+Systems Engineering\\
+Faculty of Engineering\\
+University of Ibagu\'{e}\\
+Ibagu\'{e}, Colombia}
+}
+
+\maketitle
+
+\begin{abstract}
+Each semester, academic program offices at the University of Ibagu\'{e} must manually review over twenty Academic Development Plans (PDAs) to verify compliance with institutional improvement guidelines. This process is time-consuming, inconsistent, and prone to human error. We propose UnibaBot PDA, an intelligent agent that automates this verification by combining Retrieval-Augmented Generation (RAG) with a fine-tuned large language model (LLM). The system encodes institutional guidelines into a vector database and uses semantic retrieval to identify the relevant normative criteria for each PDA section. A domain-specialized LLM, fine-tuned using QLoRA on a compliance-analysis dataset, then evaluates each section and generates a structured report identifying compliant sections, violations with the specific rule breached, and extraneous content. This paper presents the research problem, reviews the state of the art in RAG architectures, LLM fine-tuning techniques, and automated compliance checking, and defines the goals and research questions that guide the development of the system.
+\end{abstract}
+
+\begin{IEEEkeywords}
+large language models, retrieval-augmented generation, fine-tuning, QLoRA, compliance verification, academic quality assurance, intelligent agents
+\end{IEEEkeywords}
+
+% ==============================================================
+\section{Introduction}
+% ==============================================================
+
+Each semester, the offices of the different academic programs at the University of Ibagu\'{e} face the demanding task of manually reviewing more than twenty Academic Development Plans (PDAs) to ensure that each one complies with the institutional guidelines and improvement directives issued for that period. This verification process is currently performed by hand, requiring faculty and administrative staff to read through each document in detail, cross-reference it against a set of normative criteria, and document any discrepancies found. The volume of documents involved, combined with the inherent subjectivity of human review, creates conditions where errors can go undetected, criteria may be applied inconsistently across reviewers, and the process as a whole introduces significant delays into the academic calendar. These inefficiencies represent a risk not only to institutional quality assurance but also to the timely preparation of courses each semester.
+
+PDAs follow a semi-standardized template that includes identifiable sections such as learning outcomes, assessment methods, course schedules, and improvement actions from the previous semester. The institutional guidelines serve as the normative reference against which each of these sections is evaluated. Both documents are primarily written in Spanish, which introduces a multilingual processing requirement that the system must address.
+
+To address this challenge, we propose UnibaBot PDA, an intelligent agent capable of automatically analyzing each PDA against the current semester's institutional guidelines and generating a structured compliance report. The system receives as input a PDF document corresponding to a PDA and produces as output a detailed report identifying which sections do not meet the established requirements and specifying the corrections that should be made. By automating this workflow, UnibaBot PDA aims to reduce the review time from days to minutes, eliminate human inconsistency in the application of criteria, and free program staff to focus on higher-level academic decision-making rather than document processing.
+
+The system architecture combines two complementary techniques from the current landscape of large language models. First, Retrieval-Augmented Generation (RAG) \cite{lewis2020rag} is used to encode the institutional guidelines into a vector database and retrieve the most relevant normative passages for each PDA section at inference time. Second, a pre-trained LLM is fine-tuned using parameter-efficient methods---specifically QLoRA \cite{dettmers2023qlora}---on a dataset of compliance-analysis examples to specialize the model in the task of evaluating academic documents against normative criteria.
+
+The remainder of this paper is organized as follows. Section~II reviews the state of the art across three key areas: RAG architectures for knowledge-intensive tasks, parameter-efficient fine-tuning techniques for LLMs, and automated compliance checking systems. Section~III formulates the research goals and questions. Section~IV describes the proposed system architecture. Section~V outlines the planned evaluation methodology. Section~VI concludes with a discussion of expected contributions.
+
+% ==============================================================
+\section{State of the Art}
+% ==============================================================
+
+This section reviews the foundational techniques and recent advances that inform the design of UnibaBot PDA. The review is organized into four areas: the Transformer architecture and its descendants, retrieval-augmented generation, parameter-efficient fine-tuning methods, and automated compliance verification systems.
+
+% --------------------------------------------------------------
+\subsection{Transformer Architecture and Large Language Models}
+% --------------------------------------------------------------
+
+The Transformer architecture, introduced by Vaswani et al. \cite{vaswani2017attention}, replaced recurrent and convolutional sequence models with a mechanism based entirely on self-attention. The core innovation---scaled dot-product attention, defined as $\text{Attention}(Q,K,V) = \text{softmax}(QK^T / \sqrt{d_k})V$---allows the model to relate any pair of positions in the input sequence regardless of their distance, enabling effective capture of long-range dependencies. The multi-head variant projects queries, keys, and values into multiple subspaces, allowing different heads to attend to different types of relationships simultaneously. This architecture has become the foundation of virtually all modern language models.
+
+The Generative Pre-trained Transformer (GPT) paradigm, initiated by Radford et al. \cite{radford2018gpt1}, demonstrated that pre-training a Transformer decoder on large text corpora via unsupervised language modeling, followed by supervised fine-tuning on downstream tasks, produces strong task performance with minimal architecture changes. GPT-2 \cite{radford2019gpt2} scaled this approach to 1.5 billion parameters and 40GB of training data, showing that sufficiently large models can perform multiple tasks without explicit fine-tuning (zero-shot). A key architectural change introduced by GPT-2 is Pre-Norm---placing Layer Normalization before each sub-layer rather than after---which significantly improves training stability for deep models.
+
+In parallel, Devlin et al. \cite{devlin2019bert} proposed BERT, which uses the Transformer encoder with bidirectional attention and is pre-trained with Masked Language Modeling (MLM) and Next Sentence Prediction objectives. While BERT cannot generate text autoregressively, it excels at text understanding tasks such as classification and extraction---capabilities directly relevant to compliance verification, where the goal is to classify and extract information from document sections rather than generate free-form text.
+
+The subsequent release of open-weight foundation models has made these capabilities accessible for academic projects with limited computational resources. LLaMA \cite{touvron2023llama} demonstrated that smaller, well-trained models (7B--65B parameters) can match or exceed the performance of much larger models. Mistral 7B \cite{jiang2023mistral} further advanced efficiency with innovations such as grouped-query attention and sliding window attention. These models form the candidate pool for the fine-tuning component of our system, with Llama 3.2 3B and Mistral 7B being particularly suitable given the hardware constraints of Google Colab environments.
+
+% --------------------------------------------------------------
+\subsection{Retrieval-Augmented Generation}
+% --------------------------------------------------------------
+
+Retrieval-Augmented Generation (RAG), introduced by Lewis et al. \cite{lewis2020rag}, addresses a fundamental limitation of parametric language models: their knowledge is frozen at training time and cannot be updated without retraining. RAG augments the generative model with a non-parametric retrieval component that, given an input query, retrieves relevant passages from an external knowledge base and conditions the generation on both the query and the retrieved context. The original formulation uses a dense retriever (based on a bi-encoder architecture with BERT) paired with a sequence-to-sequence generator (BART), jointly trained end-to-end.
+
+Gao et al. \cite{gao2024ragsurvey} provide a comprehensive survey of the RAG paradigm as it has evolved since the original proposal. They identify three stages of development: Naive RAG (retrieve-then-read), Advanced RAG (with pre-retrieval query optimization and post-retrieval re-ranking), and Modular RAG (with interchangeable components for routing, retrieval, and generation). For compliance verification tasks, Advanced RAG with domain-specific chunking strategies is particularly relevant, as the effectiveness of retrieval depends heavily on how the normative documents are segmented.
+
+Fan et al. \cite{fan2024ragmeeting} further analyze the interaction between retrieval and generation components, emphasizing that the quality of the retrieved context is the primary determinant of output quality. They show that retrieval failures---where the correct passage exists in the knowledge base but is not retrieved---account for the majority of errors in RAG systems. This finding motivates the use of domain-adapted embedding models and careful chunking strategies for the institutional guidelines in our system.
+
+Jimeno Yepes et al. \cite{jimenoyepes2024chunking} investigate chunking strategies specifically for financial report analysis, a domain with structural similarities to academic compliance checking: both involve semi-structured documents with section headers, normative references, and tabular data. Their results show that semantically-aware chunking (respecting section boundaries rather than using fixed-size windows) improves retrieval precision by 15--20\% compared to naive approaches.
+
+Sun et al. \cite{sun2025compliance} present a compliance checking framework based directly on RAG, demonstrating that retrieval-augmented models outperform purely parametric approaches on regulatory compliance tasks. Their system retrieves relevant regulatory clauses and uses them to condition the model's compliance assessment, an architecture directly analogous to our proposed approach for PDA verification.
+
+% --------------------------------------------------------------
+\subsection{Parameter-Efficient Fine-Tuning}
+% --------------------------------------------------------------
+
+Full fine-tuning of a large language model requires updating all parameters, which for a 7B-parameter model demands over 80GB of GPU memory in FP16 precision---far beyond the resources available in typical academic settings. Parameter-efficient fine-tuning (PEFT) methods address this by modifying only a small subset of the model's parameters while keeping the rest frozen, dramatically reducing memory and compute requirements.
+
+LoRA (Low-Rank Adaptation), proposed by Hu et al. \cite{hu2022lora}, is the most widely adopted PEFT method. Instead of updating a weight matrix $W \in \mathbb{R}^{d \times d}$ directly, LoRA adds two low-rank matrices $A \in \mathbb{R}^{d \times r}$ and $B \in \mathbb{R}^{r \times d}$ where $r \ll d$, such that the forward pass becomes $h = Wx + BAx$. Only $A$ and $B$ are trained, reducing the number of trainable parameters by a factor of up to 10,000$\times$. Hu et al. demonstrated that LoRA applied to GPT-3 175B achieves quality comparable to full fine-tuning across multiple benchmarks while requiring 3$\times$ less VRAM and introducing no additional inference latency, since the adapter weights can be merged into the base model after training.
+
+QLoRA, introduced by Dettmers et al. \cite{dettmers2023qlora}, extends LoRA by quantizing the base model to 4-bit precision using a novel Normal Float 4 (NF4) data type before applying the low-rank adapters. This reduces the memory footprint of a 7B-parameter model from approximately 16GB (FP16) to approximately 6GB, making fine-tuning feasible on consumer GPUs and free-tier Google Colab instances with T4 GPUs (16GB VRAM). Dettmers et al. further introduce Double Quantization (quantizing the quantization constants themselves) and Paged Optimizers (using CPU memory to handle gradient spikes) to maintain training stability. Their Guanaco 65B model, trained with QLoRA on a single A100, achieves 99.3\% of ChatGPT's performance on the Vicuna benchmark. For our project, QLoRA is the primary fine-tuning strategy, as it enables training on the available hardware while preserving model quality.
+
+Instruction tuning, as demonstrated by Wei et al. with FLAN \cite{wei2022flan}, showed that fine-tuning on datasets reformatted as instruction-response pairs across more than 60 NLP tasks produces models that can follow natural language instructions in a zero-shot manner, generalizing to unseen tasks. This provides the theoretical foundation for creating our compliance-analysis dataset: each training example takes the form of an instruction (``Evaluate this PDA section against the following guideline'') paired with a structured response identifying compliance status and specific issues.
+
+Taori et al. \cite{taori2023alpaca} demonstrated that instruction tuning can be achieved economically by using a larger model (GPT-3.5) to generate 52,000 synthetic instruction-response pairs, then fine-tuning a smaller model (LLaMA 7B) on this data. The resulting Alpaca model achieves quality comparable to text-davinci-003 on many instruction tasks at a total cost under \$600. This self-instruct approach \cite{wang2022selfinstruct} is directly applicable to our dataset construction: we can use a capable model to generate synthetic compliance-analysis examples from real PDA sections and guidelines, creating a training dataset without manual annotation.
+
+Rafailov et al. \cite{rafailov2023dpo} proposed Direct Preference Optimization (DPO), which reformulates reinforcement learning from human feedback (RLHF) as a simple classification problem over preference pairs, eliminating the need for a separate reward model and the instability of PPO training. DPO enables quality refinement of the fine-tuned model using pairs of preferred and rejected compliance reports, providing a path to improve output quality after the initial supervised fine-tuning stage.
+
+% --------------------------------------------------------------
+\subsection{Automated Compliance Checking}
+% --------------------------------------------------------------
+
+Automated compliance verification has been explored across several domains, though its application to academic document review remains largely unexplored.
+
+Amaral Cejas et al. \cite{amaral2023gdpr} applied NLP-based methods to automatically check data processing agreements against GDPR requirements. Their system extracts obligations from regulatory text, maps them to document sections, and classifies each section as compliant or non-compliant. While focused on data protection rather than academic quality, their methodology---normative decomposition followed by section-level classification---provides a useful architectural pattern for PDA verification.
+
+Zheng et al. \cite{zheng2025construction} address automated construction contract review using knowledge graph-enhanced LLMs. They construct a domain-specific knowledge graph from construction regulations and use it to augment LLM reasoning when evaluating contract clauses. Their results show that combining structured knowledge with LLM capabilities produces more accurate and interpretable compliance assessments than either approach alone.
+
+Savelka et al. \cite{savelka2023legal} investigate the effectiveness of LLMs for zero-shot semantic annotation of legal texts, finding that models can identify regulatory provisions, obligations, and exceptions with high accuracy even without domain-specific training. This suggests that the pre-trained language understanding capabilities of modern LLMs provide a strong foundation for compliance tasks, which can be further enhanced through fine-tuning.
+
+Sun et al. \cite{sun2025compliance} present the most directly relevant prior work: a compliance checking framework built on RAG that retrieves regulatory clauses to augment LLM-based assessment. Their system achieves state-of-the-art results on regulatory compliance benchmarks, demonstrating the viability of the RAG-based approach for normative verification tasks.
+
+Sun et al. \cite{sun2025docagent} propose DocAgent, an agentic framework for multi-modal long-context document understanding. DocAgent decomposes complex document analysis tasks into sub-tasks handled by specialized agents, an architectural pattern relevant to PDA verification where different sections may require different analysis strategies.
+
+A key gap in the existing literature is the absence of systems designed for academic compliance verification in Spanish-language institutional contexts. Our work addresses this gap by adapting RAG and fine-tuning techniques to the specific domain of university PDA review, where the normative framework, document structure, and language all differ from the regulatory and legal domains that have been the focus of prior work.
+
+% ==============================================================
+\section{Research Goals and Questions}
+% ==============================================================
+
+\subsection{General Objective}
+
+To design and implement an intelligent agent that automatically verifies the compliance of Academic Development Plans (PDAs) against institutional improvement guidelines, generating structured reports that identify non-compliant sections, the specific guidelines violated, and the corrections required.
+
+\subsection{Specific Objectives}
+
+\begin{enumerate}
+    \item To build a RAG pipeline that encodes institutional guidelines into a vector database and retrieves the most relevant normative passages for each PDA section using multilingual sentence-transformer embeddings.
+    \item To construct a domain-specific dataset of compliance-analysis examples and fine-tune an open-weight LLM using QLoRA to specialize it in the evaluation of academic documents against normative criteria.
+    \item To integrate the RAG retrieval component with the fine-tuned LLM into a unified agent that processes PDA documents end-to-end and produces structured compliance reports.
+    \item To evaluate the system's accuracy, consistency, and scalability against human expert reviews on a representative set of PDAs.
+\end{enumerate}
+
+\subsection{Research Questions}
+
+\begin{enumerate}
+    \item \textbf{RQ1:} To what extent can a RAG-augmented, fine-tuned LLM accurately identify non-compliant sections in PDAs compared to human expert reviewers?
+    \item \textbf{RQ2:} How does the combination of RAG retrieval with domain-specific fine-tuning compare to using either technique in isolation for compliance verification accuracy?
+    \item \textbf{RQ3:} What chunking and retrieval strategies for institutional guidelines maximize the precision of normative passage retrieval in Spanish-language academic documents?
+\end{enumerate}
+
+% ==============================================================
+\section{Proposed System Architecture}
+% ==============================================================
+
+UnibaBot PDA operates as a pipeline with four stages. First, the \textbf{document ingestion} module receives a PDA in PDF format, extracts the text, and segments it into sections based on the document's heading structure. Second, the \textbf{retrieval} module encodes each section using a multilingual sentence-transformer model and queries the vector database of institutional guidelines to retrieve the top-$k$ most semantically similar normative passages. Third, the \textbf{compliance analysis} module passes each (PDA section, retrieved guidelines) pair to the fine-tuned LLM, which generates a structured assessment indicating compliance status, the specific guideline violated (if any), and the recommended correction. Fourth, the \textbf{report generation} module aggregates the per-section assessments into a complete compliance report.
+
+The environment is deterministic and fully observable: the same PDA evaluated against the same guidelines will consistently produce the same compliance assessment. The system processes documents in batch mode, evaluating each PDA sequentially and producing the full set of compliance reports at the end of the run.
+
+The fine-tuning component uses QLoRA \cite{dettmers2023qlora} applied to a Llama 3.2 3B base model \cite{touvron2023llama}, selected for its balance of quality and accessibility on Google Colab T4 instances. The LoRA configuration targets the attention projection matrices ($q\_proj$, $k\_proj$, $v\_proj$, $o\_proj$) with rank $r=16$ and scaling factor $\alpha=16$. Training uses the SFTTrainer from the TRL library with 4-bit quantization, gradient accumulation, and FP16 mixed precision.
+
+% ==============================================================
+\section{Evaluation Methodology}
+% ==============================================================
+
+The system will be evaluated along three dimensions. \textbf{Correctness} measures the accuracy of compliance assessments using precision, recall, and F1 score against human expert annotations on a held-out set of PDAs. \textbf{Granularity} evaluates whether the system correctly identifies not only non-compliant sections but also the specific guideline violated and the appropriate correction, assessed through ROUGE-L \cite{lin2004rouge} and BERTScore \cite{zhang2020bertscore} against reference reports. \textbf{Scalability} measures the system's ability to process the full batch of 20+ PDAs per semester without manual intervention, evaluated by end-to-end processing time and error rate.
+
+Additionally, an ablation study will compare three configurations: (a) RAG with a base (non-fine-tuned) LLM, (b) a fine-tuned LLM without RAG, and (c) the full system combining RAG with the fine-tuned LLM. This comparison directly addresses RQ2 by isolating the contribution of each component.
+
+% ==============================================================
+\section{Conclusion}
+% ==============================================================
+
+This paper has presented UnibaBot PDA, an intelligent agent for automated compliance verification of Academic Development Plans at the University of Ibagu\'{e}. The system combines Retrieval-Augmented Generation for dynamic access to institutional guidelines with QLoRA-based fine-tuning to specialize an open-weight LLM in compliance analysis. The state of the art review has established that while RAG and fine-tuning techniques have been successfully applied to compliance checking in legal and regulatory domains, their application to academic quality assurance---particularly in Spanish-language institutional contexts---remains an open area. The proposed architecture, research questions, and evaluation methodology provide a clear path toward a system that can reduce the PDA review process from days to minutes while improving consistency and accuracy.
+
+% ==============================================================
+% REFERENCES
+% ==============================================================
+\begin{thebibliography}{00}
+
+\bibitem{lewis2020rag}
+P. Lewis et al., ``Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,'' \textit{Adv. Neural Inf. Process. Syst.}, vol. 33, pp. 9459--9474, 2020, arXiv:2005.11401.
+
+\bibitem{gao2024ragsurvey}
+Y. Gao et al., ``Retrieval-Augmented Generation for Large Language Models: A Survey,'' 2024, arXiv:2312.10997.
+
+\bibitem{fan2024ragmeeting}
+W. Fan et al., ``A Survey on RAG Meeting LLMs: Towards Retrieval-Augmented Large Language Models,'' in \textit{Proc. 30th ACM SIGKDD Conf. Knowl. Discovery Data Mining (KDD)}, 2024, pp. 6491--6501.
+
+\bibitem{sun2025compliance}
+J. Sun, Z. Luo, and Y. Li, ``A Compliance Checking Framework Based on Retrieval Augmented Generation,'' in \textit{Proc. 31st Int. Conf. Comput. Linguistics (COLING)}, 2025, pp. 2603--2615.
+
+\bibitem{jimenoyepes2024chunking}
+A. Jimeno Yepes, Y. You, J. Milczek, S. Laverde, and R. Li, ``Financial Report Chunking for Effective Retrieval Augmented Generation,'' 2024, arXiv:2402.05131.
+
+\bibitem{hu2022lora}
+E. J. Hu et al., ``LoRA: Low-Rank Adaptation of Large Language Models,'' in \textit{Proc. Int. Conf. Learn. Representations (ICLR)}, 2022, arXiv:2106.09685.
+
+\bibitem{dettmers2023qlora}
+T. Dettmers, A. Pagnoni, A. Holtzman, and L. Zettlemoyer, ``QLoRA: Efficient Finetuning of Quantized LLMs,'' \textit{Adv. Neural Inf. Process. Syst.}, vol. 36, 2023, arXiv:2305.14314.
+
+\bibitem{touvron2023llama}
+H. Touvron et al., ``LLaMA: Open and Efficient Foundation Language Models,'' 2023, arXiv:2302.13971.
+
+\bibitem{jiang2023mistral}
+A. Q. Jiang et al., ``Mistral 7B,'' 2023, arXiv:2310.06825.
+
+\bibitem{vaswani2017attention}
+A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, \L. Kaiser, and I. Polosukhin, ``Attention Is All You Need,'' in \textit{Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)}, 2017, arXiv:1706.03762.
+
+\bibitem{radford2018gpt1}
+A. Radford, K. Narasimhan, T. Salimans, and I. Sutskever, ``Improving Language Understanding by Generative Pre-Training,'' OpenAI Technical Report, 2018.
+
+\bibitem{radford2019gpt2}
+A. Radford, J. Wu, R. Child, D. Luan, D. Amodei, and I. Sutskever, ``Language Models are Unsupervised Multitask Learners,'' OpenAI Technical Report, 2019.
+
+\bibitem{devlin2019bert}
+J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, ``BERT: Pre-Training of Deep Bidirectional Transformers for Language Understanding,'' in \textit{Proc. NAACL}, 2019, arXiv:1810.04805.
+
+\bibitem{wei2022flan}
+J. Wei, M. Bosma, V. Y. Zhao, K. Guu, et al., ``Finetuned Language Models Are Zero-Shot Learners,'' in \textit{Proc. Int. Conf. Learn. Representations (ICLR)}, 2022, arXiv:2109.01652.
+
+\bibitem{taori2023alpaca}
+R. Taori, I. Gulrajani, T. Zhang, Y. Dubois, et al., ``Alpaca: A Strong, Replicable Instruction-Following Model,'' Stanford CRFM, 2023.
+
+\bibitem{wang2022selfinstruct}
+Y. Wang et al., ``Self-Instruct: Aligning Language Models with Self-Generated Instructions,'' 2022, arXiv:2212.10560.
+
+\bibitem{rafailov2023dpo}
+R. Rafailov, A. Sharma, E. Mitchell, C. D. Manning, et al., ``Direct Preference Optimization: Your Language Model is Secretly a Reward Model,'' in \textit{Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)}, 2023, arXiv:2305.18290.
+
+\bibitem{amaral2023gdpr}
+O. Amaral Cejas, M. I. Azeem, S. Abualhaija, and L. C. Briand, ``NLP-Based Automated Compliance Checking of Data Processing Agreements Against GDPR,'' \textit{IEEE Trans. Softw. Eng.}, vol. 49, no. 9, pp. 4282--4303, 2023.
+
+\bibitem{zheng2025construction}
+C. Zheng, S. Wong, X. Su, Y. Tang, A. Nawaz, and M. Kassem, ``Automating Construction Contract Review Using Knowledge Graph-Enhanced Large Language Models,'' \textit{Autom. Constr.}, vol. 175, art. no. 106179, 2025.
+
+\bibitem{savelka2023legal}
+J. Savelka, K. D. Ashley, M. A. Gray, H. Westermann, and H. Xu, ``The Unreasonable Effectiveness of Large Language Models in Zero-Shot Semantic Annotation of Legal Texts,'' \textit{Front. Artif. Intell.}, vol. 6, art. no. 1279794, 2023.
+
+\bibitem{sun2025docagent}
+L. Sun, L. He, S. Jia, Y. He, and C. You, ``DocAgent: An Agentic Framework for Multi-Modal Long-Context Document Understanding,'' in \textit{Proc. Conf. Empirical Methods Natural Lang. Process. (EMNLP)}, 2025, pp. 17701--17716.
+
+\bibitem{yao2023react}
+S. Yao et al., ``ReAct: Synergizing Reasoning and Acting in Language Models,'' in \textit{Proc. Int. Conf. Learn. Representations (ICLR)}, 2023, arXiv:2210.03629.
+
+\bibitem{lin2004rouge}
+C.-Y. Lin, ``ROUGE: A Package for Automatic Evaluation of Summaries,'' in \textit{Text Summarization Branches Out}, 2004, pp. 74--81.
+
+\bibitem{zhang2020bertscore}
+T. Zhang, V. Kishore, F. Wu, K. Q. Weinberger, and Y. Artzi, ``BERTScore: Evaluating Text Generation with BERT,'' in \textit{Proc. Int. Conf. Learn. Representations (ICLR)}, 2020, arXiv:1904.09675.
+
+\bibitem{kaplan2020scaling}
+J. Kaplan, S. McCandlish, T. Henighan, T. B. Brown, et al., ``Scaling Laws for Neural Language Models,'' 2020, arXiv:2001.08361.
+
+\end{thebibliography}
+
+\end{document}
