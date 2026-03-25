@@ -251,10 +251,3 @@ Cierra resumiendo la propuesta y lo que se establecio en el articulo. Resalta el
 
 ---
 
-## Tips para la exposicion
-
-- Hablen con seguridad. Si no saben una respuesta, digan "Eso es algo que evaluaremos en la fase de experimentacion" en vez de inventar.
-- No lean las diapositivas. Las diapositivas tienen bullets cortos, ustedes expanden con las explicaciones de esta guia.
-- Si les preguntan algo tecnico que no dominan, remitan a la seccion relevante del informe: "Eso lo detallamos en la seccion II-C del articulo."
-- Practiquen la transicion entre diapositivas. Cada una debe fluir naturalmente a la siguiente.
-- El tiempo total debe ser 8-10 minutos. Si ven que van largos, acorten las diapositivas 3-6 (estado del arte) que son las mas densas.
