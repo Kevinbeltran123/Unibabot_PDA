@@ -1,0 +1,1255 @@
+[
+  {
+    "id": "EST-001",
+    "tipo": "estructural",
+    "seccion_pda": "Informacion general",
+    "descripcion": "Todo PDA debe incluir la seccion de informacion general con: programa academico, nombre de la asignatura, tipo, modalidad, creditos, horarios, y datos del docente.",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "EST-002",
+    "tipo": "estructural",
+    "seccion_pda": "Estrategia pedagogica",
+    "descripcion": "Todo PDA debe declarar al menos una estrategia pedagogica (ej: aprendizaje basado en proyectos, clase magistral, estudio de casos).",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "EST-003",
+    "tipo": "estructural",
+    "seccion_pda": "Contexto de la asignatura",
+    "descripcion": "Todo PDA debe describir el contexto de la asignatura dentro del plan de estudios y su relacion con otras materias.",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "EST-004",
+    "tipo": "estructural",
+    "seccion_pda": "Descripcion y proposito",
+    "descripcion": "Todo PDA debe incluir una descripcion del curso y su proposito formativo.",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "EST-005",
+    "tipo": "estructural",
+    "seccion_pda": "Resultados de Aprendizaje Esperados",
+    "descripcion": "Todo PDA debe declarar Resultados de Aprendizaje Esperados (RAE) medibles y alineados con las competencias del curso.",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "EST-006",
+    "tipo": "estructural",
+    "seccion_pda": "Competencias",
+    "descripcion": "Todo PDA debe declarar las competencias especificas, genericas, SABER PRO y dimensiones institucionales que desarrolla.",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "EST-007",
+    "tipo": "estructural",
+    "seccion_pda": "Criterios de evaluacion",
+    "descripcion": "Todo PDA debe incluir criterios de valoracion y retroalimentacion con porcentajes y fechas.",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "EST-008",
+    "tipo": "estructural",
+    "seccion_pda": "Cronograma",
+    "descripcion": "Todo PDA debe incluir un cronograma de actividades por semana o periodo.",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "EST-009",
+    "tipo": "estructural",
+    "seccion_pda": "Bibliografia",
+    "descripcion": "Todo PDA debe incluir bibliografia de referencia.",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "EST-010",
+    "tipo": "estructural",
+    "seccion_pda": "Politicas y acuerdos",
+    "descripcion": "Todo PDA debe incluir politicas y acuerdos para el buen funcionamiento del curso.",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "EST-011",
+    "tipo": "estructural",
+    "seccion_pda": "Encuadre pedagogico",
+    "descripcion": "Todo PDA debe registrar la fecha del encuadre pedagogico y ser revisado y aprobado.",
+    "aplica_a": "todos"
+  },
+  {
+    "id": "COMP-001",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PENSAMIENTO COMPUTACIONAL (Antes LÓGICA ALGORITMICA) (22A52) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A52"
+  },
+  {
+    "id": "COMP-002",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PENSAMIENTO COMPUTACIONAL (Antes LÓGICA ALGORITMICA) (22A52) debe declarar la competencia generica 1b: Comprensión lectora en inglés",
+    "aplica_a": "22A52"
+  },
+  {
+    "id": "COMP-003",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PENSAMIENTO COMPUTACIONAL (Antes LÓGICA ALGORITMICA) (22A52) debe declarar la competencia generica 1g: Aprender a aprender",
+    "aplica_a": "22A52"
+  },
+  {
+    "id": "COMP-004",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PENSAMIENTO COMPUTACIONAL (Antes LÓGICA ALGORITMICA) (22A52) debe declarar la competencia generica 1l: Pensamiento sistémico",
+    "aplica_a": "22A52"
+  },
+  {
+    "id": "COMP-005",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PENSAMIENTO COMPUTACIONAL (Antes LÓGICA ALGORITMICA) (22A52) debe declarar SABER PRO SP5: Inglés",
+    "aplica_a": "22A52"
+  },
+  {
+    "id": "COMP-006",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de PENSAMIENTO COMPUTACIONAL (Antes LÓGICA ALGORITMICA) (22A52) debe declarar la dimension D4: Internacional",
+    "aplica_a": "22A52"
+  },
+  {
+    "id": "COMP-007",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PROGRAMACIÓN ESTRUCTURADA (22A69) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A69"
+  },
+  {
+    "id": "COMP-008",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PROGRAMACIÓN ESTRUCTURADA (22A69) debe declarar la competencia generica 1b: Comprensión lectora en inglés",
+    "aplica_a": "22A69"
+  },
+  {
+    "id": "COMP-009",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PROGRAMACIÓN ESTRUCTURADA (22A69) debe declarar la competencia generica 1e: Cultura científica y tecnológica",
+    "aplica_a": "22A69"
+  },
+  {
+    "id": "COMP-010",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PROGRAMACIÓN ESTRUCTURADA (22A69) debe declarar SABER PRO SP5: Inglés",
+    "aplica_a": "22A69"
+  },
+  {
+    "id": "COMP-011",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PROGRAMACIÓN DE COMPUTADORES (22A53) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A53"
+  },
+  {
+    "id": "COMP-012",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PROGRAMACIÓN DE COMPUTADORES (22A53) debe declarar la competencia generica 1b: Comprensión lectora en inglés",
+    "aplica_a": "22A53"
+  },
+  {
+    "id": "COMP-013",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PROGRAMACIÓN DE COMPUTADORES (22A53) debe declarar la competencia generica 1e: Cultura científica y tecnológica",
+    "aplica_a": "22A53"
+  },
+  {
+    "id": "COMP-014",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de PROGRAMACIÓN DE COMPUTADORES (22A53) debe declarar SABER PRO SP5: Inglés",
+    "aplica_a": "22A53"
+  },
+  {
+    "id": "COMP-015",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de PROGRAMACIÓN DE COMPUTADORES (22A53) debe declarar la dimension D4: Internacional",
+    "aplica_a": "22A53"
+  },
+  {
+    "id": "COMP-016",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de APO II- ING DE SISTEMAS (22A05) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A05"
+  },
+  {
+    "id": "COMP-017",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de APO II- ING DE SISTEMAS (22A05) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A05"
+  },
+  {
+    "id": "COMP-018",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de APO II- ING DE SISTEMAS (22A05) debe declarar la competencia generica 1b: Comprensión lectora en inglés",
+    "aplica_a": "22A05"
+  },
+  {
+    "id": "COMP-019",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de APO II- ING DE SISTEMAS (22A05) debe declarar la competencia generica 1e: Cultura científica y tecnológica",
+    "aplica_a": "22A05"
+  },
+  {
+    "id": "COMP-020",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de APO II- ING DE SISTEMAS (22A05) debe declarar SABER PRO SP5: Inglés",
+    "aplica_a": "22A05"
+  },
+  {
+    "id": "COMP-021",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de APO II- ING DE SISTEMAS (22A05) debe cubrir el indicador ABET 1.1: Analiza un problema de ingeniería identificando el contexto, las variables y los datos relevantes, así como los principios de ingeniería, ciencia y matemáticas aplicables.",
+    "aplica_a": "22A05"
+  },
+  {
+    "id": "COMP-022",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de APO II- ING DE SISTEMAS (22A05) debe cubrir el indicador ABET 1.3: Resuelve un problema complejo con base en principios de ingeniería, ciencia y matemáticas.",
+    "aplica_a": "22A05"
+  },
+  {
+    "id": "COMP-023",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de APO II- ING DE SISTEMAS (22A05) debe cubrir el indicador ABET 6.1: Desarrolla experimentos pertinentes al problema, utilizando procedimientos, instrumentos o herramientas de ingeniería adecuadas.",
+    "aplica_a": "22A05"
+  },
+  {
+    "id": "COMP-024",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de APO II- ING DE SISTEMAS (22A05) debe cubrir el indicador ABET 6.3: Elabora conclusiones sustentadas derivadas de experimentos realizados empleando el juicio ingenieril.",
+    "aplica_a": "22A05"
+  },
+  {
+    "id": "COMP-025",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de OBJETOS Y ESTRUCTURAS DE DATOS (22AXX) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22AXX"
+  },
+  {
+    "id": "COMP-026",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de OBJETOS Y ESTRUCTURAS DE DATOS (22AXX) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22AXX"
+  },
+  {
+    "id": "COMP-027",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de OBJETOS Y ESTRUCTURAS DE DATOS (22AXX) debe declarar la competencia generica 1b: Comprensión lectora en inglés",
+    "aplica_a": "22AXX"
+  },
+  {
+    "id": "COMP-028",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de OBJETOS Y ESTRUCTURAS DE DATOS (22AXX) debe declarar la competencia generica 1e: Cultura científica y tecnológica",
+    "aplica_a": "22AXX"
+  },
+  {
+    "id": "COMP-029",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de OBJETOS Y ESTRUCTURAS DE DATOS (22AXX) debe declarar SABER PRO SP5: Inglés",
+    "aplica_a": "22AXX"
+  },
+  {
+    "id": "COMP-030",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de OBJETOS Y ESTRUCTURAS DE DATOS (22AXX) debe cubrir el indicador ABET 1.1: Analiza un problema de ingeniería identificando el contexto, las variables y los datos relevantes, así como los principios de ingeniería, ciencia y matemáticas aplicables.",
+    "aplica_a": "22AXX"
+  },
+  {
+    "id": "COMP-031",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de OBJETOS Y ESTRUCTURAS DE DATOS (22AXX) debe cubrir el indicador ABET 1.3: Resuelve un problema complejo con base en principios de ingeniería, ciencia y matemáticas.",
+    "aplica_a": "22AXX"
+  },
+  {
+    "id": "COMP-032",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de OBJETOS Y ESTRUCTURAS DE DATOS (22AXX) debe cubrir el indicador ABET 6.1: Desarrolla experimentos pertinentes al problema, utilizando procedimientos, instrumentos o herramientas de ingeniería adecuadas.",
+    "aplica_a": "22AXX"
+  },
+  {
+    "id": "COMP-033",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de OBJETOS Y ESTRUCTURAS DE DATOS (22AXX) debe cubrir el indicador ABET 6.3: Elabora conclusiones sustentadas derivadas de experimentos realizados empleando el juicio ingenieril.",
+    "aplica_a": "22AXX"
+  },
+  {
+    "id": "COMP-034",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTRODUCCIÓN ANALÍTICA DE DATOS (APO II INGENIERÍAS) (23A57) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "23A57"
+  },
+  {
+    "id": "COMP-035",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTRODUCCIÓN ANALÍTICA DE DATOS (APO II INGENIERÍAS) (23A57) debe declarar la competencia generica 1e: Cultura científica y tecnológica",
+    "aplica_a": "23A57"
+  },
+  {
+    "id": "COMP-036",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTRODUCCIÓN ANALÍTICA DE DATOS (APO II INGENIERÍAS) (23A57) debe declarar la competencia generica 1f: Ética y ciudadanía",
+    "aplica_a": "23A57"
+  },
+  {
+    "id": "COMP-037",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTRODUCCIÓN ANALÍTICA DE DATOS (APO II INGENIERÍAS) (23A57) debe declarar la competencia generica 1g: Aprender a aprender",
+    "aplica_a": "23A57"
+  },
+  {
+    "id": "COMP-038",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTRODUCCIÓN ANALÍTICA DE DATOS (APO II INGENIERÍAS) (23A57) debe cubrir el indicador ABET 6.1: Desarrolla experimentos pertinentes al problema, utilizando procedimientos, instrumentos o herramientas de ingeniería adecuadas.",
+    "aplica_a": "23A57"
+  },
+  {
+    "id": "COMP-039",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTRODUCCIÓN ANALÍTICA DE DATOS (APO II INGENIERÍAS) (23A57) debe cubrir el indicador ABET 6.2: Aplica métodos de análisis e interpretación de datos a resultados experimentales.",
+    "aplica_a": "23A57"
+  },
+  {
+    "id": "COMP-040",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MÉTODOS NUMÉRICOS (22A06) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A06"
+  },
+  {
+    "id": "COMP-041",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MÉTODOS NUMÉRICOS (22A06) debe declarar la competencia generica 1d: Pensamiento matemático",
+    "aplica_a": "22A06"
+  },
+  {
+    "id": "COMP-042",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MÉTODOS NUMÉRICOS (22A06) debe declarar SABER PRO SP1: Razonamiento cuantitativo",
+    "aplica_a": "22A06"
+  },
+  {
+    "id": "COMP-043",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS TELEMÉTICOS (sala de redes) (22A13) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A13"
+  },
+  {
+    "id": "COMP-044",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS TELEMÉTICOS (sala de redes) (22A13) debe declarar la competencia generica 1a: Comunicación en lengua materna",
+    "aplica_a": "22A13"
+  },
+  {
+    "id": "COMP-045",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS TELEMÉTICOS (sala de redes) (22A13) debe declarar la competencia generica 1i: Trabajo en equipo y en ambientes interculturales",
+    "aplica_a": "22A13"
+  },
+  {
+    "id": "COMP-046",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS TELEMÉTICOS (sala de redes) (22A13) debe declarar SABER PRO SP2: Lectura crítica",
+    "aplica_a": "22A13"
+  },
+  {
+    "id": "COMP-047",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS TELEMÉTICOS (sala de redes) (22A13) debe cubrir el indicador ABET 1.2: Formula el problema de ingeniería estableciendo objetivos, supuestos y restricciones, coherentes con el contexto del problema.",
+    "aplica_a": "22A13"
+  },
+  {
+    "id": "COMP-048",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS TELEMÉTICOS (sala de redes) (22A13) debe cubrir el indicador ABET 1.3: Resuelve un problema complejo con base en principios de ingeniería, ciencia y matemáticas.",
+    "aplica_a": "22A13"
+  },
+  {
+    "id": "COMP-049",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS TELEMÉTICOS (sala de redes) (22A13) debe cubrir el indicador ABET 5.1: Contribuye en la elaboración de un plan de trabajo en equipo que incluye objetivos, roles, y tareas, asignando responsabilidades según capacidades y disponibilidad del equipo.",
+    "aplica_a": "22A13"
+  },
+  {
+    "id": "COMP-050",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS TELEMÉTICOS (sala de redes) (22A13) debe cubrir el indicador ABET 5.2: Participa y se comunica de forma efectiva con su equipo de trabajo, contribuyendo activamente al cumplimiento de los objetivos comunes.",
+    "aplica_a": "22A13"
+  },
+  {
+    "id": "COMP-051",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MATEMÁTICAS DISCRETAS (22A09) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A09"
+  },
+  {
+    "id": "COMP-052",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MATEMÁTICAS DISCRETAS (22A09) debe declarar la competencia generica 1d: Pensamiento matemático",
+    "aplica_a": "22A09"
+  },
+  {
+    "id": "COMP-053",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MATEMÁTICAS DISCRETAS (22A09) debe declarar la competencia generica 1e: Cultura científica y tecnológica",
+    "aplica_a": "22A09"
+  },
+  {
+    "id": "COMP-054",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MATEMÁTICAS DISCRETAS (22A09) debe declarar SABER PRO SP1: Razonamiento cuantitativo",
+    "aplica_a": "22A09"
+  },
+  {
+    "id": "COMP-055",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ESTRUCTURA DE DATOS (22A07) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A07"
+  },
+  {
+    "id": "COMP-056",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ESTRUCTURA DE DATOS (22A07) debe declarar la competencia generica 1b: Comprensión lectora en inglés",
+    "aplica_a": "22A07"
+  },
+  {
+    "id": "COMP-057",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ESTRUCTURA DE DATOS (22A07) debe declarar la competencia generica 1d: Pensamiento matemático",
+    "aplica_a": "22A07"
+  },
+  {
+    "id": "COMP-058",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ESTRUCTURA DE DATOS (22A07) debe declarar la competencia generica 1i: Trabajo en equipo y en ambientes interculturales",
+    "aplica_a": "22A07"
+  },
+  {
+    "id": "COMP-059",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ESTRUCTURA DE DATOS (22A07) debe declarar SABER PRO SP1: Razonamiento cuantitativo",
+    "aplica_a": "22A07"
+  },
+  {
+    "id": "COMP-060",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de ESTRUCTURA DE DATOS (22A07) debe declarar la dimension D4: Internacional",
+    "aplica_a": "22A07"
+  },
+  {
+    "id": "COMP-061",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE I (sala de redes) (22A08) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A08"
+  },
+  {
+    "id": "COMP-062",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE I (sala de redes) (22A08) debe declarar la competencia especifica C3: Formula y evalúa proyectos de ingeniería de software y gestión de las TIC, para su ejecución y administración, teniendo conciencia de sus implicaciones éticas, económicas y legales.",
+    "aplica_a": "22A08"
+  },
+  {
+    "id": "COMP-063",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE I (sala de redes) (22A08) debe declarar la competencia generica 1a: Comunicación en lengua materna",
+    "aplica_a": "22A08"
+  },
+  {
+    "id": "COMP-064",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE I (sala de redes) (22A08) debe declarar la competencia generica 1h: Pensamiento crítico",
+    "aplica_a": "22A08"
+  },
+  {
+    "id": "COMP-065",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE I (sala de redes) (22A08) debe declarar la competencia generica 1i: Trabajo en equipo y en ambientes interculturales",
+    "aplica_a": "22A08"
+  },
+  {
+    "id": "COMP-066",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE I (sala de redes) (22A08) debe declarar SABER PRO SP3: Comunicación escrita",
+    "aplica_a": "22A08"
+  },
+  {
+    "id": "COMP-067",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE I (sala de redes) (22A08) debe cubrir el indicador ABET 2.1: Define especificaciones y restricciones de diseño a partir de las necesidades específicas, considerando la salud pública, la seguridad y el bienestar, así como factores globales, culturales, sociales, ambientales y económicos.",
+    "aplica_a": "22A08"
+  },
+  {
+    "id": "COMP-068",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE I (sala de redes) (22A08) debe cubrir el indicador ABET 2.3: Evalúa que el diseño del componente, sistema o proceso cumpla con las especificaciones y restricciones especificas.",
+    "aplica_a": "22A08"
+  },
+  {
+    "id": "COMP-069",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE I (sala de redes) (22A08) debe cubrir el indicador ABET 5.1: Contribuye en la elaboración de un plan de trabajo en equipo que incluye objetivos, roles, y tareas, asignando responsabilidades según capacidades y disponibilidad del equipo.",
+    "aplica_a": "22A08"
+  },
+  {
+    "id": "COMP-070",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE I (sala de redes) (22A08) debe cubrir el indicador ABET 5.2: Participa y se comunica de forma efectiva con su equipo de trabajo, contribuyendo activamente al cumplimiento de los objetivos comunes.",
+    "aplica_a": "22A08"
+  },
+  {
+    "id": "COMP-071",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS DE CONTROL AUTOMÁTICO (22A12) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A12"
+  },
+  {
+    "id": "COMP-072",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS DE CONTROL AUTOMÁTICO (22A12) debe declarar la competencia generica 1b: Comprensión lectora en inglés",
+    "aplica_a": "22A12"
+  },
+  {
+    "id": "COMP-073",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS DE CONTROL AUTOMÁTICO (22A12) debe declarar la competencia generica 1e: Cultura científica y tecnológica",
+    "aplica_a": "22A12"
+  },
+  {
+    "id": "COMP-074",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de SISTEMAS DE CONTROL AUTOMÁTICO (22A12) debe declarar SABER PRO SP5: Inglés",
+    "aplica_a": "22A12"
+  },
+  {
+    "id": "COMP-075",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES MÓVILES (22A27) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A27"
+  },
+  {
+    "id": "COMP-076",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES MÓVILES (22A27) debe declarar la competencia generica 1b: Comprensión lectora en inglés",
+    "aplica_a": "22A27"
+  },
+  {
+    "id": "COMP-077",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES MÓVILES (22A27) debe declarar la competencia generica 1e: Cultura científica y tecnológica",
+    "aplica_a": "22A27"
+  },
+  {
+    "id": "COMP-078",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES MÓVILES (22A27) debe declarar la competencia generica 1j: Espíritu emprendedor",
+    "aplica_a": "22A27"
+  },
+  {
+    "id": "COMP-079",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES MÓVILES (22A27) debe declarar SABER PRO SP5: Inglés",
+    "aplica_a": "22A27"
+  },
+  {
+    "id": "COMP-080",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES MÓVILES (22A27) debe declarar la dimension D5: Espíritu emprendedor",
+    "aplica_a": "22A27"
+  },
+  {
+    "id": "COMP-081",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE PERSISTENCIA (sala de redes) (22A11) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A11"
+  },
+  {
+    "id": "COMP-082",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE PERSISTENCIA (sala de redes) (22A11) debe declarar la competencia generica 1a: Comunicación en lengua materna",
+    "aplica_a": "22A11"
+  },
+  {
+    "id": "COMP-083",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE PERSISTENCIA (sala de redes) (22A11) debe declarar la competencia generica 1c: Comunicación en segunda lengua",
+    "aplica_a": "22A11"
+  },
+  {
+    "id": "COMP-084",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE PERSISTENCIA (sala de redes) (22A11) debe declarar la competencia generica 1e: Cultura científica y tecnológica",
+    "aplica_a": "22A11"
+  },
+  {
+    "id": "COMP-085",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE PERSISTENCIA (sala de redes) (22A11) debe declarar SABER PRO SP3: Comunicación escrita",
+    "aplica_a": "22A11"
+  },
+  {
+    "id": "COMP-086",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE PERSISTENCIA (sala de redes) (22A11) debe cubrir el indicador ABET 2.1: Define especificaciones y restricciones de diseño a partir de las necesidades específicas, considerando la salud pública, la seguridad y el bienestar, así como factores globales, culturales, sociales, ambientales y económicos.",
+    "aplica_a": "22A11"
+  },
+  {
+    "id": "COMP-087",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE PERSISTENCIA (sala de redes) (22A11) debe cubrir el indicador ABET 2.2: Propone alternativas de diseño del componente, sistema o proceso considerando requisitos y restricciones especificas.",
+    "aplica_a": "22A11"
+  },
+  {
+    "id": "COMP-088",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE PERSISTENCIA (sala de redes) (22A11) debe cubrir el indicador ABET 3.1: Redacta informes técnicos usando tablas, gráficos o diagramas pertinentes para sustentar la explicación y facilitar la comprensión de la audiencia objetivo.",
+    "aplica_a": "22A11"
+  },
+  {
+    "id": "COMP-089",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE PERSISTENCIA (sala de redes) (22A11) debe cubrir el indicador ABET 6.1: Desarrolla experimentos pertinentes al problema, utilizando procedimientos, instrumentos o herramientas de ingeniería adecuadas.",
+    "aplica_a": "22A11"
+  },
+  {
+    "id": "COMP-090",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE PERSISTENCIA (sala de redes) (22A11) debe cubrir el indicador ABET 6.2: Aplica métodos de análisis e interpretación de datos a resultados experimentales.",
+    "aplica_a": "22A11"
+  },
+  {
+    "id": "COMP-091",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INFRA. Y SEGURIDAD COMPUTACIONAL (sala de redes) (22A16) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A16"
+  },
+  {
+    "id": "COMP-092",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INFRA. Y SEGURIDAD COMPUTACIONAL (sala de redes) (22A16) debe declarar la competencia generica 1a: Comunicación en lengua materna",
+    "aplica_a": "22A16"
+  },
+  {
+    "id": "COMP-093",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INFRA. Y SEGURIDAD COMPUTACIONAL (sala de redes) (22A16) debe declarar la competencia generica 1g: Aprender a aprender",
+    "aplica_a": "22A16"
+  },
+  {
+    "id": "COMP-094",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INFRA. Y SEGURIDAD COMPUTACIONAL (sala de redes) (22A16) debe declarar la competencia generica 1l: Pensamiento sistémico",
+    "aplica_a": "22A16"
+  },
+  {
+    "id": "COMP-095",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INFRA. Y SEGURIDAD COMPUTACIONAL (sala de redes) (22A16) debe declarar SABER PRO SP3: Comunicación escrita",
+    "aplica_a": "22A16"
+  },
+  {
+    "id": "COMP-096",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INFRA. Y SEGURIDAD COMPUTACIONAL (sala de redes) (22A16) debe cubrir el indicador ABET 2.1: Define especificaciones y restricciones de diseño a partir de las necesidades específicas, considerando la salud pública, la seguridad y el bienestar, así como factores globales, culturales, sociales, ambientales y económicos.",
+    "aplica_a": "22A16"
+  },
+  {
+    "id": "COMP-097",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INFRA. Y SEGURIDAD COMPUTACIONAL (sala de redes) (22A16) debe cubrir el indicador ABET 2.3: Evalúa que el diseño del componente, sistema o proceso cumpla con las especificaciones y restricciones especificas.",
+    "aplica_a": "22A16"
+  },
+  {
+    "id": "COMP-098",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INFRA. Y SEGURIDAD COMPUTACIONAL (sala de redes) (22A16) debe cubrir el indicador ABET 7.1: Demuestra la capacidad de identificar y aplicar nuevo conocimiento aplicando estrategias de aprendizaje autónomo.",
+    "aplica_a": "22A16"
+  },
+  {
+    "id": "COMP-099",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de INFRA. Y SEGURIDAD COMPUTACIONAL (sala de redes) (22A16) debe declarar la dimension D2: Ética",
+    "aplica_a": "22A16"
+  },
+  {
+    "id": "COMP-100",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de AGENTES INTELIGENTES (22A14) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A14"
+  },
+  {
+    "id": "COMP-101",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de AGENTES INTELIGENTES (22A14) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A14"
+  },
+  {
+    "id": "COMP-102",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de AGENTES INTELIGENTES (22A14) debe declarar la competencia generica 1c: Comunicación en segunda lengua",
+    "aplica_a": "22A14"
+  },
+  {
+    "id": "COMP-103",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de AGENTES INTELIGENTES (22A14) debe declarar la competencia generica 1h: Pensamiento crítico",
+    "aplica_a": "22A14"
+  },
+  {
+    "id": "COMP-104",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de AGENTES INTELIGENTES (22A14) debe declarar SABER PRO SP5: Inglés",
+    "aplica_a": "22A14"
+  },
+  {
+    "id": "COMP-105",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de AGENTES INTELIGENTES (22A14) debe declarar la dimension D4: Internacional",
+    "aplica_a": "22A14"
+  },
+  {
+    "id": "COMP-106",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A32"
+  },
+  {
+    "id": "COMP-107",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe declarar la competencia generica 1e: Cultura científica y tecnológica",
+    "aplica_a": "22A32"
+  },
+  {
+    "id": "COMP-108",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe declarar la competencia generica 1i: Trabajo en equipo y en ambientes interculturales",
+    "aplica_a": "22A32"
+  },
+  {
+    "id": "COMP-109",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe declarar la competencia generica 1j: Espíritu emprendedor",
+    "aplica_a": "22A32"
+  },
+  {
+    "id": "COMP-110",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe declarar SABER PRO SP4: Competencias ciudadanas",
+    "aplica_a": "22A32"
+  },
+  {
+    "id": "COMP-111",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe cubrir el indicador ABET 5.1: Contribuye en la elaboración de un plan de trabajo en equipo que incluye objetivos, roles, y tareas, asignando responsabilidades según capacidades y disponibilidad del equipo.",
+    "aplica_a": "22A32"
+  },
+  {
+    "id": "COMP-112",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe cubrir el indicador ABET 5.2: Participa y se comunica de forma efectiva con su equipo de trabajo, contribuyendo activamente al cumplimiento de los objetivos comunes.",
+    "aplica_a": "22A32"
+  },
+  {
+    "id": "COMP-113",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe cubrir el indicador ABET 6.3: Elabora conclusiones sustentadas derivadas de experimentos realizados empleando el juicio ingenieril.",
+    "aplica_a": "22A32"
+  },
+  {
+    "id": "COMP-114",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe declarar la dimension D1: Transdisciplinar",
+    "aplica_a": "22A32"
+  },
+  {
+    "id": "COMP-115",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe declarar la dimension D6: Regional",
+    "aplica_a": "22A32"
+  },
+  {
+    "id": "COMP-116",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES UI/UX (22A31) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A31"
+  },
+  {
+    "id": "COMP-117",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES UI/UX (22A31) debe declarar la competencia especifica C3: Formula y evalúa proyectos de ingeniería de software y gestión de las TIC, para su ejecución y administración, teniendo conciencia de sus implicaciones éticas, económicas y legales.",
+    "aplica_a": "22A31"
+  },
+  {
+    "id": "COMP-118",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES UI/UX (22A31) debe declarar la competencia generica 1a: Comunicación en lengua materna",
+    "aplica_a": "22A31"
+  },
+  {
+    "id": "COMP-119",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES UI/UX (22A31) debe declarar la competencia generica 1g: Aprender a aprender",
+    "aplica_a": "22A31"
+  },
+  {
+    "id": "COMP-120",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES UI/UX (22A31) debe declarar la competencia generica 1j: Espíritu emprendedor",
+    "aplica_a": "22A31"
+  },
+  {
+    "id": "COMP-121",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES UI/UX (22A31) debe declarar SABER PRO SP2: Lectura crítica",
+    "aplica_a": "22A31"
+  },
+  {
+    "id": "COMP-122",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES UI/UX (22A31) debe declarar la dimension D1: Transdisciplinar",
+    "aplica_a": "22A31"
+  },
+  {
+    "id": "COMP-123",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES UI/UX (22A31) debe declarar la dimension D5: Espíritu emprendedor",
+    "aplica_a": "22A31"
+  },
+  {
+    "id": "COMP-124",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ARQUITECTURA DE SOFTWARE (sala de redes) (22A35) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A35"
+  },
+  {
+    "id": "COMP-125",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ARQUITECTURA DE SOFTWARE (sala de redes) (22A35) debe declarar la competencia especifica C3: Formula y evalúa proyectos de ingeniería de software y gestión de las TIC, para su ejecución y administración, teniendo conciencia de sus implicaciones éticas, económicas y legales.",
+    "aplica_a": "22A35"
+  },
+  {
+    "id": "COMP-126",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ARQUITECTURA DE SOFTWARE (sala de redes) (22A35) debe declarar la competencia generica 1a: Comunicación en lengua materna",
+    "aplica_a": "22A35"
+  },
+  {
+    "id": "COMP-127",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ARQUITECTURA DE SOFTWARE (sala de redes) (22A35) debe declarar la competencia generica 1h: Pensamiento crítico",
+    "aplica_a": "22A35"
+  },
+  {
+    "id": "COMP-128",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ARQUITECTURA DE SOFTWARE (sala de redes) (22A35) debe declarar la competencia generica 1l: Pensamiento sistémico",
+    "aplica_a": "22A35"
+  },
+  {
+    "id": "COMP-129",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de ARQUITECTURA DE SOFTWARE (sala de redes) (22A35) debe declarar SABER PRO SP2: Lectura crítica",
+    "aplica_a": "22A35"
+  },
+  {
+    "id": "COMP-130",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de COMPUTACIÓN EN LA NUBE (sala de redes) (22A36) debe declarar la competencia especifica C1: Analiza y modela fenómenos y procesos para resolver problemas de gestión de información y del desarrollo de software, utilizando los fundamentos de las ciencias naturales y de la Ingeniería, con una visión sistémica del entorno.",
+    "aplica_a": "22A36"
+  },
+  {
+    "id": "COMP-131",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de COMPUTACIÓN EN LA NUBE (sala de redes) (22A36) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A36"
+  },
+  {
+    "id": "COMP-132",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de COMPUTACIÓN EN LA NUBE (sala de redes) (22A36) debe declarar la competencia generica 1b: Comprensión lectora en inglés",
+    "aplica_a": "22A36"
+  },
+  {
+    "id": "COMP-133",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de COMPUTACIÓN EN LA NUBE (sala de redes) (22A36) debe declarar la competencia generica 1c: Comunicación en segunda lengua",
+    "aplica_a": "22A36"
+  },
+  {
+    "id": "COMP-134",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de COMPUTACIÓN EN LA NUBE (sala de redes) (22A36) debe declarar la competencia generica 1f: Ética y ciudadanía",
+    "aplica_a": "22A36"
+  },
+  {
+    "id": "COMP-135",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de COMPUTACIÓN EN LA NUBE (sala de redes) (22A36) debe declarar SABER PRO SP4: Competencias ciudadanas",
+    "aplica_a": "22A36"
+  },
+  {
+    "id": "COMP-136",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de COMPUTACIÓN EN LA NUBE (sala de redes) (22A36) debe declarar la dimension D2: Ética",
+    "aplica_a": "22A36"
+  },
+  {
+    "id": "COMP-137",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES EMPRESARIALES (sala de redes) (22A34) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A34"
+  },
+  {
+    "id": "COMP-138",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES EMPRESARIALES (sala de redes) (22A34) debe declarar la competencia generica 1h: Pensamiento crítico",
+    "aplica_a": "22A34"
+  },
+  {
+    "id": "COMP-139",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES EMPRESARIALES (sala de redes) (22A34) debe declarar la competencia generica 1j: Espíritu emprendedor",
+    "aplica_a": "22A34"
+  },
+  {
+    "id": "COMP-140",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES EMPRESARIALES (sala de redes) (22A34) debe declarar la competencia generica 1l: Pensamiento sistémico",
+    "aplica_a": "22A34"
+  },
+  {
+    "id": "COMP-141",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de DESARROLLO DE APLICACIONES EMPRESARIALES (sala de redes) (22A34) debe declarar SABER PRO SP2: Lectura crítica",
+    "aplica_a": "22A34"
+  },
+  {
+    "id": "COMP-142",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTELIGENCIA DE NEGOCIOS (22A18) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A18"
+  },
+  {
+    "id": "COMP-143",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTELIGENCIA DE NEGOCIOS (22A18) debe declarar la competencia especifica C3: Formula y evalúa proyectos de ingeniería de software y gestión de las TIC, para su ejecución y administración, teniendo conciencia de sus implicaciones éticas, económicas y legales.",
+    "aplica_a": "22A18"
+  },
+  {
+    "id": "COMP-144",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTELIGENCIA DE NEGOCIOS (22A18) debe declarar la competencia generica 1c: Comunicación en segunda lengua",
+    "aplica_a": "22A18"
+  },
+  {
+    "id": "COMP-145",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTELIGENCIA DE NEGOCIOS (22A18) debe declarar la competencia generica 1g: Aprender a aprender",
+    "aplica_a": "22A18"
+  },
+  {
+    "id": "COMP-146",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INTELIGENCIA DE NEGOCIOS (22A18) debe declarar SABER PRO SP3: Comunicación escrita",
+    "aplica_a": "22A18"
+  },
+  {
+    "id": "COMP-147",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de INTELIGENCIA DE NEGOCIOS (22A18) debe declarar la dimension D3: Investigación",
+    "aplica_a": "22A18"
+  },
+  {
+    "id": "COMP-148",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de INTELIGENCIA DE NEGOCIOS (22A18) debe declarar la dimension D6: Regional",
+    "aplica_a": "22A18"
+  },
+  {
+    "id": "COMP-149",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe declarar la competencia especifica C2: Diseña sistemas, componentes o procesos para satisfacer requerimientos, restricciones y especificaciones técnicas relacionadas con la gestión de información y el desarrollo de software, considerando aspectos técnicos y económicos.",
+    "aplica_a": "22A10"
+  },
+  {
+    "id": "COMP-150",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe declarar la competencia generica 1a: Comunicación en lengua materna",
+    "aplica_a": "22A10"
+  },
+  {
+    "id": "COMP-151",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe declarar la competencia generica 1f: Ética y ciudadanía",
+    "aplica_a": "22A10"
+  },
+  {
+    "id": "COMP-152",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe declarar la competencia generica 1j: Espíritu emprendedor",
+    "aplica_a": "22A10"
+  },
+  {
+    "id": "COMP-153",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe declarar SABER PRO SP4: Competencias ciudadanas",
+    "aplica_a": "22A10"
+  },
+  {
+    "id": "COMP-154",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe cubrir el indicador ABET 3.1: Redacta informes técnicos usando tablas, gráficos o diagramas pertinentes para sustentar la explicación y facilitar la comprensión de la audiencia objetivo.",
+    "aplica_a": "22A10"
+  },
+  {
+    "id": "COMP-155",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe cubrir el indicador ABET 3.2: Realiza presentaciones orales organizadas, ajustando el contenido y el lenguaje a la audiencia objetivo.",
+    "aplica_a": "22A10"
+  },
+  {
+    "id": "COMP-156",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe cubrir el indicador ABET 4.1: Reconoce las responsabilidades éticas y profesionales en casos o situciones de ingeniería en contextos globales, económicos ambientales o sociales.",
+    "aplica_a": "22A10"
+  },
+  {
+    "id": "COMP-157",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe cubrir el indicador ABET 4.2: Emite juicios fundamentados acerca del impacto de las soluciones de ingeniería aplicada en contextos globales, económicos, ambientales o sociales.",
+    "aplica_a": "22A10"
+  },
+  {
+    "id": "COMP-158",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe declarar la dimension D2: Ética",
+    "aplica_a": "22A10"
+  },
+  {
+    "id": "COMP-159",
+    "tipo": "competencia_especifica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe declarar la competencia especifica C3: Formula y evalúa proyectos de ingeniería de software y gestión de las TIC, para su ejecución y administración, teniendo conciencia de sus implicaciones éticas, económicas y legales.",
+    "aplica_a": "22A19"
+  },
+  {
+    "id": "COMP-160",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe declarar la competencia generica 1f: Ética y ciudadanía",
+    "aplica_a": "22A19"
+  },
+  {
+    "id": "COMP-161",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe declarar la competencia generica 1i: Trabajo en equipo y en ambientes interculturales",
+    "aplica_a": "22A19"
+  },
+  {
+    "id": "COMP-162",
+    "tipo": "competencia_generica",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe declarar la competencia generica 1j: Espíritu emprendedor",
+    "aplica_a": "22A19"
+  },
+  {
+    "id": "COMP-163",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe declarar SABER PRO SP3: Comunicación escrita",
+    "aplica_a": "22A19"
+  },
+  {
+    "id": "COMP-164",
+    "tipo": "saber_pro",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe declarar SABER PRO SP4: Competencias ciudadanas",
+    "aplica_a": "22A19"
+  },
+  {
+    "id": "COMP-165",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe cubrir el indicador ABET 3.2: Realiza presentaciones orales organizadas, ajustando el contenido y el lenguaje a la audiencia objetivo.",
+    "aplica_a": "22A19"
+  },
+  {
+    "id": "COMP-166",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe cubrir el indicador ABET 4.3: ",
+    "aplica_a": "22A19"
+  },
+  {
+    "id": "COMP-167",
+    "tipo": "abet",
+    "seccion_pda": "Competencias / Resultados de Aprendizaje",
+    "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe cubrir el indicador ABET 7.1: Demuestra la capacidad de identificar y aplicar nuevo conocimiento aplicando estrategias de aprendizaje autónomo.",
+    "aplica_a": "22A19"
+  },
+  {
+    "id": "COMP-168",
+    "tipo": "dimension",
+    "seccion_pda": "Informacion general / Competencias",
+    "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe declarar la dimension D4: Internacional",
+    "aplica_a": "22A19"
+  }
+]

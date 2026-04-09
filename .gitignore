@@ -1,12 +1,27 @@
-# Claude
-CLAUDE.md
 
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
 
-# Python
+# PDAs reales (datos confidenciales de la universidad)
+PDAs/
+
+# Base vectorial de ChromaDB (se regenera con: python src/rag/ingest.py)
+data/chroma_db/
+
+# Pares crudos sin output (intermedio de trabajo)
+data/pares_crudos.jsonl
+
+# Modelos entrenados (pesados, se generan en Colab)
+models/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.gguf
+*.onnx
+
+# Reportes generados (se regeneran corriendo el agente)
+results/
+
+# === Python ===
 __pycache__/
 *.py[cod]
 *$py.class
@@ -17,41 +32,32 @@ build/
 *.egg
 .eggs/
 *.whl
-
-# Virtual environments
+.venv/
 venv/
 env/
-.venv/
-.env
 
-# Jupyter Notebooks
+# === Jupyter ===
 .ipynb_checkpoints/
 
-# Model artifacts
-*.pt
-*.pth
-*.bin
-*.safetensors
-*.gguf
-*.onnx
-outputs/
-checkpoints/
-lora_adapter/
+# === macOS ===
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# Data
-*.csv
-*.jsonl
-*.parquet
-data/raw/
-data/processed/
-
-# IDEs
+# === IDEs ===
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Logs
-*.log
+# === Logs y herramientas ===
 wandb/
 runs/
+outputs/
+checkpoints/
+
+# === Proyecto ===
+CLAUDE.md
+Docs/*.aux
+Docs/*.log
+"PDA - Intelligent Agents 2026A-01.docx.pdf"

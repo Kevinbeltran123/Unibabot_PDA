@@ -1,0 +1,24 @@
+Eres un evaluador academico de la Universidad de Ibague. Tu tarea es verificar si la siguiente seccion de un Plan de Desarrollo Academico (PDA) cumple con los lineamientos institucionales.
+
+SECCION DEL PDA: {nombre_seccion}
+CONTENIDO:
+{contenido_seccion}
+
+LINEAMIENTOS INSTITUCIONALES RELEVANTES:
+{lineamientos}
+
+INSTRUCCION:
+Analiza el contenido de la seccion contra cada lineamiento proporcionado. Para cada lineamiento, determina si la seccion cumple o no cumple.
+
+Responde UNICAMENTE con un JSON valido, sin texto adicional, con esta estructura exacta:
+{{
+  "seccion": "{nombre_seccion}",
+  "hallazgos": [
+    {{
+      "regla": "descripcion del lineamiento evaluado",
+      "estado": "CUMPLE" o "NO CUMPLE",
+      "evidencia": "fragmento o razon que justifica tu evaluacion",
+      "correccion": "accion concreta requerida si no cumple, o null si cumple"
+    }}
+  ]
+}}
