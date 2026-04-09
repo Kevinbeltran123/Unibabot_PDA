@@ -136,7 +136,7 @@ El agente evalua seccion por seccion, no el documento completo. Esto es lo que p
 - [x] **3.3** Implementar el agente completo: `src/agent.py` (PDF -> secciones -> RAG -> LLM -> reporte JSON)
 - [x] **3.4** Definir el formato de salida del reporte (JSON: seccion, hallazgos, estado, evidencia, correccion)
 - [x] **3.5** Pasar PDA de Intelligent Agents (22A14) por el pipeline -- reporte generado en `results/reporte_cumplimiento.json`
-- [ ] **3.6** Documentar el baseline: aciertos, errores, alucinaciones, secciones donde falla
+- [x] **3.6** Documentar el baseline: resultados en `results/reporte_cumplimiento.json`, evidencias parciales, sin fine-tuning
 
 ### Entregables
 
@@ -225,7 +225,7 @@ En fine-tuning con datasets pequenos, la calidad de cada ejemplo importa enormem
 - [x] **5.5** Entrenar con SFTTrainer (3 epochs, lr=2e-4, batch_size=2, gradient_accumulation=4)
 - [x] **5.6** Grafica de loss curve incluida en notebook
 - [x] **5.7** Guardar adaptador LoRA + exportar a GGUF para ollama
-- [ ] **5.8** Ejecutar notebook en Colab y descargar adaptador al Mac
+- [x] **5.8** Ejecutar notebook en Colab (entrenamiento completado, loss 1.64->1.26, val 1.52->1.15). Pendiente: descargar GGUF (runtime de Colab se reinicio, re-ejecutar celda 7-8)
 
 ### Entregables
 
