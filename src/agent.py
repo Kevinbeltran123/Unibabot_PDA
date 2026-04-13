@@ -8,6 +8,7 @@ import json
 import sys
 import ollama
 from pathlib import Path
+from pydantic import ValidationError
 
 # Asegurar que src/ este en el path para imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -15,9 +16,11 @@ sys.path.insert(0, str(Path(__file__).parent))
 from pdf_parser import parsear_pda
 from rag.retriever import recuperar_lineamientos
 from rules.estructural_checker import verificar_estructurales
+from schemas import ReporteSeccion
 
 ROOT = Path(__file__).parent.parent
 PROMPT_PATH = ROOT / "src" / "prompts" / "compliance_prompt.txt"
+RETRY_PROMPT_PATH = ROOT / "src" / "prompts" / "retry_prompt.txt"
 
 # Modelos disponibles (registrados en ollama)
 MODELO_BASELINE = "llama3.2"
@@ -28,6 +31,34 @@ MODELO_DEFAULT = MODELO_BASELINE
 def cargar_prompt_template() -> str:
     with open(PROMPT_PATH, encoding="utf-8") as f:
         return f.read()
+
+
+def cargar_retry_template() -> str:
+    with open(RETRY_PROMPT_PATH, encoding="utf-8") as f:
+        return f.read()
+
+
+def _extraer_json(texto: str) -> dict | None:
+    """Extrae el primer bloque JSON de un texto, tolerante a texto extra alrededor."""
+    inicio = texto.find("{")
+    fin = texto.rfind("}") + 1
+    if inicio < 0 or fin <= inicio:
+        return None
+    try:
+        return json.loads(texto[inicio:fin])
+    except json.JSONDecodeError:
+        return None
+
+
+def parsear_y_validar(texto: str) -> ReporteSeccion | None:
+    """Extrae JSON, intenta parsear con Pydantic. Devuelve ReporteSeccion o None."""
+    data = _extraer_json(texto)
+    if data is None:
+        return None
+    try:
+        return ReporteSeccion(**data)
+    except ValidationError:
+        return None
 
 
 def formatear_lineamientos(lineamientos: list[dict]) -> str:
@@ -48,41 +79,65 @@ def evaluar_seccion(
     lineamientos: list[dict],
     template: str,
     modelo: str = MODELO_DEFAULT,
-) -> dict | None:
-    """Envia una seccion + lineamientos al LLM y parsea la respuesta JSON."""
+    retry_template: str | None = None,
+) -> dict:
+    """Envia una seccion + lineamientos al LLM, valida con Pydantic y reintenta si falla.
+
+    Flujo:
+        1. Primera llamada al LLM con el prompt principal.
+        2. Extraer JSON + validar con schemas.ReporteSeccion.
+        3. Si falla: reintentar una vez con el retry_prompt (que incluye la
+           respuesta previa y pide correccion).
+        4. Si falla de nuevo: devolver reporte con error estructurado.
+    """
     prompt = template.format(
         nombre_seccion=nombre_seccion,
-        contenido_seccion=contenido[:2000],  # limitar contexto para modelo 3B
+        contenido_seccion=contenido[:2000],
         lineamientos=formatear_lineamientos(lineamientos),
     )
 
+    # Intento 1
     response = ollama.chat(
         model=modelo,
         messages=[{"role": "user", "content": prompt}],
         options={
             "temperature": 0.1,
-            "num_predict": 800,  # max tokens de salida (evita loops infinitos)
-            "stop": ["<|eot_id|>", "<|end_of_text|>"],  # tokens de fin para modelos fine-tuneados
+            "num_predict": 800,
+            "stop": ["<|eot_id|>", "<|end_of_text|>"],
         },
     )
-
     texto_respuesta = response["message"]["content"]
 
-    # Intentar parsear JSON de la respuesta
-    try:
-        # Buscar el JSON en la respuesta (a veces el LLM agrega texto extra)
-        inicio = texto_respuesta.find("{")
-        fin = texto_respuesta.rfind("}") + 1
-        if inicio >= 0 and fin > inicio:
-            return json.loads(texto_respuesta[inicio:fin])
-    except json.JSONDecodeError:
-        pass
+    reporte = parsear_y_validar(texto_respuesta)
+    if reporte is not None:
+        return reporte.model_dump()
 
-    # Si no se pudo parsear, devolver respuesta cruda
+    # Intento 2: retry con el prompt de correccion
+    if retry_template is not None:
+        retry_prompt = retry_template.format(
+            respuesta_previa=texto_respuesta[:800],
+            error="JSON invalido o estructura incorrecta",
+            nombre_seccion=nombre_seccion,
+        )
+        response = ollama.chat(
+            model=modelo,
+            messages=[{"role": "user", "content": retry_prompt}],
+            options={
+                "temperature": 0.1,
+                "num_predict": 400,
+                "stop": ["<|eot_id|>", "<|end_of_text|>"],
+            },
+        )
+        texto_respuesta = response["message"]["content"]
+        reporte = parsear_y_validar(texto_respuesta)
+        if reporte is not None:
+            return reporte.model_dump()
+
+    # Fallback: reporte con error estructurado
     return {
         "seccion": nombre_seccion,
         "hallazgos": [],
-        "error": "No se pudo parsear la respuesta del LLM",
+        "error": "No se pudo parsear la respuesta del LLM tras retry",
         "respuesta_cruda": texto_respuesta[:500],
     }
 
@@ -151,6 +206,7 @@ def analizar_pda(
     evaluaciones = preparar_evaluacion(secciones, codigo_curso)
 
     template = cargar_prompt_template()
+    retry_template = cargar_retry_template()
     reporte = {
         "archivo": pdf_path,
         "modelo": modelo,
@@ -174,6 +230,7 @@ def analizar_pda(
             eval_info["lineamientos"],
             template,
             modelo=modelo,
+            retry_template=retry_template,
         )
         reporte["resultados"].append(resultado)
 
