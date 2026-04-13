@@ -10,6 +10,7 @@ Dataset de evaluacion: 48 entradas gold etiquetadas manualmente sobre 4 PDAs rea
 | `m3_validation_retry` | + Pydantic + retry | 0.947 | 0.333 | 1.000 | 1.000 | 94s | 2 | 35 | 1 | 38/48 |
 | `m1_few_shot` | + few-shot (2 CUMPLE + 1 NO CUMPLE) | 0.951 | 0.333 | 1.000 | 1.000 | 91s | 2 | 38 | 1 | 41/48 |
 | `m4_llama31_8b` | + Llama 3.1 8B como modelo LLM | **1.000** | **1.000** | **1.000** | 1.000 | 189s | **0** | **40** | 1 | 41/48 |
+| ~~`m5_hybrid_search`~~ | ~~+ hybrid semantic/BM25~~ | _0.976_ | _0.500_ | _1.000_ | _1.000_ | _180s_ | _1_ | _39_ | _1_ | _41/48_ |
 
 ## Analisis por mejora
 
@@ -92,3 +93,21 @@ Dataset de evaluacion: 48 entradas gold etiquetadas manualmente sobre 4 PDAs rea
 **Por que funciono:** Los 2 FP que tenia m1 eran casos en que el 3B confundia similitud semantica con cumplimiento estricto. El 8B razona mejor sobre contexto, distingue "el PDA habla de pensamiento critico" vs "el PDA declara la competencia 1h: Pensamiento critico" como lineamiento formal.
 
 **Cambio de default:** `MODELO_DEFAULT` en `src/agent.py` se actualiza de `MODELO_BASELINE` (llama3.2 3B) a `MODELO_8B` (llama3.1:8b). El 3B sigue disponible como `baseline` por CLI.
+
+### Mejora 5 (hybrid BM25) -- DESCARTADA
+
+**Cambio intentado:** Agregar BM25 sobre `reglas.json` y combinar con semantic search via `alpha * semantic + (1-alpha) * bm25`. Alpha default = 0.6.
+
+**Impacto medido (m5 vs m4):**
+- Accuracy: 1.000 → 0.976 (-0.024)
+- Precision NO CUMPLE: 1.000 → 0.500
+- Matched: 41/48 → 41/48 (sin cambio)
+- FP: 0 → 1
+
+**Por que fallo:** La expectativa era que BM25 mejorara el recall del retrieval, permitiendo matchear las 7 entradas del gold que m4 no alcanza. Pero el retrieval no es el bottleneck: las 7 entradas no se matchean porque el **filtro estricto** de `seccion_pda` (mejora 2) excluye reglas antes del ranking. BM25 solo re-ordena el top-k, no cambia el conjunto filtrado.
+
+Ademas, BM25 promovio una regla con buen match por keyword pero semanticamente divergente, introduciendo 1 FP.
+
+**Decision:** Descartada. El plan explicitamente contemplaba esta opcion. Se revierte el retriever a la version de m4.
+
+**Aprendizaje:** Hybrid search ayuda cuando el problema es de **ranking dentro de top-k**, no cuando es de **filtering pre-retrieval**. Para mejorar el matching del gold, la solucion correcta seria relajar el filtro `seccion_pda` o agregar un fallback. Queda como trabajo futuro.
