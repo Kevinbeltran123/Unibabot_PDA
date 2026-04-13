@@ -92,7 +92,7 @@ def evaluar_seccion(
     """
     prompt = template.format(
         nombre_seccion=nombre_seccion,
-        contenido_seccion=contenido[:2000],
+        contenido_seccion=contenido[:1500],  # reducido por few-shot examples en el prompt
         lineamientos=formatear_lineamientos(lineamientos),
     )
 
