@@ -41,11 +41,13 @@ def recuperar_lineamientos(
 
     #Transformar resultado a lista de dicts
     lineamientos = []
-    for i in range (len(result["documents"][0])):
+    for i in range(len(result["documents"][0])):
         lineamientos.append({
+            "id": result["ids"][0][i],
             "descripcion": result["documents"][0][i],
             "distancia": result["distances"][0][i],
             "tipo": result["metadatas"][0][i]["tipo"],
+            "seccion_pda": result["metadatas"][0][i]["seccion_pda"],
         })
 
     return lineamientos
@@ -70,6 +72,6 @@ if __name__ == "__main__":
         print("La funcion recuperar_lineamientos() aun no esta implementada.")
     else:
         for i, r in enumerate(resultados):
-            print(f"[{i+1}] (distancia: {r['distancia']:.3f}) [{r['tipo']}]")
+            print(f"[{i+1}] {r['id']} (distancia: {r['distancia']:.3f}) [{r['tipo']}]")
             print(f"    {r['descripcion'][:120]}")
             print()

@@ -8,16 +8,17 @@ LINEAMIENTOS INSTITUCIONALES RELEVANTES:
 {lineamientos}
 
 INSTRUCCION:
-Analiza el contenido de la seccion contra cada lineamiento proporcionado. Para cada lineamiento, determina si la seccion cumple o no cumple.
+Analiza el contenido de la seccion contra cada lineamiento proporcionado. Para cada lineamiento, determina si la seccion cumple o no cumple. Debes incluir el identificador [ID] del lineamiento en el campo regla_id de cada hallazgo.
 
 Responde UNICAMENTE con un JSON valido, sin texto adicional, con esta estructura exacta:
 {{
   "seccion": "{nombre_seccion}",
   "hallazgos": [
     {{
-      "regla": "descripcion del lineamiento evaluado",
+      "regla_id": "ID exacto del lineamiento (ej: EST-001 o COMP-045)",
+      "regla": "descripcion breve del lineamiento evaluado",
       "estado": "CUMPLE" o "NO CUMPLE",
-      "evidencia": "fragmento o razon que justifica tu evaluacion",
+      "evidencia": "fragmento textual del PDA o razon especifica",
       "correccion": "accion concreta requerida si no cumple, o null si cumple"
     }}
   ]

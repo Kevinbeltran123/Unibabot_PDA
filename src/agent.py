@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from pdf_parser import parsear_pda
 from rag.retriever import recuperar_lineamientos
+from rules.estructural_checker import verificar_estructurales
 
 ROOT = Path(__file__).parent.parent
 PROMPT_PATH = ROOT / "src" / "prompts" / "compliance_prompt.txt"
@@ -30,10 +31,14 @@ def cargar_prompt_template() -> str:
 
 
 def formatear_lineamientos(lineamientos: list[dict]) -> str:
-    """Convierte la lista de lineamientos recuperados en texto para el prompt."""
+    """Convierte la lista de lineamientos recuperados en texto para el prompt.
+
+    Incluye el id de cada regla para que el LLM pueda referenciarlo en su respuesta
+    y facilitar el matching exacto en el script de evaluacion.
+    """
     lineas = []
-    for i, lin in enumerate(lineamientos, 1):
-        lineas.append(f"{i}. [{lin['tipo']}] {lin['descripcion']}")
+    for lin in lineamientos:
+        lineas.append(f"[{lin['id']}] ({lin['tipo']}) {lin['descripcion']}")
     return "\n".join(lineas)
 
 
@@ -88,8 +93,10 @@ def preparar_evaluacion(
     top_k: int = 5,
 ) -> list[dict]:
     """Decide que secciones evaluar y recupera lineamientos para cada una.
-    Returns:
-        Lista de dicts con: nombre_seccion, contenido, lineamientos
+
+    Las reglas estructurales (tipo='estructural') se filtran del retrieval
+    porque se verifican via rule-based deterministico en analizar_pda().
+    El LLM solo recibe reglas de competencias y similares.
     """
     evaluaciones = []
     for nombre, contenido in secciones.items():
@@ -98,11 +105,17 @@ def preparar_evaluacion(
             continue
         if len(contenido) < 20:
             continue
-        
-        #Recuperar lineamientos relevantes para esta seccion
-        lineamientos = recuperar_lineamientos(contenido, top_k=top_k, codigo_curso=codigo_curso)
+
+        # Recuperar mas lineamientos (top_k*2) porque vamos a filtrar estructurales
+        lineamientos = recuperar_lineamientos(contenido, top_k=top_k * 2, codigo_curso=codigo_curso)
+        # Filtrar reglas estructurales (se manejan con rule-based)
+        lineamientos = [l for l in lineamientos if l["tipo"] != "estructural"][:top_k]
+
+        if not lineamientos:
+            continue
+
         evaluaciones.append({
-            "nombre_seccion":nombre,
+            "nombre_seccion": nombre,
             "contenido": contenido,
             "lineamientos": lineamientos,
         })
@@ -115,13 +128,21 @@ def analizar_pda(
     codigo_curso: str | None = None,
     modelo: str = MODELO_DEFAULT,
 ) -> dict:
-    """Pipeline completo: PDF -> reporte de cumplimiento."""
+    """Pipeline completo: PDF -> reporte de cumplimiento.
+
+    Usa rule-based determinista para las 11 reglas estructurales y LLM
+    para las demas reglas (competencias, ABET, dimensiones, etc).
+    """
     print(f"Parseando PDF: {pdf_path}")
     print(f"Modelo: {modelo}")
     secciones = parsear_pda(pdf_path)
     print(f"Secciones encontradas: {len(secciones)}")
 
-    print("Preparando evaluacion...")
+    # Verificacion rule-based de reglas estructurales (determinista, rapido)
+    print("Verificando reglas estructurales (rule-based)...")
+    hallazgos_estructurales = verificar_estructurales(secciones)
+
+    print("Preparando evaluacion LLM (solo competencias)...")
     evaluaciones = preparar_evaluacion(secciones, codigo_curso)
 
     template = cargar_prompt_template()
@@ -130,7 +151,12 @@ def analizar_pda(
         "modelo": modelo,
         "codigo_curso": codigo_curso,
         "total_secciones": len(evaluaciones),
-        "resultados": [],
+        "resultados": [
+            {
+                "seccion": "__estructural_global__",
+                "hallazgos": hallazgos_estructurales,
+            }
+        ],
     }
 
     for eval_info in evaluaciones:
