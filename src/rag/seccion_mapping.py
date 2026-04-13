@@ -11,8 +11,8 @@ reglas de competencias aparezcan al evaluar informacion general y viceversa.
 # se consideran validas las secciones_pda listadas.
 MAPPING_SECCIONES = {
     # Informacion general / datos basicos del curso
-    "informacion general": ["Informacion general", "Informacion general / Competencias"],
-    "general information": ["Informacion general", "Informacion general / Competencias"],
+    "informacion general": ["Informacion general"],
+    "general information": ["Informacion general"],
     "syllabus": ["Informacion general"],
     "professor's information": ["Informacion general"],
     "plan de estudios": ["Informacion general"],

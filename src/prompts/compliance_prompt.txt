@@ -69,7 +69,7 @@ LINEAMIENTOS INSTITUCIONALES RELEVANTES:
 {lineamientos}
 
 INSTRUCCION:
-Analiza el contenido contra cada lineamiento proporcionado, siguiendo el formato de los ejemplos. Debes incluir el identificador [ID] del lineamiento en el campo regla_id de cada hallazgo.
+Analiza el contenido contra cada lineamiento proporcionado, siguiendo el formato de los ejemplos. Debes incluir el identificador [ID] del lineamiento en el campo regla_id de cada hallazgo. Una declaracion informal cuenta como CUMPLE si el nombre semantico coincide con la regla aunque no use el codigo formal (ej: "Dimension ● Transdisciplinar" equivale a "D1: Transdisciplinar").
 
 Responde UNICAMENTE con un JSON valido, sin texto adicional, con esta estructura exacta:
 {{

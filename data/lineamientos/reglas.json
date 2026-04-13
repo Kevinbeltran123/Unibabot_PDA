@@ -114,7 +114,7 @@
   {
     "id": "COMP-006",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de PENSAMIENTO COMPUTACIONAL (Antes LÓGICA ALGORITMICA) (22A52) debe declarar la dimension D4: Internacional",
     "aplica_a": "22A52"
   },
@@ -177,7 +177,7 @@
   {
     "id": "COMP-015",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de PROGRAMACIÓN DE COMPUTADORES (22A53) debe declarar la dimension D4: Internacional",
     "aplica_a": "22A53"
   },
@@ -492,7 +492,7 @@
   {
     "id": "COMP-060",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de ESTRUCTURA DE DATOS (22A07) debe declarar la dimension D4: Internacional",
     "aplica_a": "22A07"
   },
@@ -632,7 +632,7 @@
   {
     "id": "COMP-080",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de DESARROLLO DE APLICACIONES MÓVILES (22A27) debe declarar la dimension D5: Espíritu emprendedor",
     "aplica_a": "22A27"
   },
@@ -765,7 +765,7 @@
   {
     "id": "COMP-099",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de INFRA. Y SEGURIDAD COMPUTACIONAL (sala de redes) (22A16) debe declarar la dimension D2: Ética",
     "aplica_a": "22A16"
   },
@@ -807,7 +807,7 @@
   {
     "id": "COMP-105",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de AGENTES INTELIGENTES (22A14) debe declarar la dimension D4: Internacional",
     "aplica_a": "22A14"
   },
@@ -870,14 +870,14 @@
   {
     "id": "COMP-114",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe declarar la dimension D1: Transdisciplinar",
     "aplica_a": "22A32"
   },
   {
     "id": "COMP-115",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de GESTIÓN DE TI (22A32) debe declarar la dimension D6: Regional",
     "aplica_a": "22A32"
   },
@@ -926,14 +926,14 @@
   {
     "id": "COMP-122",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de DESARROLLO DE APLICACIONES UI/UX (22A31) debe declarar la dimension D1: Transdisciplinar",
     "aplica_a": "22A31"
   },
   {
     "id": "COMP-123",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de DESARROLLO DE APLICACIONES UI/UX (22A31) debe declarar la dimension D5: Espíritu emprendedor",
     "aplica_a": "22A31"
   },
@@ -1024,7 +1024,7 @@
   {
     "id": "COMP-136",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de COMPUTACIÓN EN LA NUBE (sala de redes) (22A36) debe declarar la dimension D2: Ética",
     "aplica_a": "22A36"
   },
@@ -1101,14 +1101,14 @@
   {
     "id": "COMP-147",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de INTELIGENCIA DE NEGOCIOS (22A18) debe declarar la dimension D3: Investigación",
     "aplica_a": "22A18"
   },
   {
     "id": "COMP-148",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de INTELIGENCIA DE NEGOCIOS (22A18) debe declarar la dimension D6: Regional",
     "aplica_a": "22A18"
   },
@@ -1178,7 +1178,7 @@
   {
     "id": "COMP-158",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de INGENIERÍA DE SOFTWARE II (sala de redes) (22A10) debe declarar la dimension D2: Ética",
     "aplica_a": "22A10"
   },
@@ -1248,7 +1248,7 @@
   {
     "id": "COMP-168",
     "tipo": "dimension",
-    "seccion_pda": "Informacion general / Competencias",
+    "seccion_pda": "Competencias",
     "descripcion": "El PDA de MODELOS DE NEGOCIACIÓN TECNOLÓGICA (22A19) debe declarar la dimension D4: Internacional",
     "aplica_a": "22A19"
   }
