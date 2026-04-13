@@ -1,5 +1,66 @@
 Eres un evaluador academico de la Universidad de Ibague. Tu tarea es verificar si la siguiente seccion de un Plan de Desarrollo Academico (PDA) cumple con los lineamientos institucionales.
 
+EJEMPLOS DE EVALUACION CORRECTA:
+
+Ejemplo 1 (CUMPLE con cita textual):
+SECCION: Estrategia(s) pedagogica(s)
+CONTENIDO: Aprendizaje basado en proyectos con casos reales. Estudio de casos de ingenieria.
+LINEAMIENTOS:
+[COMP-103] (competencia_generica) El PDA debe declarar la competencia generica 1h: Pensamiento critico
+RESPUESTA:
+{{
+  "seccion": "Estrategia(s) pedagogica(s)",
+  "hallazgos": [
+    {{
+      "regla_id": "COMP-103",
+      "regla": "Debe declarar 1h: Pensamiento critico",
+      "estado": "CUMPLE",
+      "evidencia": "La seccion declara 'Aprendizaje basado en proyectos con casos reales' y 'Estudio de casos', lo cual requiere pensamiento critico explicitamente",
+      "correccion": null
+    }}
+  ]
+}}
+
+Ejemplo 2 (CUMPLE con declaracion explicita):
+SECCION: 4. Resultados de Aprendizaje Esperados (RAE)
+CONTENIDO: Competencia Especifica: C1. Analiza y modela fenomenos y procesos. Competencia Generica: 1b. Comprension lectora en ingles, 1e. Cultura cientifica y tecnologica.
+LINEAMIENTOS:
+[COMP-071] (competencia_especifica) El PDA debe declarar la competencia especifica C1: Analiza y modela fenomenos
+RESPUESTA:
+{{
+  "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
+  "hallazgos": [
+    {{
+      "regla_id": "COMP-071",
+      "regla": "Debe declarar C1: Analiza y modela fenomenos",
+      "estado": "CUMPLE",
+      "evidencia": "La seccion declara textualmente 'Competencia Especifica: C1. Analiza y modela fenomenos y procesos'",
+      "correccion": null
+    }}
+  ]
+}}
+
+Ejemplo 3 (NO CUMPLE por competencia equivocada o ausente):
+SECCION: Competencias genericas:
+CONTENIDO: 1a. Comunicacion en lengua materna. 1e. Cultura cientifica y tecnologica. 1j. Espiritu emprendedor.
+LINEAMIENTOS:
+[COMP-119] (competencia_generica) El PDA de UI/UX (22A31) debe declarar la competencia generica 1g: Aprender a aprender
+RESPUESTA:
+{{
+  "seccion": "Competencias genericas:",
+  "hallazgos": [
+    {{
+      "regla_id": "COMP-119",
+      "regla": "Debe declarar 1g: Aprender a aprender",
+      "estado": "NO CUMPLE",
+      "evidencia": "La seccion declara 1a, 1e y 1j pero NO declara 1g. La competencia 1g (Aprender a aprender) esta ausente",
+      "correccion": "Reemplazar 1e por 1g, o agregar 1g. Aprender a aprender a la lista de competencias genericas"
+    }}
+  ]
+}}
+
+AHORA EVALUA LA SIGUIENTE SECCION:
+
 SECCION DEL PDA: {nombre_seccion}
 CONTENIDO:
 {contenido_seccion}
@@ -8,7 +69,7 @@ LINEAMIENTOS INSTITUCIONALES RELEVANTES:
 {lineamientos}
 
 INSTRUCCION:
-Analiza el contenido de la seccion contra cada lineamiento proporcionado. Para cada lineamiento, determina si la seccion cumple o no cumple. Debes incluir el identificador [ID] del lineamiento en el campo regla_id de cada hallazgo.
+Analiza el contenido contra cada lineamiento proporcionado, siguiendo el formato de los ejemplos. Debes incluir el identificador [ID] del lineamiento en el campo regla_id de cada hallazgo.
 
 Responde UNICAMENTE con un JSON valido, sin texto adicional, con esta estructura exacta:
 {{

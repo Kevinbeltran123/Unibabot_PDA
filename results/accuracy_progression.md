@@ -7,7 +7,8 @@ Dataset de evaluacion: 48 entradas gold etiquetadas manualmente sobre 4 PDAs rea
 | `baseline` | Llama 3.2 3B sin mejoras | 0.351 | 0.000 | 0.000 | 0.986 | 565s | 23 | 13 | 0 | 37/48 |
 | `m8_rule_based` | + rule-based hybrid | 0.927 | 0.000 | 0.000 | 0.978 | 444s | 2 | 38 | 0 | 41/48 |
 | `m2_retrieval_filter` | + retrieval filtrado por seccion | 0.944 | 0.333 | 1.000 | 0.949 | 91s | 2 | 33 | 1 | 36/48 |
-| `m3_validation_retry` | + Pydantic + retry | **0.947** | 0.333 | 1.000 | **1.000** | 94s | 2 | 35 | 1 | 38/48 |
+| `m3_validation_retry` | + Pydantic + retry | 0.947 | 0.333 | 1.000 | 1.000 | 94s | 2 | 35 | 1 | 38/48 |
+| `m1_few_shot` | + few-shot (2 CUMPLE + 1 NO CUMPLE) | **0.951** | 0.333 | 1.000 | 1.000 | 91s | 2 | 38 | 1 | 41/48 |
 
 ## Analisis por mejora
 
@@ -54,3 +55,21 @@ Dataset de evaluacion: 48 entradas gold etiquetadas manualmente sobre 4 PDAs rea
 **Por que funciono:** Los `@field_validator` de Pydantic normalizan variaciones comunes de la salida del LLM (el string `"null"` → `None`, `"cumple"` → `"CUMPLE"`, etc). Antes, los hallazgos con esos formatos se descartaban silenciosamente en el JSON parsing. Ahora se rescatan.
 
 **Valor estrategico:** Esta mejora es un pequeno salto en accuracy pero un **prerrequisito critico** para las mejoras 4 (modelo 8B que puede generar JSON mas sofisticado) y 6 (self-consistency voting, donde necesitamos matchear hallazgos por regla_id entre runs). Sin Pydantic + retry, esas mejoras mas grandes fallarian o tendrian resultados inconsistentes.
+
+### Mejora 1 (few-shot prompts)
+
+**Cambio principal:** El prompt incluye 3 ejemplos completos (seccion + contenido + lineamientos + respuesta JSON correcta) antes de la instruccion. Los ejemplos cubren dos casos CUMPLE (con cita textual y con declaracion explicita) y uno NO CUMPLE (por competencia ausente).
+
+**Impacto medido (m1 vs m3):**
+- Accuracy: 0.947 → 0.951 (+0.004)
+- Matched: 38/48 → 41/48 (+3)
+- TN: 35 → 38 (+3)
+- Latencia: 94s → 91s (leve reduccion)
+- Precision/Recall NO CUMPLE: mantiene 0.333 / 1.000
+
+**Iteraciones del experimento:**
+1. **v1 (1 CUMPLE + 2 NO CUMPLE):** accuracy cayo a 0.902 porque el modelo se sesgo a predecir mas NO CUMPLE. Los falsos positivos subieron de 2 a 4.
+2. **v2 (2 CUMPLE + 1 NO CUMPLE + regla agresiva "si menciona el concepto es CUMPLE"):** accuracy subio a 0.976 pero recall NO CUMPLE cayo a 0 -- modelo demasiado permisivo. Descartada para auditoria (falsos negativos son inaceptables).
+3. **v3 (2 CUMPLE + 1 NO CUMPLE, sin regla agresiva):** balance optimo. Accuracy 0.951 y mantiene deteccion de NO CUMPLE.
+
+**Aprendizaje clave:** Los ejemplos few-shot introducen un prior estadistico implicito. La proporcion CUMPLE:NO CUMPLE del few-shot debe matchear la distribucion real del dataset (~78% CUMPLE en los PDAs reales). Instrucciones categoricas como "si menciona X es CUMPLE" sesgan demasiado al modelo.
