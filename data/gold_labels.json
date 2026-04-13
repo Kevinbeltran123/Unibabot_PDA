@@ -1,0 +1,18 @@
+[
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "Inteligent Agents 1. General Information",
+    "regla_id": "EST-001",
+    "estado_esperado": "CUMPLE",
+    "nota": "Esta seccion tiene programa, nombre, tipo, modalidad, creditos, horario y docente. Todos los campos estructurales requeridos por EST-001 estan presentes."
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "Pedagogical Strategy(ies)",
+    "regla_id": "EST-002",
+    "estado_esperado": "CUMPLE",
+    "nota": "La seccion menciona explicitamente 'project-based learning', que es una estrategia pedagogica valida segun EST-002."
+  }
+]

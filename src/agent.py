@@ -30,10 +30,14 @@ def cargar_prompt_template() -> str:
 
 
 def formatear_lineamientos(lineamientos: list[dict]) -> str:
-    """Convierte la lista de lineamientos recuperados en texto para el prompt."""
+    """Convierte la lista de lineamientos recuperados en texto para el prompt.
+
+    Incluye el id de cada regla para que el LLM pueda referenciarlo en su respuesta
+    y facilitar el matching exacto en el script de evaluacion.
+    """
     lineas = []
-    for i, lin in enumerate(lineamientos, 1):
-        lineas.append(f"{i}. [{lin['tipo']}] {lin['descripcion']}")
+    for lin in lineamientos:
+        lineas.append(f"[{lin['id']}] ({lin['tipo']}) {lin['descripcion']}")
     return "\n".join(lineas)
 
 
