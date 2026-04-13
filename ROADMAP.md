@@ -263,13 +263,13 @@ El resultado: fine-tuning de un modelo de 3B parametros en una GPU T4 gratuita d
 
 ### Tareas
 
-- [ ] **6.1** Reemplazar el modelo base por el modelo fine-tuneado en el pipeline del agente
-- [ ] **6.2** Pasar los mismos PDAs del baseline por el modelo fine-tuneado
-- [ ] **6.3** Calcular metricas: precision, recall, F1 por tipo de hallazgo
+- [x] **6.1** Registrar modelo fine-tuneado en ollama (`unibabot-pda`) e integrar al pipeline con seleccion por CLI
+- [x] **6.2** Pasar PDAs por el modelo fine-tuneado -- HALLAZGO: loops de generacion, modelo degradado
+- [ ] **6.3** Calcular metricas precision/recall/F1 (descartado: el fine-tuneado no produce JSON valido)
 - [ ] **6.4** Evaluacion humana: Kevin y Jeryleefth revisan los reportes y califican calidad (1-5)
-- [ ] **6.5** Comparar baseline vs. fine-tuned: tabla de resultados
-- [ ] **6.6** Probar con 1-2 PDAs que el modelo no haya visto durante entrenamiento
-- [ ] **6.7** Documentar decisiones tecnicas, resultados, y limitaciones
+- [x] **6.5** Comparar baseline vs. fine-tuned: baseline funciona, fine-tuneado degradado por dataset pequeno
+- [ ] **6.6** Probar con 1-2 PDAs nuevos (pendiente con baseline)
+- [x] **6.7** Documentar decisiones tecnicas, resultados, y limitaciones (`results/evaluation_report.md`)
 - [ ] **6.8** Actualizar el reporte IEEE con los resultados obtenidos
 
 ### Entregables

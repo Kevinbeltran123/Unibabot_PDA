@@ -18,8 +18,10 @@ models/
 *.gguf
 *.onnx
 
-# Reportes generados (se regeneran corriendo el agente)
-results/
+# Reportes JSON generados (se regeneran corriendo el agente)
+# Pero los .md del reporte de evaluacion SI van al repo
+results/*.json
+!results/evaluation_report.md
 
 # === Python ===
 __pycache__/

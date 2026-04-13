@@ -17,7 +17,11 @@ from rag.retriever import recuperar_lineamientos
 
 ROOT = Path(__file__).parent.parent
 PROMPT_PATH = ROOT / "src" / "prompts" / "compliance_prompt.txt"
-MODELO = "llama3.2"
+
+# Modelos disponibles (registrados en ollama)
+MODELO_BASELINE = "llama3.2"
+MODELO_FINETUNED = "unibabot-pda"
+MODELO_DEFAULT = MODELO_BASELINE
 
 
 def cargar_prompt_template() -> str:
@@ -38,6 +42,7 @@ def evaluar_seccion(
     contenido: str,
     lineamientos: list[dict],
     template: str,
+    modelo: str = MODELO_DEFAULT,
 ) -> dict | None:
     """Envia una seccion + lineamientos al LLM y parsea la respuesta JSON."""
     prompt = template.format(
@@ -47,9 +52,13 @@ def evaluar_seccion(
     )
 
     response = ollama.chat(
-        model=MODELO,
+        model=modelo,
         messages=[{"role": "user", "content": prompt}],
-        options={"temperature": 0.1},  # baja temperatura para respuestas consistentes
+        options={
+            "temperature": 0.1,
+            "num_predict": 800,  # max tokens de salida (evita loops infinitos)
+            "stop": ["<|eot_id|>", "<|end_of_text|>"],  # tokens de fin para modelos fine-tuneados
+        },
     )
 
     texto_respuesta = response["message"]["content"]
@@ -101,9 +110,14 @@ def preparar_evaluacion(
     return evaluaciones
 
 
-def analizar_pda(pdf_path: str, codigo_curso: str | None = None) -> dict:
+def analizar_pda(
+    pdf_path: str,
+    codigo_curso: str | None = None,
+    modelo: str = MODELO_DEFAULT,
+) -> dict:
     """Pipeline completo: PDF -> reporte de cumplimiento."""
     print(f"Parseando PDF: {pdf_path}")
+    print(f"Modelo: {modelo}")
     secciones = parsear_pda(pdf_path)
     print(f"Secciones encontradas: {len(secciones)}")
 
@@ -113,6 +127,7 @@ def analizar_pda(pdf_path: str, codigo_curso: str | None = None) -> dict:
     template = cargar_prompt_template()
     reporte = {
         "archivo": pdf_path,
+        "modelo": modelo,
         "codigo_curso": codigo_curso,
         "total_secciones": len(evaluaciones),
         "resultados": [],
@@ -127,6 +142,7 @@ def analizar_pda(pdf_path: str, codigo_curso: str | None = None) -> dict:
             eval_info["contenido"],
             eval_info["lineamientos"],
             template,
+            modelo=modelo,
         )
         reporte["resultados"].append(resultado)
 
@@ -138,17 +154,26 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) < 2:
-        print("Uso: python agent.py <ruta_al_pdf> [codigo_curso]")
-        print("Ejemplo: python agent.py 'PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf' 22A14")
+        print("Uso: python agent.py <ruta_al_pdf> [codigo_curso] [modelo]")
+        print("  modelo: 'baseline' (llama3.2) o 'finetuned' (unibabot-pda). Default: baseline")
+        print("Ejemplo: python agent.py 'PDAs/tu_pda.pdf' 22A14 finetuned")
         sys.exit(1)
 
     pdf_path = sys.argv[1]
     codigo = sys.argv[2] if len(sys.argv) > 2 else None
 
-    reporte = analizar_pda(pdf_path, codigo)
+    # Aliases + fallback a nombre crudo (permite probar modelos ad-hoc)
+    aliases = {"baseline": MODELO_BASELINE, "finetuned": MODELO_FINETUNED}
+    if len(sys.argv) > 3:
+        modelo = aliases.get(sys.argv[3], sys.argv[3])
+    else:
+        modelo = MODELO_DEFAULT
 
-    # Guardar reporte
-    output_path = ROOT / "results" / "reporte_cumplimiento.json"
+    reporte = analizar_pda(pdf_path, codigo, modelo=modelo)
+
+    # Guardar reporte con sufijo del modelo para no pisar el del otro
+    sufijo = "finetuned" if modelo == MODELO_FINETUNED else "baseline"
+    output_path = ROOT / "results" / f"reporte_{sufijo}.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(reporte, f, ensure_ascii=False, indent=2)
 
