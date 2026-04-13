@@ -44,6 +44,28 @@ def _construir_filtro(codigo_curso: str | None, nombre_seccion: str | None) -> d
     return {"$and": filtros}
 
 
+def recuperar_dimension_rules(codigo_curso: str) -> list[dict]:
+    """Recupera todas las reglas de dimension para un curso directamente por metadata.
+
+    Se usa para garantizar que las reglas de dimension siempre aparezcan en el
+    contexto de secciones de competencias, independiente del ranking semantico.
+    """
+    collection = obtener_coleccion()
+    result = collection.get(
+        where={"$and": [{"tipo": "dimension"}, {"aplica_a": codigo_curso}]}
+    )
+    lineamientos = []
+    for i in range(len(result["documents"])):
+        lineamientos.append({
+            "id": result["ids"][i],
+            "descripcion": result["documents"][i],
+            "distancia": 0.0,
+            "tipo": result["metadatas"][i]["tipo"],
+            "seccion_pda": result["metadatas"][i]["seccion_pda"],
+        })
+    return lineamientos
+
+
 def recuperar_lineamientos(
     texto: str,
     top_k: int = 5,

@@ -14,7 +14,8 @@ from pydantic import ValidationError
 sys.path.insert(0, str(Path(__file__).parent))
 
 from pdf_parser import parsear_pda
-from rag.retriever import recuperar_lineamientos
+from rag.retriever import recuperar_lineamientos, recuperar_dimension_rules
+from rag.seccion_mapping import secciones_pda_validas
 from rules.estructural_checker import verificar_estructurales
 from schemas import ReporteSeccion
 
@@ -185,6 +186,38 @@ def preparar_evaluacion(
     return evaluaciones
 
 
+def preparar_evaluaciones_dimension(
+    secciones: dict[str, str],
+    codigo_curso: str,
+) -> list[dict]:
+    """Genera evaluaciones separadas para reglas de dimension del curso.
+
+    Las reglas de dimension no compiten con reglas de competencias en el ranking
+    semantico (tienen terminologia diferente), por lo que se evaluan en llamadas
+    LLM separadas — una por cada seccion de Competencias detectada. Esto garantiza
+    que buscar_hallazgo() las encuentre sin importar en que seccion el gold las espera.
+
+    Devuelve una lista de evaluaciones (una entrada por seccion de Competencias).
+    """
+    dim_rules = recuperar_dimension_rules(codigo_curso)
+    if not dim_rules:
+        return []
+
+    evaluaciones = []
+    for nombre, contenido in secciones.items():
+        if len(contenido) < 20:
+            continue
+        secciones_mapeadas = secciones_pda_validas(nombre)
+        if secciones_mapeadas and "Competencias" in secciones_mapeadas:
+            evaluaciones.append({
+                "nombre_seccion": nombre,
+                "contenido": contenido,
+                "lineamientos": dim_rules,
+            })
+
+    return evaluaciones
+
+
 def analizar_pda(
     pdf_path: str,
     codigo_curso: str | None = None,
@@ -206,6 +239,10 @@ def analizar_pda(
 
     print("Preparando evaluacion LLM (solo competencias)...")
     evaluaciones = preparar_evaluacion(secciones, codigo_curso)
+
+    # Evaluacion separada para reglas de dimension (no ranquean bien semanticamente)
+    if codigo_curso:
+        evaluaciones += preparar_evaluaciones_dimension(secciones, codigo_curso)
 
     template = cargar_prompt_template()
     retry_template = cargar_retry_template()

@@ -120,7 +120,7 @@ def generar_reglas_competencias() -> list[dict]:
             reglas.append({
                 "id": f"COMP-{contador:03d}",
                 "tipo": "dimension",
-                "seccion_pda": "Informacion general / Competencias",
+                "seccion_pda": "Competencias",
                 "descripcion": f"El PDA de {nombre_curso} ({codigo}) debe declarar la dimension {dim_id}: {desc}",
                 "aplica_a": codigo,
             })
