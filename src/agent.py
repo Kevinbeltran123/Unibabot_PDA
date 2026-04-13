@@ -107,7 +107,12 @@ def preparar_evaluacion(
             continue
 
         # Recuperar mas lineamientos (top_k*2) porque vamos a filtrar estructurales
-        lineamientos = recuperar_lineamientos(contenido, top_k=top_k * 2, codigo_curso=codigo_curso)
+        lineamientos = recuperar_lineamientos(
+            contenido,
+            top_k=top_k * 2,
+            codigo_curso=codigo_curso,
+            nombre_seccion=nombre,
+        )
         # Filtrar reglas estructurales (se manejan con rule-based)
         lineamientos = [l for l in lineamientos if l["tipo"] != "estructural"][:top_k]
 
