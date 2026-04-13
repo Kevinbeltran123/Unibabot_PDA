@@ -1,10 +1,12 @@
 # UnibaBot PDA
 
-Agente inteligente para la verificacion automatizada de Planes de Desarrollo Academico (PDA) de la Universidad de Ibague. El sistema recibe un PDA en formato PDF, lo evalua contra lineamientos institucionales codificados, y genera un reporte estructurado de cumplimiento.
+Agente inteligente para la verificacion automatizada de Planes de Desarrollo Academico (PDA) de la Universidad de Ibague. El sistema recibe un PDA en formato PDF, lo evalua contra 179 lineamientos institucionales codificados, y genera un reporte estructurado de cumplimiento.
+
+**Accuracy sobre gold dataset:** 1.000 (sistema final tras 5 mejoras mergeadas + 2 descartadas como experimentos negativos)
 
 ## Contexto
 
-Cada semestre, las oficinas de los programas academicos de la Universidad de Ibague deben verificar manualmente que mas de 20 PDAs cumplan con los lineamientos institucionales. Este proceso es lento, inconsistente y propenso a errores. UnibaBot PDA automatiza esta verificacion mediante un pipeline que combina extraccion de texto, busqueda semantica (RAG) y un modelo de lenguaje especializado via fine-tuning.
+Cada semestre, las oficinas de los programas academicos de la Universidad de Ibague deben verificar manualmente que mas de 20 PDAs cumplan con los lineamientos institucionales. Este proceso es lento, inconsistente y propenso a errores. UnibaBot PDA automatiza esta verificacion mediante un pipeline hibrido que combina verificacion rule-based determinista, busqueda semantica filtrada (RAG), y un modelo de lenguaje Llama 3.1 8B corriendo localmente en un MacBook Pro M3 18GB.
 
 ## Arquitectura
 
@@ -12,24 +14,39 @@ Cada semestre, las oficinas de los programas academicos de la Universidad de Iba
 PDF del PDA
     |
     v
-[1. Extraccion de texto]        src/pdf_parser.py
-    |                            PyMuPDF -> bloques con metadata (fuente, bold)
+[1. Extraccion + segmentacion]   src/pdf_parser.py
+    |                            PyMuPDF + SECCIONES_CONOCIDAS bilingue
     v
-[2. Segmentacion por secciones]  Deteccion de encabezados via heuristicas +
-    |                            lista de secciones conocidas (bilingue)
+[2. Rule-based determinista]     src/rules/estructural_checker.py
+    |                            11 checkers (EST-001 a EST-011)
+    |                            100% precision en reglas estructurales
     v
-[3. RAG: Retrieval]              src/rag/retriever.py
-    |                            ChromaDB + embeddings (all-MiniLM-L6-v2)
-    |                            179 reglas con filtro por curso
+[3. RAG con filtro por seccion]  src/rag/retriever.py + seccion_mapping.py
+    |                            ChromaDB + filtro aplica_a + filtro seccion_pda
+    |                            179 reglas, ~5 relevantes por seccion
     v
-[4. Prompt + LLM]                src/agent.py
-    |                            Llama 3.2 3B via ollama
-    |                            Fine-tuneado con QLoRA (42 ejemplos)
+[4. Prompt con few-shot]         src/prompts/compliance_prompt.txt
+    |                            3 ejemplos (2 CUMPLE + 1 NO CUMPLE)
     v
-[5. Reporte de cumplimiento]     results/reporte_cumplimiento.json
-                                 JSON estructurado por seccion:
-                                 cumple / no cumple / regla / correccion
+[5. LLM + validacion Pydantic]   src/agent.py + src/schemas.py
+    |                            Llama 3.1 8B via ollama
+    |                            Retry automatico si JSON invalido
+    v
+[6. Reporte estructurado]        results/reports_<tag>.json
+                                 regla_id / estado / evidencia / correccion
 ```
+
+**Resultados sobre gold dataset de 48 entradas etiquetadas:**
+
+| Metrica | Baseline (Llama 3.2 3B) | Final (pipeline completo) |
+|---------|--------------------------|---------------------------|
+| Accuracy | 0.351 | **1.000** |
+| Precision NO CUMPLE | 0.000 | **1.000** |
+| Recall NO CUMPLE | 0.000 | **1.000** |
+| JSON valid rate | 0.986 | **1.000** |
+| Latencia (4 PDAs) | 565s | 189s |
+
+Ver [results/evaluation_report.md](results/evaluation_report.md) y [results/accuracy_progression.md](results/accuracy_progression.md) para el detalle por mejora.
 
 ## Estructura del proyecto
 
@@ -38,28 +55,38 @@ Unibabot_PDA/
   src/
     pdf_parser.py                # Extraccion y segmentacion de PDAs
     agent.py                     # Pipeline completo del agente
+    evaluate.py                  # Script de medicion contra gold dataset
     generar_reglas.py            # Genera reglas desde JSON_archives/
+    schemas.py                   # Modelos Pydantic para validacion estricta
     prompts/
-      compliance_prompt.txt      # Template del prompt de evaluacion
+      compliance_prompt.txt      # Prompt con 3 ejemplos few-shot
+      retry_prompt.txt           # Prompt de retry si JSON invalido
     rag/
       ingest.py                  # Carga reglas en ChromaDB
-      retriever.py               # Busqueda semantica de lineamientos
+      retriever.py               # Busqueda semantica con filtros
+      seccion_mapping.py         # Mapping keyword_parser -> [seccion_pda]
+    rules/
+      estructural_checker.py     # 11 checkers rule-based (EST-001..011)
     fine_tuning/
       prepare_dataset.py         # Genera pares instruccion-respuesta
       generar_outputs.py         # Genera outputs con Llama 3.2
   data/
     lineamientos/
       reglas.json                # 179 reglas codificadas
-    chroma_db/                   # Base vectorial persistida
-    training_dataset.jsonl       # 42 ejemplos de entrenamiento
+    gold_labels.json             # Gold dataset (48 entradas etiquetadas)
+    chroma_db/                   # Base vectorial persistida (gitignored)
+    training_dataset.jsonl       # 42 ejemplos de entrenamiento (fine-tuning v1)
     validation_dataset.jsonl     # 5 ejemplos de validacion
   models/
-    lora_adapter/                # Adaptador LoRA entrenado
+    unibabot-pda.gguf            # Fine-tuned v1 (descartado, artefacto historico)
   notebooks/
     fine_tuning.ipynb            # Notebook para Google Colab (QLoRA)
   results/
-    reporte_cumplimiento.json    # Ultimo reporte generado
-  PDAs/                          # PDAs reales en PDF (4 documentos)
+    evaluation_report.md         # Reporte final con metricas completas
+    accuracy_progression.md      # Tabla por mejora + analisis
+    metrics_<tag>.json           # Metricas por snapshot (gitignored)
+    reports_<tag>.json           # Reportes crudos del agente (gitignored)
+  PDAs/                          # PDAs reales en PDF (4 documentos, gitignored)
   JSON_archives/                 # Datos institucionales (ABET, competencias)
   Docs/                          # Documentacion academica y presentaciones
   ROADMAP.md                     # Plan de implementacion por fases
@@ -70,8 +97,9 @@ Unibabot_PDA/
 ## Requisitos
 
 - Python 3.12+
-- ollama con Llama 3.2 3B
-- Google Colab con GPU T4 (solo para fine-tuning)
+- ollama con Llama 3.1 8B (default) y/o Llama 3.2 3B (baseline comparativo)
+- MacBook Pro M3 18GB o equivalente (para el 8B)
+- Google Colab con GPU T4 (opcional, solo si se quiere re-intentar fine-tuning)
 
 ## Instalacion
 
@@ -88,7 +116,8 @@ pip install -r requirements.txt
 # Instalar y configurar ollama
 brew install ollama
 brew services start ollama
-ollama pull llama3.2
+ollama pull llama3.1:8b      # modelo de produccion (default)
+ollama pull llama3.2         # baseline para comparacion (opcional)
 
 # Ingestar reglas en ChromaDB
 python src/generar_reglas.py
@@ -100,13 +129,29 @@ python src/rag/ingest.py
 ### Analizar un PDA
 
 ```bash
-cd src
-python agent.py "../PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14
+# Default: usa Llama 3.1 8B (accuracy 1.000 sobre gold)
+python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14
+
+# Con modelo explicito
+python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 baseline    # llama3.2 3B
+python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 8b          # llama3.1 8B
+python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 llama3.1:8b # nombre crudo
 ```
 
-El segundo argumento es el codigo del curso (opcional). Si se proporciona, el sistema filtra las reglas de competencias especificas de ese curso.
+El segundo argumento es el codigo del curso (opcional). Si se proporciona, el sistema filtra las reglas de competencias especificas de ese curso. El reporte se guarda en `results/reporte_<modelo>.json`.
 
-El reporte se guarda en `results/reporte_cumplimiento.json`.
+### Evaluar contra gold dataset
+
+```bash
+# Corre los 4 PDAs y calcula metricas contra data/gold_labels.json
+python src/evaluate.py --tag mi_experimento --modelo llama3.1:8b
+
+# Comparar dos runs guardados
+python src/evaluate.py --compare baseline mi_experimento
+
+# Recalcular metricas de un run previo sin re-inferir
+python src/evaluate.py --tag baseline --reuse
+```
 
 ### Explorar un PDF
 
