@@ -6,7 +6,8 @@ Dataset de evaluacion: 48 entradas gold etiquetadas manualmente sobre 4 PDAs rea
 |----------|--------|----------|---------|-----------|------------|----------|----|----|----|---------|
 | `baseline` | Llama 3.2 3B sin mejoras | 0.351 | 0.000 | 0.000 | 0.986 | 565s | 23 | 13 | 0 | 37/48 |
 | `m8_rule_based` | + rule-based hybrid | 0.927 | 0.000 | 0.000 | 0.978 | 444s | 2 | 38 | 0 | 41/48 |
-| `m2_retrieval_filter` | + retrieval filtrado por seccion | **0.944** | **0.333** | **1.000** | 0.949 | **91s** | 2 | 33 | **1** | 36/48 |
+| `m2_retrieval_filter` | + retrieval filtrado por seccion | 0.944 | 0.333 | 1.000 | 0.949 | 91s | 2 | 33 | 1 | 36/48 |
+| `m3_validation_retry` | + Pydantic + retry | **0.947** | 0.333 | 1.000 | **1.000** | 94s | 2 | 35 | 1 | 38/48 |
 
 ## Analisis por mejora
 
@@ -39,3 +40,17 @@ Dataset de evaluacion: 48 entradas gold etiquetadas manualmente sobre 4 PDAs rea
 **Por que funciono:** El filtro por seccion elimina falsos positivos del LLM (cuando el LLM recibia reglas irrelevantes y trataba de aplicarlas forzadamente). Ademas, al recibir menos reglas por seccion, muchas secciones quedan sin lineamientos que evaluar y se excluyen del pipeline, reduciendo drasticamente la latencia.
 
 **Riesgo identificado:** Matched bajo de 41 a 36. Algunas reglas del gold ya no se evaluan porque el filtro las excluyo. Esto se puede mitigar mas adelante con hybrid search (mejora 5) agregando fallback cuando el filtro deja muy pocas reglas.
+
+### Mejora 3 (validacion Pydantic + retry)
+
+**Cambio principal:** El parseo del JSON del LLM ahora usa Pydantic (`schemas.ReporteSeccion`) en vez de `json.loads()` directo. Si la validacion falla, el agente reintenta una vez con un prompt de correccion (`retry_prompt.txt`) que incluye la respuesta previa y el error.
+
+**Impacto medido:**
+- Accuracy: 0.944 → 0.947 (+0.003)
+- JSON valid rate: 0.949 → 1.000 (+0.051)
+- Matched: 36/48 → 38/48 (+2)
+- TN: 33 → 35 (+2)
+
+**Por que funciono:** Los `@field_validator` de Pydantic normalizan variaciones comunes de la salida del LLM (el string `"null"` → `None`, `"cumple"` → `"CUMPLE"`, etc). Antes, los hallazgos con esos formatos se descartaban silenciosamente en el JSON parsing. Ahora se rescatan.
+
+**Valor estrategico:** Esta mejora es un pequeno salto en accuracy pero un **prerrequisito critico** para las mejoras 4 (modelo 8B que puede generar JSON mas sofisticado) y 6 (self-consistency voting, donde necesitamos matchear hallazgos por regla_id entre runs). Sin Pydantic + retry, esas mejoras mas grandes fallarian o tendrian resultados inconsistentes.

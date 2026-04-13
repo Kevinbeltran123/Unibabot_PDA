@@ -1,0 +1,22 @@
+Tu respuesta anterior no fue un JSON valido con la estructura requerida.
+
+Respuesta previa:
+{respuesta_previa}
+
+Error de validacion:
+{error}
+
+INSTRUCCION: corrige tu respuesta y devuelve UNICAMENTE un JSON valido con esta estructura exacta, sin texto adicional antes ni despues:
+
+{{
+  "seccion": "{nombre_seccion}",
+  "hallazgos": [
+    {{
+      "regla_id": "ID exacto del lineamiento (ej: COMP-100)",
+      "regla": "descripcion breve del lineamiento",
+      "estado": "CUMPLE" o "NO CUMPLE",
+      "evidencia": "fragmento textual del PDA o razon especifica",
+      "correccion": "accion concreta requerida si no cumple, o null si cumple"
+    }}
+  ]
+}}
