@@ -8,7 +8,8 @@ Dataset de evaluacion: 48 entradas gold etiquetadas manualmente sobre 4 PDAs rea
 | `m8_rule_based` | + rule-based hybrid | 0.927 | 0.000 | 0.000 | 0.978 | 444s | 2 | 38 | 0 | 41/48 |
 | `m2_retrieval_filter` | + retrieval filtrado por seccion | 0.944 | 0.333 | 1.000 | 0.949 | 91s | 2 | 33 | 1 | 36/48 |
 | `m3_validation_retry` | + Pydantic + retry | 0.947 | 0.333 | 1.000 | 1.000 | 94s | 2 | 35 | 1 | 38/48 |
-| `m1_few_shot` | + few-shot (2 CUMPLE + 1 NO CUMPLE) | **0.951** | 0.333 | 1.000 | 1.000 | 91s | 2 | 38 | 1 | 41/48 |
+| `m1_few_shot` | + few-shot (2 CUMPLE + 1 NO CUMPLE) | 0.951 | 0.333 | 1.000 | 1.000 | 91s | 2 | 38 | 1 | 41/48 |
+| `m4_llama31_8b` | + Llama 3.1 8B como modelo LLM | **1.000** | **1.000** | **1.000** | 1.000 | 189s | **0** | **40** | 1 | 41/48 |
 
 ## Analisis por mejora
 
@@ -73,3 +74,21 @@ Dataset de evaluacion: 48 entradas gold etiquetadas manualmente sobre 4 PDAs rea
 3. **v3 (2 CUMPLE + 1 NO CUMPLE, sin regla agresiva):** balance optimo. Accuracy 0.951 y mantiene deteccion de NO CUMPLE.
 
 **Aprendizaje clave:** Los ejemplos few-shot introducen un prior estadistico implicito. La proporcion CUMPLE:NO CUMPLE del few-shot debe matchear la distribucion real del dataset (~78% CUMPLE en los PDAs reales). Instrucciones categoricas como "si menciona X es CUMPLE" sesgan demasiado al modelo.
+
+### Mejora 4 (Llama 3.1 8B) -- CHECKPOINT CRITICO
+
+**Cambio principal:** El modelo LLM cambia de `llama3.2` (3B parametros) a `llama3.1:8b` (8B parametros). El resto del pipeline (rule-based, retrieval filtrado, Pydantic, few-shot) se mantiene igual.
+
+**Impacto medido (m4 vs m1):**
+- Accuracy: 0.951 → **1.000** (+0.049)
+- Precision NO CUMPLE: 0.333 → **1.000** (+0.667)
+- Recall NO CUMPLE: mantiene 1.000
+- FP: 2 → 0 (perfecto)
+- TN: 38 → 40
+- Latencia: 91s → 189s (~2x, esperado por modelo mas grande)
+
+**Resultado:** El pipeline alcanza **accuracy perfecta 1.000** sobre 41 entradas matcheadas del gold (41 de 48, los 7 restantes son casos donde el filtro de retrieval excluye la regla antes de llegar al LLM).
+
+**Por que funciono:** Los 2 FP que tenia m1 eran casos en que el 3B confundia similitud semantica con cumplimiento estricto. El 8B razona mejor sobre contexto, distingue "el PDA habla de pensamiento critico" vs "el PDA declara la competencia 1h: Pensamiento critico" como lineamiento formal.
+
+**Cambio de default:** `MODELO_DEFAULT` en `src/agent.py` se actualiza de `MODELO_BASELINE` (llama3.2 3B) a `MODELO_8B` (llama3.1:8b). El 3B sigue disponible como `baseline` por CLI.

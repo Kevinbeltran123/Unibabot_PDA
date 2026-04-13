@@ -25,7 +25,9 @@ RETRY_PROMPT_PATH = ROOT / "src" / "prompts" / "retry_prompt.txt"
 # Modelos disponibles (registrados en ollama)
 MODELO_BASELINE = "llama3.2"
 MODELO_FINETUNED = "unibabot-pda"
-MODELO_DEFAULT = MODELO_BASELINE
+MODELO_8B = "llama3.1:8b"
+# Default es ahora el 8B porque alcanza accuracy 1.000 en el gold dataset
+MODELO_DEFAULT = MODELO_8B
 
 
 def cargar_prompt_template() -> str:
@@ -251,7 +253,12 @@ if __name__ == "__main__":
     codigo = sys.argv[2] if len(sys.argv) > 2 else None
 
     # Aliases + fallback a nombre crudo (permite probar modelos ad-hoc)
-    aliases = {"baseline": MODELO_BASELINE, "finetuned": MODELO_FINETUNED}
+    aliases = {
+        "baseline": MODELO_BASELINE,
+        "finetuned": MODELO_FINETUNED,
+        "8b": MODELO_8B,
+        "large": MODELO_8B,
+    }
     if len(sys.argv) > 3:
         modelo = aliases.get(sys.argv[3], sys.argv[3])
     else:
