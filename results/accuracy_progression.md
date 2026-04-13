@@ -11,6 +11,7 @@ Dataset de evaluacion: 48 entradas gold etiquetadas manualmente sobre 4 PDAs rea
 | `m1_few_shot` | + few-shot (2 CUMPLE + 1 NO CUMPLE) | 0.951 | 0.333 | 1.000 | 1.000 | 91s | 2 | 38 | 1 | 41/48 |
 | `m4_llama31_8b` | + Llama 3.1 8B como modelo LLM | **1.000** | **1.000** | **1.000** | 1.000 | 189s | **0** | **40** | 1 | 41/48 |
 | ~~`m5_hybrid_search`~~ | ~~+ hybrid semantic/BM25~~ | _0.976_ | _0.500_ | _1.000_ | _1.000_ | _180s_ | _1_ | _39_ | _1_ | _41/48_ |
+| ~~`m6_self_consistency`~~ | ~~+ voting n=3~~ | _1.000_ | _1.000_ | _1.000_ | _1.000_ | _448s_ | _0_ | _40_ | _1_ | _41/48_ |
 
 ## Analisis por mejora
 
@@ -111,3 +112,18 @@ Ademas, BM25 promovio una regla con buen match por keyword pero semanticamente d
 **Decision:** Descartada. El plan explicitamente contemplaba esta opcion. Se revierte el retriever a la version de m4.
 
 **Aprendizaje:** Hybrid search ayuda cuando el problema es de **ranking dentro de top-k**, no cuando es de **filtering pre-retrieval**. Para mejorar el matching del gold, la solucion correcta seria relajar el filtro `seccion_pda` o agregar un fallback. Queda como trabajo futuro.
+
+### Mejora 6 (self-consistency voting) -- DESCARTADA CON LECTURA POSITIVA
+
+**Cambio intentado:** Correr cada evaluacion 3 veces con `temperature=0.3`, agrupar hallazgos por `regla_id` entre los runs, y votar por mayoria el `estado` final. Funcion `evaluar_seccion_voting(n_samples=3)` en `src/agent.py`.
+
+**Impacto medido (m6 vs m4):**
+- Accuracy: 1.000 → 1.000 (identico)
+- Precision/Recall/FP/TN: identicos
+- Latencia: 189s → 448s (+137%)
+
+**Por que no mejoro (lectura positiva):** Self-consistency voting ayuda cuando el modelo tiene varianza en sus respuestas. Con Llama 3.1 8B + el pipeline completo (mejoras 8+2+3+1), cada run produce **exactamente la misma respuesta correcta**. Los 3 runs votan identico, no hay conflicto que resolver, el voting replica el resultado de un solo run.
+
+**Decision:** Descartada por el plan (criterio: ganancia < 3% = descarte). Se revierte el codigo del voting.
+
+**Lectura positiva:** Este experimento **valida que m4 es robusto y determinista**. Un sistema de auditoria academica requiere reproducibilidad, y la identidad entre runs demuestra que el pipeline produce resultados consistentes. No necesitamos ensemble.
