@@ -2,50 +2,66 @@
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
     "codigo_curso": "22A14",
-    "seccion": "Inteligent Agents 1. General Information",
+    "seccion": "__global__",
     "regla_id": "EST-001",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara Academic Program, Subject Name, Subject type, Modality, Credit numbers, Hours, Schedule, Professor name y e-mail. Todos los campos estructurales de EST-001 presentes."
+    "nota": "El PDA declara Academic Program, Subject Name, type, modality, credits, schedule y datos del docente (distribuidos en varias secciones del bloque general)."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
     "codigo_curso": "22A14",
-    "seccion": "Pedagogical Strategy(ies)",
+    "seccion": "__global__",
     "regla_id": "EST-002",
     "estado_esperado": "CUMPLE",
-    "nota": "Menciona explicitamente 'project-based learning' como estrategia pedagogica principal."
+    "nota": "Declara explicitamente 'project-based learning' como estrategia pedagogica."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
     "codigo_curso": "22A14",
-    "seccion": "3. Description and purpose of the course",
+    "seccion": "__global__",
+    "regla_id": "EST-003",
+    "estado_esperado": "CUMPLE",
+    "nota": "El PDA incluye '2. Context of the subject' describiendo el contexto de la asignatura en el programa."
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "__global__",
     "regla_id": "EST-004",
     "estado_esperado": "CUMPLE",
-    "nota": "Describe explicitamente el proposito: 'The course aims to provide the student with an insight into the world of Artificial Intelligence'."
+    "nota": "Incluye '3. Description and purpose of the course' con el proposito formativo."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
     "codigo_curso": "22A14",
-    "seccion": "feedback Date",
+    "seccion": "__global__",
     "regla_id": "EST-007",
     "estado_esperado": "CUMPLE",
-    "nota": "Incluye porcentajes explicitos (20%, 10%) con fechas o periodos asociados (Throughout the semester, Week X)."
+    "nota": "Incluye criterios con porcentajes (20%, 10%) y fechas (Throughout the semester, Week X)."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
     "codigo_curso": "22A14",
-    "seccion": "(bibliography and",
+    "seccion": "__global__",
+    "regla_id": "EST-008",
+    "estado_esperado": "CUMPLE",
+    "nota": "Incluye cronograma de actividades con temas organizados secuencialmente."
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "__global__",
     "regla_id": "EST-009",
     "estado_esperado": "CUMPLE",
-    "nota": "Incluye referencia bibliografica explicita: Russell S. and Norvig P (2010). Artificial Intelligence. A Modern Approach."
+    "nota": "Incluye referencias bibliograficas (Russell & Norvig 2010, Artificial Intelligence)."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
     "codigo_curso": "22A14",
-    "seccion": "Date of pedagogical agreement:",
+    "seccion": "__global__",
     "regla_id": "EST-011",
     "estado_esperado": "CUMPLE",
-    "nota": "Registra fecha explicita: 05/02/2025."
+    "nota": "Registra 'Date of pedagogical agreement: 05/02/2025' y tiene seccion 'Reviewed and approved'."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
@@ -53,7 +69,7 @@
     "seccion": "Pedagogical Strategy(ies)",
     "regla_id": "COMP-102",
     "estado_esperado": "CUMPLE",
-    "nota": "Competencia generica 1c (Comunicacion en segunda lengua): 'the international dimension is integrated through the delivery of materials and presentation of results in English'."
+    "nota": "Competencia 1c (Comunicacion segunda lengua): 'delivery of materials and presentation of results in English'."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
@@ -61,7 +77,7 @@
     "seccion": "What methodology guides the activities?",
     "regla_id": "COMP-103",
     "estado_esperado": "CUMPLE",
-    "nota": "Competencia generica 1h (Pensamiento critico): 'promoting critical thinking and problem-solving'."
+    "nota": "Competencia 1h (Pensamiento critico): 'promoting critical thinking and problem-solving'."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
@@ -69,79 +85,79 @@
     "seccion": "Classroom typology",
     "regla_id": "COMP-105",
     "estado_esperado": "CUMPLE",
-    "nota": "Dimension D4 (Internacional) declarada explicitamente: 'Dimension Internacional'."
-  },
-  {
-    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
-    "codigo_curso": "22A14",
-    "seccion": "Inteligent Agents 1. General Information",
-    "regla_id": "COMP-100",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de informacion general no menciona explicitamente la competencia especifica C1 (Analiza y modela fenomenos). Las competencias no se declaran en esta seccion."
+    "nota": "Dimension D4 (Internacional) declarada: 'Dimension Internacional'."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
     "codigo_curso": "22A14",
     "seccion": "Pedagogical Strategy(ies)",
-    "regla_id": "EST-009",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de estrategia pedagogica no contiene referencias bibliograficas. La bibliografia esta en otra seccion del PDA."
+    "regla_id": "COMP-104",
+    "estado_esperado": "CUMPLE",
+    "nota": "SABER PRO SP5 (Ingles) implicita: 'The use of English in the classroom will be encouraged'."
   },
   {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
     "codigo_curso": "22A12",
-    "seccion": "Sistemas de Control Automático 1. Información general",
+    "seccion": "__global__",
     "regla_id": "EST-001",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara Programa Academico, Nombre, Tipo, Modalidad. Otros campos (creditos, horario, docente) estan en secciones contiguas del mismo bloque general."
+    "nota": "Declara Programa, Nombre, Tipo, Modalidad, Creditos, Horario, Docente."
   },
   {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
     "codigo_curso": "22A12",
-    "seccion": "Estrategia(s) pedagógica(s)",
+    "seccion": "__global__",
     "regla_id": "EST-002",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara 'aprendizaje basado en problemas' y 'flipped classroom (aula invertida)'."
+    "nota": "Declara 'aprendizaje basado en problemas' y 'flipped classroom'."
   },
   {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
     "codigo_curso": "22A12",
-    "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
+    "seccion": "__global__",
     "regla_id": "EST-005",
     "estado_esperado": "CUMPLE",
-    "nota": "Seccion explicita de Resultados de Aprendizaje Esperados con competencias alineadas (C1)."
+    "nota": "Seccion explicita '4. Resultados de Aprendizaje Esperados (RAE)'."
   },
   {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
     "codigo_curso": "22A12",
-    "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
+    "seccion": "__global__",
     "regla_id": "EST-006",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara Competencia Especifica C1, Competencias Genericas 1b y 1e."
+    "nota": "Declara Competencia Especifica C1, Genericas 1b y 1e."
   },
   {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
     "codigo_curso": "22A12",
-    "seccion": "Criterios para la valoración y la retroalimentación Fecha",
+    "seccion": "__global__",
     "regla_id": "EST-007",
     "estado_esperado": "CUMPLE",
-    "nota": "Incluye porcentajes (8%, 17%) con semanas asociadas (Semana 1-5, Semana 6)."
+    "nota": "Incluye porcentajes (8%, 17%) con semanas (Semana 1-5, Semana 6)."
   },
   {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
     "codigo_curso": "22A12",
-    "seccion": "7. Cronograma de actividades",
+    "seccion": "__global__",
     "regla_id": "EST-008",
     "estado_esperado": "CUMPLE",
-    "nota": "Seccion explicita de cronograma con estructura por semanas y actividades."
+    "nota": "Seccion '7. Cronograma de actividades' con estructura por modulos y semanas."
   },
   {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
     "codigo_curso": "22A12",
-    "seccion": "Fecha del encuadre pedagógico:",
+    "seccion": "__global__",
+    "regla_id": "EST-009",
+    "estado_esperado": "CUMPLE",
+    "nota": "Bibliografia presente (aunque el parser no la segmenta como seccion propia, esta en el PDF)."
+  },
+  {
+    "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
+    "codigo_curso": "22A12",
+    "seccion": "__global__",
     "regla_id": "EST-011",
     "estado_esperado": "CUMPLE",
-    "nota": "Fecha del encuadre explicita: 5 de febrero de 2026."
+    "nota": "Fecha encuadre: 5 de febrero de 2026. Seccion Revisado y aprobado presente."
   },
   {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
@@ -149,7 +165,7 @@
     "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
     "regla_id": "COMP-071",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara explicitamente 'Competencia Especifica: C1. Analiza y modela fenomenos y procesos'."
+    "nota": "Declara 'C1. Analiza y modela fenomenos y procesos'."
   },
   {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
@@ -157,7 +173,7 @@
     "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
     "regla_id": "COMP-072",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara explicitamente '1b. Comprension lectora en ingles'."
+    "nota": "Declara '1b. Comprension lectora en ingles'."
   },
   {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
@@ -173,71 +189,71 @@
     "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
     "regla_id": "COMP-074",
     "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de RAE no menciona explicitamente SABER PRO SP5 (Ingles). Declara competencias genericas de ingles (1b) pero no SABER PRO."
+    "nota": "La seccion de RAE no menciona SABER PRO SP5 (Ingles) explicitamente. Solo declara 1b (generica) pero no SP5."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
     "codigo_curso": "22A31",
-    "seccion": "Desarrollo de Aplicaciones UI/UX 1. Información general",
+    "seccion": "__global__",
     "regla_id": "EST-001",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara Programa Academico, Nucleo formacion, Nombre, Tipo, Modalidad."
+    "nota": "Declara todos los campos basicos de informacion general."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
     "codigo_curso": "22A31",
-    "seccion": "Estrategia(s) pedagógica(s)",
+    "seccion": "__global__",
     "regla_id": "EST-002",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara 'Aprendizaje cooperativo', 'Proyecto grupal', 'Participacion activa' como estrategias pedagogicas."
+    "nota": "Declara 'Aprendizaje cooperativo, Proyecto grupal, Participacion activa'."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
     "codigo_curso": "22A31",
-    "seccion": "3. Descripción y propósito de la asignatura",
+    "seccion": "__global__",
     "regla_id": "EST-004",
     "estado_esperado": "CUMPLE",
-    "nota": "Describe explicitamente: 'El proposito de la asignatura es, proporcionar a los estudiantes una comprension avanzada y practica de los principios de UI/UX'."
+    "nota": "Seccion '3. Descripcion y proposito de la asignatura' completa."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
     "codigo_curso": "22A31",
-    "seccion": "Competencias genéricas:",
+    "seccion": "__global__",
     "regla_id": "EST-006",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara competencias genericas, Saber Pro y Dimensiones explicitamente: '1a, 1e, 1j, SP2, D1, D5'."
+    "nota": "Declara competencias especificas (C2, C3), genericas (1a, 1e, 1j), Saber Pro (SP2) y dimensiones (D1, D5)."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
     "codigo_curso": "22A31",
-    "seccion": "retroalimentación Fecha",
+    "seccion": "__global__",
     "regla_id": "EST-007",
     "estado_esperado": "CUMPLE",
-    "nota": "Incluye porcentajes (30%, 40%) con semanas asociadas (Semana 11, Semana 15)."
+    "nota": "Incluye porcentajes (30%, 40%) con semanas (Semana 11, Semana 15)."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
     "codigo_curso": "22A31",
-    "seccion": "7. Cronograma de actividades",
+    "seccion": "__global__",
     "regla_id": "EST-008",
     "estado_esperado": "CUMPLE",
-    "nota": "Seccion explicita de cronograma con estructura semanal y modulos."
+    "nota": "'7. Cronograma de actividades' con organizacion por modulos y semanas."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
     "codigo_curso": "22A31",
-    "seccion": "8. Bibliografía c Como bibliografía se utilizará:",
+    "seccion": "__global__",
     "regla_id": "EST-009",
     "estado_esperado": "CUMPLE",
-    "nota": "Seccion explicita de bibliografia con referencias a libros y articulos (Bacca-Acosta 2024, Botina Carpio)."
+    "nota": "'8. Bibliografia' con referencias a libros y articulos."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
     "codigo_curso": "22A31",
-    "seccion": "9. Políticas y acuerdos para el buen funcionamiento",
+    "seccion": "__global__",
     "regla_id": "EST-010",
     "estado_esperado": "CUMPLE",
-    "nota": "Seccion explicita de politicas y acuerdos para el desarrollo de la asignatura."
+    "nota": "'9. Politicas y acuerdos para el buen funcionamiento' presente."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
@@ -245,7 +261,7 @@
     "seccion": "Competencias específicas:",
     "regla_id": "COMP-116",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara explicitamente 'C2. Disena sistemas, componentes o procesos'."
+    "nota": "Declara 'C2. Disena sistemas'."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
@@ -253,7 +269,7 @@
     "seccion": "Competencias específicas:",
     "regla_id": "COMP-117",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara explicitamente 'C3. Formula y evalua proyectos de ingenieria de software'."
+    "nota": "Declara 'C3. Formula y evalua proyectos'."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
@@ -261,7 +277,7 @@
     "seccion": "Competencias genéricas:",
     "regla_id": "COMP-118",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara explicitamente '1a. Comunicacion en lengua materna'."
+    "nota": "Declara '1a. Comunicacion en lengua materna'."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
@@ -269,7 +285,7 @@
     "seccion": "Competencias genéricas:",
     "regla_id": "COMP-119",
     "estado_esperado": "NO CUMPLE",
-    "nota": "La regla exige 1g (Aprender a aprender) pero el PDA declara 1e (Cultura cientifica y tecnologica) en su lugar. Competencia incorrecta."
+    "nota": "INCUMPLIMIENTO REAL: la regla exige competencia generica 1g (Aprender a aprender) pero el PDA declara 1e (Cultura cientifica) en su lugar. La competencia 1g esta ausente del PDA."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
@@ -277,7 +293,7 @@
     "seccion": "Competencias genéricas:",
     "regla_id": "COMP-120",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara explicitamente '1j. Espiritu emprendedor'."
+    "nota": "Declara '1j. Espiritu emprendedor'."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
@@ -285,7 +301,7 @@
     "seccion": "Competencias genéricas:",
     "regla_id": "COMP-121",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara explicitamente 'Saber Pro: SP2, Lectura critica'."
+    "nota": "Declara 'Saber Pro: SP2, Lectura critica'."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
@@ -293,7 +309,7 @@
     "seccion": "Competencias genéricas:",
     "regla_id": "COMP-122",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara explicitamente 'Dimensiones: D1, Transdisciplinar'."
+    "nota": "Declara 'Dimensiones: D1, Transdisciplinar'."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
@@ -301,142 +317,70 @@
     "seccion": "Competencias genéricas:",
     "regla_id": "COMP-123",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara explicitamente 'D5, Espiritu emprendedor'."
+    "nota": "Declara 'D5, Espiritu emprendedor'."
   },
   {
     "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
     "codigo_curso": null,
-    "seccion": "Modelos y Simulación 1. Información general",
+    "seccion": "__global__",
     "regla_id": "EST-001",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara Programa Academico, Nucleo, Nombre, Tipo, Modalidad."
+    "nota": "Declara campos basicos de informacion general."
   },
   {
     "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
     "codigo_curso": null,
-    "seccion": "Estrategia(s) pedagógica(s)",
+    "seccion": "__global__",
     "regla_id": "EST-002",
     "estado_esperado": "CUMPLE",
-    "nota": "Declara multiples estrategias: aprendizaje basado en problemas, aprendizaje basado en proyectos, clase magistral, estudio de casos."
+    "nota": "Declara 4 estrategias: aprendizaje basado en problemas, en proyectos, clase magistral, estudio de casos."
   },
   {
     "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
     "codigo_curso": null,
-    "seccion": "2. Contexto de la asignatura",
+    "seccion": "__global__",
     "regla_id": "EST-003",
     "estado_esperado": "CUMPLE",
-    "nota": "Describe el contexto: 'La asignatura Modelos y Simulacion es una herramienta clave en la formacion del ingeniero industrial'."
+    "nota": "Seccion '2. Contexto de la asignatura' explicita."
   },
   {
     "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
     "codigo_curso": null,
-    "seccion": "El RAE 1 aporta en las siguientes Competencias: C1, SP1, SP5, O6",
+    "seccion": "__global__",
     "regla_id": "EST-005",
     "estado_esperado": "CUMPLE",
-    "nota": "Menciona explicitamente RAE1 y RAE2 con sus competencias asociadas. La seccion esta dedicada a Resultados de Aprendizaje Esperados."
+    "nota": "Menciona 'El RAE 1 aporta en las siguientes Competencias' y 'RAE2. Disenar y analizar posibles estrategias'."
   },
   {
     "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
     "codigo_curso": null,
-    "seccion": "la retroalimentación Fecha",
-    "regla_id": "EST-007",
+    "seccion": "__global__",
+    "regla_id": "EST-008",
     "estado_esperado": "CUMPLE",
-    "nota": "Incluye porcentajes (10, 20) con fechas especificas (6 de abril, 12 de marzo, 5 de marzo)."
+    "nota": "'7. Cronograma de actividades' con estructura temporal."
   },
   {
     "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
     "codigo_curso": null,
-    "seccion": "CRC Press. 9. Políticas y acuerdos para el buen funcionamiento",
+    "seccion": "__global__",
+    "regla_id": "EST-009",
+    "estado_esperado": "CUMPLE",
+    "nota": "Bibliografia presente con Banks, Carson, Nelson, Joines & Roberts."
+  },
+  {
+    "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
+    "codigo_curso": null,
+    "seccion": "__global__",
     "regla_id": "EST-010",
     "estado_esperado": "CUMPLE",
-    "nota": "Seccion explicita de politicas con reglas sobre horario, comunicacion y examenes."
+    "nota": "'9. Politicas y acuerdos para el buen funcionamiento' con reglas explicitas."
   },
   {
     "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
     "codigo_curso": null,
-    "seccion": "Fecha del encuadre pedagógico: 2 de febrero de 2026",
+    "seccion": "__global__",
     "regla_id": "EST-011",
     "estado_esperado": "CUMPLE",
-    "nota": "Fecha del encuadre pedagogico explicita en el nombre mismo de la seccion: 2 de febrero de 2026."
-  },
-  {
-    "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
-    "codigo_curso": null,
-    "seccion": "2. Contexto de la asignatura",
-    "regla_id": "EST-009",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de contexto no contiene bibliografia. La bibliografia esta en otra seccion del PDA."
-  },
-  {
-    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
-    "codigo_curso": "22A14",
-    "seccion": "Pedagogical Strategy(ies)",
-    "regla_id": "EST-001",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de estrategia pedagogica no contiene los campos de informacion general (programa, creditos, horario, docente). Esos datos estan en otra seccion del PDA."
-  },
-  {
-    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
-    "codigo_curso": "22A14",
-    "seccion": "Inteligent Agents 1. General Information",
-    "regla_id": "EST-009",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de informacion general no contiene bibliografia. La bibliografia aparece en otra seccion del PDA."
-  },
-  {
-    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
-    "codigo_curso": "22A14",
-    "seccion": "3. Description and purpose of the course",
-    "regla_id": "EST-007",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de descripcion no contiene criterios de valoracion con porcentajes y fechas. Esos criterios estan en la seccion de feedback."
-  },
-  {
-    "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
-    "codigo_curso": "22A12",
-    "seccion": "Sistemas de Control Automático 1. Información general",
-    "regla_id": "EST-009",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de informacion general no contiene bibliografia. En este PDA la bibliografia no esta segmentada como seccion propia por el parser."
-  },
-  {
-    "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
-    "codigo_curso": "22A12",
-    "seccion": "Estrategia(s) pedagógica(s)",
-    "regla_id": "EST-004",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de estrategia pedagogica no incluye descripcion y proposito del curso. Esa informacion deberia estar en una seccion dedicada."
-  },
-  {
-    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
-    "codigo_curso": "22A31",
-    "seccion": "Desarrollo de Aplicaciones UI/UX 1. Información general",
-    "regla_id": "EST-010",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de informacion general no contiene politicas y acuerdos. Esas estan en la seccion 9 del PDA."
-  },
-  {
-    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
-    "codigo_curso": "22A31",
-    "seccion": "8. Bibliografía c Como bibliografía se utilizará:",
-    "regla_id": "EST-007",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de bibliografia no contiene criterios de valoracion con porcentajes y fechas. Esa informacion esta en la seccion de retroalimentacion."
-  },
-  {
-    "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
-    "codigo_curso": null,
-    "seccion": "Modelos y Simulación 1. Información general",
-    "regla_id": "EST-007",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de informacion general no contiene criterios de valoracion con porcentajes. Esos criterios estan en la seccion de retroalimentacion del PDA."
-  },
-  {
-    "pda_file": "PDA-Modelos y Simulación- 2026A.pdf",
-    "codigo_curso": null,
-    "seccion": "Estrategia(s) pedagógica(s)",
-    "regla_id": "EST-011",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de estrategia pedagogica no registra la fecha del encuadre pedagogico. Esa fecha esta en una seccion administrativa separada."
+    "nota": "Fecha del encuadre: 2 de febrero de 2026. Seccion 'Revisado y aprobado' presente."
   }
 ]

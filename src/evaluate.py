@@ -50,10 +50,21 @@ def cargar_gold() -> list[dict]:
 def buscar_hallazgo(reporte: dict, seccion: str, regla_id: str) -> dict | None:
     """Encuentra el hallazgo para una seccion + regla_id en el reporte del agente.
 
-    Match flexible: la seccion del gold puede ser substring del nombre detectado
-    por el parser (ej: gold dice "1. General Information", parser detecto
-    "Inteligent Agents 1. General Information").
+    Caso especial: si seccion == "__global__", busca el regla_id en CUALQUIER
+    seccion del reporte (para reglas estructurales que son globales al PDA).
+
+    Match flexible en secciones normales: la seccion del gold puede ser substring
+    del nombre detectado por el parser.
     """
+    # Caso especial: regla global, buscar en cualquier seccion
+    if seccion == "__global__":
+        for resultado in reporte.get("resultados", []):
+            for h in resultado.get("hallazgos", []):
+                if h.get("regla_id") == regla_id:
+                    return h
+        return None
+
+    # Matching flexible por seccion
     seccion_norm = seccion.lower().strip()
     for resultado in reporte.get("resultados", []):
         nombre_parseado = resultado.get("seccion", "").lower().strip()
@@ -129,8 +140,12 @@ def calcular_json_valid_rate(reportes: dict[str, dict]) -> float:
     return validos / total if total > 0 else 0.0
 
 
-def ejecutar_pipeline(modelo: str) -> tuple[dict[str, dict], float]:
-    """Corre analizar_pda sobre los 4 PDAs y devuelve los reportes + latencia total."""
+def ejecutar_pipeline(modelo: str, tag: str) -> tuple[dict[str, dict], float]:
+    """Corre analizar_pda sobre los 4 PDAs y devuelve los reportes + latencia total.
+
+    Persiste los reportes en results/reports_<tag>.json para permitir
+    recalculo de metricas sin volver a correr el pipeline completo.
+    """
     reportes = {}
     start = time.time()
 
@@ -149,7 +164,24 @@ def ejecutar_pipeline(modelo: str) -> tuple[dict[str, dict], float]:
             reportes[pdf_name] = {"resultados": [], "error": str(e)}
 
     elapsed = time.time() - start
+
+    # Persistir reportes crudos
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    reportes_path = RESULTS_DIR / f"reports_{tag}.json"
+    with open(reportes_path, "w", encoding="utf-8") as f:
+        json.dump(reportes, f, ensure_ascii=False, indent=2)
+    print(f"\nReportes raw guardados en: {reportes_path}")
+
     return reportes, elapsed
+
+
+def cargar_reportes(tag: str) -> dict[str, dict] | None:
+    """Carga reportes previamente guardados para un tag dado."""
+    reportes_path = RESULTS_DIR / f"reports_{tag}.json"
+    if not reportes_path.exists():
+        return None
+    with open(reportes_path, encoding="utf-8") as f:
+        return json.load(f)
 
 
 def guardar_metricas(metricas: dict, tag: str):
@@ -212,6 +244,7 @@ def main():
     parser.add_argument("--tag", type=str, help="Tag para guardar esta corrida (ej: baseline, m2_filter)")
     parser.add_argument("--modelo", type=str, default="llama3.2", help="Modelo a usar (default: llama3.2)")
     parser.add_argument("--compare", nargs=2, metavar=("TAG_A", "TAG_B"), help="Comparar dos runs guardados")
+    parser.add_argument("--reuse", action="store_true", help="Reutilizar reportes guardados del tag (no re-correr el pipeline)")
     args = parser.parse_args()
 
     if args.compare:
@@ -224,8 +257,16 @@ def main():
     gold = cargar_gold()
     print(f"Gold labels cargados: {len(gold)} entradas")
 
-    print(f"\nCorriendo pipeline con modelo '{args.modelo}'...")
-    reportes, latencia = ejecutar_pipeline(args.modelo)
+    if args.reuse:
+        reportes = cargar_reportes(args.tag)
+        if reportes is None:
+            print(f"ERROR: no se encontraron reportes guardados para tag '{args.tag}'")
+            sys.exit(1)
+        print(f"Reusando reportes guardados para tag '{args.tag}'")
+        latencia = 0.0
+    else:
+        print(f"\nCorriendo pipeline con modelo '{args.modelo}'...")
+        reportes, latencia = ejecutar_pipeline(args.modelo, args.tag)
 
     print("\nCalculando metricas...")
     metricas_acc = calcular_accuracy(reportes, gold)
