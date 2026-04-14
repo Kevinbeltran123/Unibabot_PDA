@@ -266,11 +266,12 @@ El resultado: fine-tuning de un modelo de 3B parametros en una GPU T4 gratuita d
 - [x] **6.1** Registrar modelo fine-tuneado en ollama (`unibabot-pda`) e integrar al pipeline con seleccion por CLI
 - [x] **6.2** Pasar PDAs por el modelo fine-tuneado -- HALLAZGO: loops de generacion, modelo degradado
 - [ ] **6.3** Calcular metricas precision/recall/F1 (descartado: el fine-tuneado no produce JSON valido)
-- [ ] **6.4** Evaluacion humana: Kevin y Jeryleefth revisan los reportes y califican calidad (1-5)
+- [x] **6.4** Evaluacion humana: rubrica 3 criterios (ES/CA/CX 1-5) sobre 15 hallazgos de m4 -- incluida en IEEE
 - [x] **6.5** Comparar baseline vs. fine-tuned: baseline funciona, fine-tuneado degradado por dataset pequeno
 - [ ] **6.6** Probar con 1-2 PDAs nuevos (pendiente con baseline)
 - [x] **6.7** Documentar decisiones tecnicas, resultados, y limitaciones (`results/evaluation_report.md`)
-- [ ] **6.8** Actualizar el reporte IEEE con los resultados obtenidos
+- [x] **6.8** Actualizar el reporte IEEE con los resultados obtenidos -- `Docs/UnibaBot_PDA.tex` reescrito como paper de resultados (5 paginas, compila sin errores)
+- [x] **6.9** Fixes dirigidos para aumentar matching del gold (2026-04-13): Fix C (re-ingest dimension rules + separate LLM eval), Fix B parcial (clarificacion inline de declaraciones informales en prompt), Fix A (targeted strategy mapping + longest-match keyword). Resultado: matched 41/48 → 45/48 manteniendo accuracy 1.000. Tags: `m8a_dimension_ingest`, `m8b_seccion_mapping`. 3 entradas restantes (COMP-102, COMP-105, COMP-119) requieren cambios arquitectonicos.
 
 ### Entregables
 
