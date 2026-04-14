@@ -6,6 +6,7 @@ Pipeline: PDF -> secciones -> RAG -> LLM -> reporte
 
 import json
 import sys
+from typing import Callable
 import ollama
 from pathlib import Path
 from pydantic import ValidationError
@@ -29,6 +30,40 @@ MODELO_FINETUNED = "unibabot-pda"
 MODELO_8B = "llama3.1:8b"
 # Default es ahora el 8B porque alcanza accuracy 1.000 en el gold dataset
 MODELO_DEFAULT = MODELO_8B
+
+# Contrato del callback de progreso: (evento, datos) -> None
+# Eventos emitidos por analizar_pda:
+#   parsing_start       {pdf_path, modelo}
+#   parsing_done        {num_secciones}
+#   structural_start    {}
+#   structural_done     {hallazgos}
+#   llm_prep_start      {}
+#   llm_prep_done       {num_evaluaciones}
+#   section_eval_start  {index, total, name}
+#   section_eval_done   {index, total, name, cumple, no_cumple}
+#   done                {total_secciones}
+ProgressCallback = Callable[[str, dict], None]
+
+
+def _default_progress(event: str, data: dict) -> None:
+    """Callback por defecto: replica exactamente el stdout previo al refactor.
+
+    Solo los eventos que la CLI imprimia antes producen output. El resto
+    (structural_done, llm_prep_done, section_eval_done, done) permanecen
+    silenciosos para que `python src/agent.py ...` siga teniendo el mismo
+    stdout byte-a-byte, y scripts como evaluate.py no noten el cambio.
+    """
+    if event == "parsing_start":
+        print(f"Parseando PDF: {data['pdf_path']}")
+        print(f"Modelo: {data['modelo']}")
+    elif event == "parsing_done":
+        print(f"Secciones encontradas: {data['num_secciones']}")
+    elif event == "structural_start":
+        print("Verificando reglas estructurales (rule-based)...")
+    elif event == "llm_prep_start":
+        print("Preparando evaluacion LLM (solo competencias)...")
+    elif event == "section_eval_start":
+        print(f"  Evaluando: {data['name']}...")
 
 
 def cargar_prompt_template() -> str:
@@ -223,27 +258,35 @@ def analizar_pda(
     codigo_curso: str | None = None,
     modelo: str = MODELO_DEFAULT,
     top_k: int = 5,
+    on_progress: ProgressCallback | None = None,
 ) -> dict:
     """Pipeline completo: PDF -> reporte de cumplimiento.
 
     Usa rule-based determinista para las 11 reglas estructurales y LLM
     para las demas reglas (competencias, ABET, dimensiones, etc).
+
+    Si `on_progress` es None, se usa `_default_progress` que replica el
+    stdout previo al refactor. La UI de Streamlit pasa un callback custom
+    que traduce los eventos a updates visuales (st.status, progress bar).
     """
-    print(f"Parseando PDF: {pdf_path}")
-    print(f"Modelo: {modelo}")
+    emit = on_progress or _default_progress
+
+    emit("parsing_start", {"pdf_path": pdf_path, "modelo": modelo})
     secciones = parsear_pda(pdf_path)
-    print(f"Secciones encontradas: {len(secciones)}")
+    emit("parsing_done", {"num_secciones": len(secciones)})
 
     # Verificacion rule-based de reglas estructurales (determinista, rapido)
-    print("Verificando reglas estructurales (rule-based)...")
+    emit("structural_start", {})
     hallazgos_estructurales = verificar_estructurales(secciones)
+    emit("structural_done", {"hallazgos": len(hallazgos_estructurales)})
 
-    print("Preparando evaluacion LLM (solo competencias)...")
+    emit("llm_prep_start", {})
     evaluaciones = preparar_evaluacion(secciones, codigo_curso, top_k=top_k)
 
     # Evaluacion separada para reglas de dimension (no ranquean bien semanticamente)
     if codigo_curso:
         evaluaciones += preparar_evaluaciones_dimension(secciones, codigo_curso)
+    emit("llm_prep_done", {"num_evaluaciones": len(evaluaciones)})
 
     template = cargar_prompt_template()
     retry_template = cargar_retry_template()
@@ -260,9 +303,10 @@ def analizar_pda(
         ],
     }
 
-    for eval_info in evaluaciones:
+    total = len(evaluaciones)
+    for idx, eval_info in enumerate(evaluaciones, start=1):
         nombre = eval_info["nombre_seccion"]
-        print(f"  Evaluando: {nombre}...")
+        emit("section_eval_start", {"index": idx, "total": total, "name": nombre})
 
         resultado = evaluar_seccion(
             nombre,
@@ -274,6 +318,18 @@ def analizar_pda(
         )
         reporte["resultados"].append(resultado)
 
+        hallazgos = resultado.get("hallazgos", [])
+        cumple = sum(1 for h in hallazgos if h.get("estado") == "CUMPLE")
+        no_cumple = sum(1 for h in hallazgos if h.get("estado") == "NO CUMPLE")
+        emit("section_eval_done", {
+            "index": idx,
+            "total": total,
+            "name": nombre,
+            "cumple": cumple,
+            "no_cumple": no_cumple,
+        })
+
+    emit("done", {"total_secciones": total})
     return reporte
 
 
