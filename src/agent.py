@@ -222,6 +222,7 @@ def analizar_pda(
     pdf_path: str,
     codigo_curso: str | None = None,
     modelo: str = MODELO_DEFAULT,
+    top_k: int = 5,
 ) -> dict:
     """Pipeline completo: PDF -> reporte de cumplimiento.
 
@@ -238,7 +239,7 @@ def analizar_pda(
     hallazgos_estructurales = verificar_estructurales(secciones)
 
     print("Preparando evaluacion LLM (solo competencias)...")
-    evaluaciones = preparar_evaluacion(secciones, codigo_curso)
+    evaluaciones = preparar_evaluacion(secciones, codigo_curso, top_k=top_k)
 
     # Evaluacion separada para reglas de dimension (no ranquean bien semanticamente)
     if codigo_curso:

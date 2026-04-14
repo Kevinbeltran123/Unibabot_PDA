@@ -18,12 +18,16 @@ MAPPING_SECCIONES = {
     "plan de estudios": ["Informacion general"],
 
     # Estrategia pedagogica y metodologia
+    # "pedagogical strategy" y "what methodology" incluyen Competencias porque
+    # PDAs bilingues (ej: Agentes Inteligentes) declaran competencias 1h, SP5
+    # en estas secciones (COMP-103, COMP-104). Las demas secciones de estrategia
+    # quedan sin Competencias para evitar FPs en evaluaciones incorrectas.
     "estrategia": ["Estrategia pedagogica"],
-    "pedagogical strategy": ["Estrategia pedagogica"],
+    "pedagogical strategy": ["Estrategia pedagogica", "Competencias", "Competencias / Resultados de Aprendizaje"],
     "metodologia": ["Estrategia pedagogica"],
     "methodology": ["Estrategia pedagogica"],
     "how will my students learn": ["Estrategia pedagogica"],
-    "what methodology": ["Estrategia pedagogica"],
+    "what methodology": ["Estrategia pedagogica", "Competencias", "Competencias / Resultados de Aprendizaje"],
     "what characterizes": ["Estrategia pedagogica"],
     "classroom typology": ["Estrategia pedagogica"],
     "tipologia del salon": ["Estrategia pedagogica"],
@@ -104,6 +108,10 @@ def normalizar_nombre(nombre: str) -> str:
 def secciones_pda_validas(nombre_seccion: str) -> list[str] | None:
     """Devuelve la lista de valores seccion_pda validos para un nombre de seccion.
 
+    Usa longest-match: si multiples keywords hacen match (ej: "methodology" y
+    "what methodology"), gana el mas especifico (mas largo). Esto evita que
+    keywords cortos como "methodology" enmascaren "what methodology".
+
     Args:
         nombre_seccion: nombre de la seccion detectada por el parser
 
@@ -113,9 +121,13 @@ def secciones_pda_validas(nombre_seccion: str) -> list[str] | None:
     """
     nombre_norm = normalizar_nombre(nombre_seccion)
 
-    # Intentar match con cada keyword del mapping
+    # Longest-match: recopilar todos los matches y elegir el keyword mas largo
+    mejor_keyword = None
+    mejor_secciones = None
     for keyword, secciones_validas in MAPPING_SECCIONES.items():
         if keyword in nombre_norm:
-            return secciones_validas
+            if mejor_keyword is None or len(keyword) > len(mejor_keyword):
+                mejor_keyword = keyword
+                mejor_secciones = secciones_validas
 
-    return None
+    return mejor_secciones
