@@ -126,7 +126,22 @@ python src/rag/ingest.py
 
 ## Uso
 
-### Analizar un PDA
+### Interfaz web (Streamlit)
+
+```bash
+streamlit run streamlit_app.py
+```
+
+Abre la UI en `http://localhost:8501`. El flujo es:
+
+1. Subir un PDA en PDF, opcionalmente escribir el codigo del curso (ej: `22A14`) y elegir modelo.
+2. Al pulsar "Analizar PDA" se ve el progreso en vivo seccion por seccion (reutiliza los mismos eventos que la CLI).
+3. El reporte se muestra con metricas globales, tabs (Estructural / Por seccion / Resumen) y acordeones con badges coloreados por hallazgo.
+4. Cada reporte se guarda automaticamente en `results/history/` y aparece en el sidebar para consultar despues sin re-analizar.
+
+La UI es una capa delgada sobre `analizar_pda` de [src/agent.py](src/agent.py); toda la logica del pipeline sigue siendo la misma que usa la CLI, y ambos canales pueden convivir sin interferirse.
+
+### Analizar un PDA (CLI)
 
 ```bash
 # Default: usa Llama 3.1 8B (accuracy 1.000 sobre gold)

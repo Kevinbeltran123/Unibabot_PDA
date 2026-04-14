@@ -21,7 +21,12 @@ models/
 # Reportes JSON generados (se regeneran corriendo el agente)
 # Pero los .md del reporte de evaluacion SI van al repo
 results/*.json
+results/history/*.json
 !results/evaluation_report.md
+!results/history/.gitkeep
+
+# Archivos temporales de la webapp (PDFs subidos)
+tmp/
 
 # === Python ===
 __pycache__/
