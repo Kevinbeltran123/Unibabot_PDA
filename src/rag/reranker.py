@@ -33,11 +33,14 @@ def _resolver_device() -> str:
 
 
 def reranker_disponible() -> bool:
-    """Permite desactivar reranker globalmente via env var.
+    """Permite activar reranker globalmente via env var.
 
-    Util para ablation o debugging de problemas de carga.
+    Desactivado por default tras el analisis m9: sobre este corpus en
+    particular, el stack mpnet+reranker regresa vs all-MiniLM-L6-v2 solo.
+    Activar explicitamente con UNIBABOT_RERANKER_ENABLED=1 para
+    experimentar o si se cambia el embedding a uno multilingue mas fuerte.
     """
-    flag = os.environ.get("UNIBABOT_RERANKER_ENABLED", "1")
+    flag = os.environ.get("UNIBABOT_RERANKER_ENABLED", "0")
     return flag not in ("0", "false", "False", "no")
 
 

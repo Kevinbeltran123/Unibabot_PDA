@@ -1,8 +1,12 @@
 """
 Embedding function personalizada para ChromaDB.
 
-Usa sentence-transformers con modelo multilingue optimizado para espanol.
-Parametrizable via variable de entorno UNIBABOT_EMBEDDING_MODEL.
+Por default usa all-MiniLM-L6-v2 (384d), que es el modelo que produjo la
+config m8b de produccion (accuracy 1.000, matched 45/48). Se puede cambiar
+a multilingue (ej. paraphrase-multilingual-mpnet-base-v2, 768d) via
+variable de entorno UNIBABOT_EMBEDDING_MODEL, pero la evaluacion m9/m9.1
+demostro que mpnet regresa sobre este corpus especifico (ver
+results/evaluation_report.md seccion "Iteracion 4").
 """
 
 import os
@@ -13,7 +17,7 @@ from chromadb.api.types import Documents, EmbeddingFunction, Embeddings
 from sentence_transformers import SentenceTransformer
 
 
-DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 
 def _resolver_modelo() -> str:
