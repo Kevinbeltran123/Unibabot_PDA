@@ -15,10 +15,10 @@ CHROMA_PATH = ROOT / "data" / "chroma_db"
 
 def obtener_coleccion() -> chromadb.Collection:
     client = chromadb.PersistentClient(path=str(CHROMA_PATH))
-    return client.get_collection(
-        "lineamientos",
-        embedding_function=get_embedding_function(),
-    )
+    ef = get_embedding_function()
+    if ef is None:
+        return client.get_collection("lineamientos")
+    return client.get_collection("lineamientos", embedding_function=ef)
 
 
 def _construir_filtro(codigo_curso: str | None, nombre_seccion: str | None) -> dict | None:
