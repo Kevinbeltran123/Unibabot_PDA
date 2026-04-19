@@ -37,11 +37,15 @@ def crear_coleccion(reset: bool = False) -> chromadb.Collection:
         except Exception:
             pass
 
-    collection = client.get_or_create_collection(
-        name="lineamientos",
-        metadata={"hnsw:space": "cosine"},
-        embedding_function=get_embedding_function(),
-    )
+    kwargs = {
+        "name": "lineamientos",
+        "metadata": {"hnsw:space": "cosine"},
+    }
+    ef = get_embedding_function()
+    if ef is not None:
+        kwargs["embedding_function"] = ef
+
+    collection = client.get_or_create_collection(**kwargs)
     return collection
 
 

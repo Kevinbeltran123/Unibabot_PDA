@@ -398,3 +398,89 @@ UNIBABOT_RERANKER_ENABLED=0 python src/evaluate.py --tag m8b_restored
 - **COMP-105 (Classroom typology):** requiere ajuste de mapping de secciones o negative sampling en el prompt; no resuelto por m9.
 - **COMP-119 (deteccion de ausencia):** requiere un paso adicional explicito que compare la lista de competencias declaradas contra la lista esperada para el curso. No es un problema de retrieval sino de razonamiento; pendiente para m10.
 - **Gold held-out sobre los 3 PDAs nuevos** aun no etiquetado; la evaluacion m9 corrio solo sobre los 3 PDAs originales (gold_labels.json sin entradas para los nuevos).
+
+## Iteracion 4.1 (m9.1, m9a, m9.2): ablation, fallback y restauracion de produccion
+
+Tras documentar la regresion de m9 se ejecutaron tres experimentos para aislar la causa y decidir que configuracion dejar como produccion:
+
+### m9a -- Ablation: SBERT sin reranker
+
+Config: `UNIBABOT_RERANKER_ENABLED=0` con embedding mpnet multilingue.
+
+| Metrica | m8b | m9 | **m9a (solo mpnet)** |
+|---------|-----|----|---------------------|
+| Accuracy | 1.000 | 0.947 | **0.892** |
+| Matched | 45/48 | 38/48 | **37/48** |
+| TP/FP/TN/FN | 1/0/44/0 | 1/2/35/0 | **0/3/33/1** |
+| Recall NO CUMPLE | 1.000 | 1.000 | **0.000** |
+| Latencia | 236s | 247s | **321s** |
+
+**Interpretacion:** sin reranker, el stack mpnet es estrictamente peor que m9 (con reranker). La recall NO CUMPLE cae a 0.000: el sistema ya no detecta el incumplimiento de COMP-074. Esto **confirma que el reranker aporta valor neto**; la regresion vs m8b viene del embedding mpnet mismo, no del cross-encoder.
+
+### m9.1 -- Fallback a filtro relajado cuando pool <5
+
+Config: mpnet + reranker + nuevo fallback en `recuperar_lineamientos()`. Si tras aplicar filtro estricto (curso + seccion_pda) el pool tiene menos de `MIN_POOL_BEFORE_FALLBACK=5` candidatos, se re-query con solo filtro de curso y se fusionan resultados sin duplicados. Implementado en `src/rag/retriever.py` en rama `feat/m9.1-filter-fallback`.
+
+| Metrica | m8b | m9 | **m9.1 (fallback)** |
+|---------|-----|----|----|
+| Accuracy | 1.000 | 0.947 | **0.923** |
+| Matched | 45/48 | 38/48 | **39/48** |
+| TP/FP/TN/FN | 1/0/44/0 | 1/2/35/0 | **1/3/35/0** |
+| Recall NO CUMPLE | 1.000 | 1.000 | **1.000** |
+| Latencia | 236s | 247s | **1434s (!)** |
+
+**Interpretacion:** el fallback aporta **+1 matched** (39 vs 38) pero a costo de:
+- **Accuracy cae** (0.947 -> 0.923) por un FP adicional.
+- **Latencia se dispara 6x** (247s -> 1434s) porque ahora se hace 2x queries + rerank sobre pool ampliado por seccion.
+- Smoke test cualitativo fue positivo (COMP-117/COMP-116 suben a top-2 con score 9+) pero el gold matching flexible de `evaluate.py` no siempre reconoce las secciones donde aparecen; y el LLM produce FPs sobre las reglas nuevas que ahora recibe.
+
+**La relacion coste/beneficio es negativa.** Con el corpus y gold actual, m9.1 no se justifica.
+
+### m9.2 -- Restauracion de produccion a m8b-equivalente
+
+Conclusion del analisis: **mpnet regresa sobre este corpus especifico, sin importar la variante**. Hipotesis del por que:
+
+1. Los lineamientos tienen mucho lenguaje formulaico repetido (nombres de seccion, cliches institucionales). `all-MiniLM-L6-v2` captura esas similitudes superficiales, que aqui son la senial dominante.
+2. `mpnet-multilingual` prioriza similitud semantica profunda; eso introduce rankings "correctos" en abstracto pero divergentes del mapping por `seccion_pda` que espera `evaluate.py`.
+3. El corpus gold (48 entradas, 2 NO CUMPLE, 3 PDAs) es pequeno: cualquier reordenamiento mueve la aguja facil y no se observan ganancias robustas de mpnet.
+
+**Decision de produccion:** restaurar comportamiento m8b manteniendo la infraestructura nueva como opcional.
+
+Cambios en `m9.2`:
+
+- `src/rag/embeddings.py`: `DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"` (antes mpnet).
+- `src/rag/reranker.py`: `UNIBABOT_RERANKER_ENABLED` default `"0"` (antes `"1"`). Activacion explicita requerida.
+- ChromaDB re-ingestado con dim=384 (confirmado).
+- Nueva rama `feat/m9.2-restore-production`; la rama `feat/m9.1-filter-fallback` se deja **sin mergear** (no aporta produccion, se preserva como referencia historica del intento).
+
+Con esto, `python src/evaluate.py --tag cualquier_nombre` reproduce m8b por default. Quien quiera experimentar con mpnet o reranker debe activarlos explicitamente via env vars:
+
+```bash
+# Experimento opt-in con multilingue + reranker
+UNIBABOT_EMBEDDING_MODEL="sentence-transformers/paraphrase-multilingual-mpnet-base-v2" \
+  python src/rag/ingest.py
+UNIBABOT_RERANKER_ENABLED=1 python src/evaluate.py --tag experimento_mpnet
+```
+
+### Tabla comparativa final
+
+| Config | Default? | Accuracy | Matched | Rec NC | Lat | Decision |
+|--------|----------|----------|---------|--------|-----|----------|
+| **m8b** | si (restaurado en m9.2) | **1.000** | **45/48** | **1.000** | **236s** | **Produccion** |
+| m9 | no | 0.947 | 38/48 | 1.000 | 247s | Infraestructura opt-in |
+| m9a | no | 0.892 | 37/48 | 0.000 | 321s | Solo para ablation |
+| m9.1 | no (no mergeado) | 0.923 | 39/48 | 1.000 | 1434s | Descartado (latencia x6) |
+
+### Aprendizajes
+
+1. **No cambiar el embedding sin un gold suficientemente grande.** 48 entradas son insuficientes para detectar ganancias robustas de mpnet; solo amplifican el ruido.
+2. **El reranker fue positivo en ablation** (+1 matched, +0.055 accuracy frente a solo mpnet), pero compensar una degradacion del bi-encoder es distinto a mejorar un bi-encoder ya bueno.
+3. **Los FPs introducidos por mpnet son del LLM**, no del retrieval: el retrieval recupera reglas que antes no aparecian; el LLM las evalua y algunas veces las marca mal. Expandir el filtro sin mejorar el prompt introduce FPs.
+4. **Latencia del fallback es inaceptable** porque cada rerun del query materializa mas candidatos que el cross-encoder debe puntuar; el doble query en disco + 2x rerank escalan con numero de secciones.
+
+### Trabajo futuro (m10)
+
+- **Corpus gold 5x mas grande** (~200 entradas) antes de volver a evaluar mpnet. Sin eso cualquier cambio de embedding es estadisticamente inconcluso.
+- **COMP-105 (classroom typology):** ajustar `seccion_mapping.py` para que esa seccion no mapee a Competencias. Fix dirigido, no requiere cambios de modelo.
+- **COMP-119 (deteccion de ausencia):** paso de razonamiento explicito que compare competencias declaradas vs esperadas. Probablemente un checker rule-based mas, estilo `estructural_checker.py`.
+- **Etiquetar `data/gold_labels_test.json`** con los 3 PDAs nuevos (Arquitectura, Gestion TI, Pensamiento Computacional) para medir generalizacion held-out. Los PDAs ya estan registrados en `PDAS_CURSOS`.
