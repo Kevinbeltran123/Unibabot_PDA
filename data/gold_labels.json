@@ -318,5 +318,141 @@
     "regla_id": "COMP-123",
     "estado_esperado": "CUMPLE",
     "nota": "Declara 'D5, Espiritu emprendedor'."
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "__global__",
+    "regla_id": "EST-005",
+    "estado_esperado": "CUMPLE",
+    "nota": "RAEs declarados en/cerca de seccion '3. Description and purpose of the course'"
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "__global__",
+    "regla_id": "EST-006",
+    "estado_esperado": "CUMPLE",
+    "nota": "PDA declara 4/4 tipos de competencias (especifica/generica/saberpro/dimension)"
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "__global__",
+    "regla_id": "EST-010",
+    "estado_esperado": "CUMPLE",
+    "nota": "Politicas encontradas en/cerca de seccion 'Date of pedagogical agreement:'"
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "Pedagogical Strategy(ies)",
+    "regla_id": "COMP-100",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[LLM+Claude agree] La seccion Pedagogical Strategy no declara la competencia especifica C1 (Analiza y modela fenomenos); describe metodologia ABP."
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "Pedagogical Strategy(ies)",
+    "regla_id": "COMP-101",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[LLM+Claude agree] La seccion Pedagogical Strategy no declara la competencia especifica C2 (Disena sistemas)."
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "What methodology guides the activities?",
+    "regla_id": "COMP-102",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[LLM+Claude agree] La seccion 'What methodology guides the activities?' no declara 1c (Comunicacion en segunda lengua); se enfoca en como se ensena."
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "Pedagogical Strategy(ies)",
+    "regla_id": "COMP-103",
+    "estado_esperado": "CUMPLE",
+    "nota": "[LLM+Claude agree] La seccion menciona 'practical application of techniques used by intelligent agents in real-world cases and challenges', lo que implica pensamiento critico (1h)."
+  },
+  {
+    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
+    "codigo_curso": "22A14",
+    "seccion": "Pedagogical Strategy(ies)",
+    "regla_id": "COMP-105",
+    "estado_esperado": "CUMPLE",
+    "nota": "[LLM+Claude agree] La seccion declara 'the international dimension is integrated through the delivery of materials and presentation of results in English' -- D4 Internacional."
+  },
+  {
+    "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
+    "codigo_curso": "22A12",
+    "seccion": "__global__",
+    "regla_id": "EST-003",
+    "estado_esperado": "CUMPLE",
+    "nota": "Contexto encontrado en seccion 'Plan de estudios de la'"
+  },
+  {
+    "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
+    "codigo_curso": "22A12",
+    "seccion": "__global__",
+    "regla_id": "EST-004",
+    "estado_esperado": "CUMPLE",
+    "nota": "Descripcion y proposito en seccion 'Plan de estudios de la'"
+  },
+  {
+    "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
+    "codigo_curso": "22A12",
+    "seccion": "__global__",
+    "regla_id": "EST-010",
+    "estado_esperado": "CUMPLE",
+    "nota": "Politicas encontradas en/cerca de seccion 'actividad (bibliografía y otros)'"
+  },
+  {
+    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
+    "codigo_curso": "22A31",
+    "seccion": "__global__",
+    "regla_id": "EST-003",
+    "estado_esperado": "CUMPLE",
+    "nota": "Contexto encontrado en seccion 'Plan de estudios de la'"
+  },
+  {
+    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
+    "codigo_curso": "22A31",
+    "seccion": "__global__",
+    "regla_id": "EST-005",
+    "estado_esperado": "CUMPLE",
+    "nota": "RAEs declarados en/cerca de seccion 'Competencias genéricas:'"
+  },
+  {
+    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
+    "codigo_curso": "22A31",
+    "seccion": "__global__",
+    "regla_id": "EST-011",
+    "estado_esperado": "CUMPLE",
+    "nota": "fecha del encuadre en 'Fecha del encuadre pedagógico:', seccion 'Revisado y aprobado' presente"
+  },
+  {
+    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
+    "codigo_curso": "22A31",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-119",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] El PDA de UI/UX declara 1e (Cultura cientifica) donde la regla exige 1g (Aprender a aprender). Caso conocido documentado en m8b."
+  },
+  {
+    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
+    "codigo_curso": "22A31",
+    "seccion": "Competencias específicas:",
+    "regla_id": "COMP-122",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[LLM+Claude agree] La seccion Competencias especificas no declara la dimension D1 Transdisciplinar (las dimensiones van en otra seccion)."
+  },
+  {
+    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
+    "codigo_curso": "22A31",
+    "seccion": "Competencias específicas:",
+    "regla_id": "COMP-123",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[LLM+Claude agree] La seccion Competencias especificas no declara la dimension D5 Espiritu emprendedor."
   }
 ]
