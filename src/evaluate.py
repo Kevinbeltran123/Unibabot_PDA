@@ -52,31 +52,39 @@ def cargar_gold(path: Path | None = None) -> list[dict]:
         return json.load(f)
 
 
-def buscar_hallazgo(reporte: dict, seccion: str, regla_id: str) -> dict | None:
-    """Encuentra el hallazgo para una seccion + regla_id en el reporte del agente.
+def _secciones_mapean_al_mismo_canonico(a: str, b: str) -> bool:
+    """True si ambos nombres de seccion mapean a alguna seccion_pda comun.
 
-    Caso especial: si seccion == "__global__", busca el regla_id en CUALQUIER
-    seccion del reporte (para reglas estructurales que son globales al PDA).
-
-    Match flexible en secciones normales: la seccion del gold puede ser substring
-    del nombre detectado por el parser.
+    Usa seccion_mapping.py para traducir los nombres reales a categorias
+    canonicas. Permite hacer match cuando el gold usa el nombre canonico
+    (ej. 'Competencias / Resultados de Aprendizaje') y el agente emite
+    bajo el nombre parseado real (ej. 'Plan de estudios de la').
     """
-    # Caso especial: regla global, buscar en cualquier seccion
-    if seccion == "__global__":
-        for resultado in reporte.get("resultados", []):
-            for h in resultado.get("hallazgos", []):
-                if h.get("regla_id") == regla_id:
-                    return h
-        return None
+    sys.path.insert(0, str(ROOT / "src"))
+    from rag.seccion_mapping import secciones_pda_validas
+    mapa_a = set(secciones_pda_validas(a) or [])
+    mapa_b = set(secciones_pda_validas(b) or [])
+    # El nombre canonico puede ser el literal tambien (ej. "Competencias")
+    if a in mapa_b or b in mapa_a:
+        return True
+    return bool(mapa_a & mapa_b)
 
-    # Matching flexible por seccion
-    seccion_norm = seccion.lower().strip()
+
+def buscar_hallazgo(reporte: dict, seccion: str, regla_id: str) -> dict | None:
+    """Encuentra el hallazgo para una regla_id en el reporte del agente.
+
+    Desde m11 (rule-driven) cada regla es evaluada exactamente una vez por
+    reporte (grouping determinista por seccion destino). Por lo tanto el
+    matching puede basarse exclusivamente en regla_id, ignorando la seccion
+    del gold -- la unicidad esta garantizada por construccion.
+
+    El parametro `seccion` se conserva por compatibilidad pero no se usa
+    para matching, solo para debugging.
+    """
     for resultado in reporte.get("resultados", []):
-        nombre_parseado = resultado.get("seccion", "").lower().strip()
-        if seccion_norm in nombre_parseado or nombre_parseado in seccion_norm:
-            for h in resultado.get("hallazgos", []):
-                if h.get("regla_id") == regla_id:
-                    return h
+        for h in resultado.get("hallazgos", []):
+            if h.get("regla_id") == regla_id:
+                return h
     return None
 
 

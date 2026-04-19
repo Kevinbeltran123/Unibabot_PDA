@@ -15,9 +15,13 @@ from pydantic import ValidationError
 sys.path.insert(0, str(Path(__file__).parent))
 
 from pdf_parser import parsear_pda
-from rag.retriever import recuperar_lineamientos, recuperar_dimension_rules
-from rag.seccion_mapping import secciones_pda_validas
-from rules.estructural_checker import verificar_estructurales
+from rag.rule_dispatcher import (
+    SECCION_AUSENTE,
+    agrupar_reglas_por_seccion,
+    formatear_regla_como_lineamiento,
+    reglas_aplicables,
+)
+from rules.estructural_checker import hallazgo, verificar_estructurales
 from schemas import ReporteSeccion
 
 ROOT = Path(__file__).parent.parent
@@ -134,13 +138,17 @@ def evaluar_seccion(
         lineamientos=formatear_lineamientos(lineamientos),
     )
 
+    # num_predict escala con numero de lineamientos: ~180 tokens por hallazgo
+    # (JSON estructurado) + 200 tokens base. Minimo 800, maximo 4000.
+    num_predict = min(4000, max(800, 200 + 180 * len(lineamientos)))
+
     # Intento 1
     response = ollama.chat(
         model=modelo,
         messages=[{"role": "user", "content": prompt}],
         options={
             "temperature": 0.1,
-            "num_predict": 800,
+            "num_predict": num_predict,
             "stop": ["<|eot_id|>", "<|end_of_text|>"],
         },
     )
@@ -183,74 +191,60 @@ def evaluar_seccion(
 def preparar_evaluacion(
     secciones: dict[str, str],
     codigo_curso: str | None = None,
-    top_k: int = 5,
-) -> list[dict]:
-    """Decide que secciones evaluar y recupera lineamientos para cada una.
+) -> tuple[list[dict], list[dict]]:
+    """Prepara evaluaciones para el LLM usando iteracion sobre reglas (m11).
 
-    Las reglas estructurales (tipo='estructural') se filtran del retrieval
-    porque se verifican via rule-based deterministico en analizar_pda().
-    El LLM solo recibe reglas de competencias y similares.
+    Flujo rule-driven (no retrieval):
+    1. Iterar sobre todas las reglas aplicables al curso.
+    2. Agrupar por la seccion destino (via metadata seccion_pda).
+    3. Producir una evaluacion por (seccion, reglas).
+
+    Reglas cuya seccion destino no existe en el PDA quedan en un grupo
+    especial que produce hallazgos NO CUMPLE deterministicos.
+
+    Returns:
+        (evaluaciones_llm, hallazgos_deterministicos_ausentes).
     """
+    if not codigo_curso:
+        return [], []
+
+    reglas = reglas_aplicables(codigo_curso)
+    grupos = agrupar_reglas_por_seccion(reglas, secciones)
+
     evaluaciones = []
-    for nombre, contenido in secciones.items():
-        #Saltar secciones irrelevantes (ejemplo: preambulo, bibliografia, etc)
-        if nombre == "PREAMBULO":
+    hallazgos_ausentes = []
+
+    for nombre, reglas_grupo in grupos.items():
+        if nombre == SECCION_AUSENTE:
+            for r in reglas_grupo:
+                hallazgos_ausentes.append(hallazgo(
+                    regla_id=r["id"],
+                    regla=r["descripcion"],
+                    cumple=False,
+                    evidencia=f"Seccion esperada '{r.get('seccion_pda', '?')}' no encontrada en el PDA",
+                    correccion=f"Agregar la seccion correspondiente y declarar: {r['descripcion'][:120]}",
+                ))
             continue
+
+        contenido = secciones.get(nombre, "")
         if len(contenido) < 20:
-            continue
-
-        # Recuperar mas lineamientos (top_k*2) porque vamos a filtrar estructurales
-        lineamientos = recuperar_lineamientos(
-            contenido,
-            top_k=top_k * 2,
-            codigo_curso=codigo_curso,
-            nombre_seccion=nombre,
-        )
-        # Filtrar reglas estructurales (se manejan con rule-based)
-        lineamientos = [l for l in lineamientos if l["tipo"] != "estructural"][:top_k]
-
-        if not lineamientos:
+            for r in reglas_grupo:
+                hallazgos_ausentes.append(hallazgo(
+                    regla_id=r["id"],
+                    regla=r["descripcion"],
+                    cumple=False,
+                    evidencia=f"Seccion '{nombre}' vacia o insuficiente para evaluar",
+                    correccion=f"Completar la seccion con: {r['descripcion'][:120]}",
+                ))
             continue
 
         evaluaciones.append({
             "nombre_seccion": nombre,
             "contenido": contenido,
-            "lineamientos": lineamientos,
+            "lineamientos": [formatear_regla_como_lineamiento(r) for r in reglas_grupo],
         })
 
-    return evaluaciones
-
-
-def preparar_evaluaciones_dimension(
-    secciones: dict[str, str],
-    codigo_curso: str,
-) -> list[dict]:
-    """Genera evaluaciones separadas para reglas de dimension del curso.
-
-    Las reglas de dimension no compiten con reglas de competencias en el ranking
-    semantico (tienen terminologia diferente), por lo que se evaluan en llamadas
-    LLM separadas — una por cada seccion de Competencias detectada. Esto garantiza
-    que buscar_hallazgo() las encuentre sin importar en que seccion el gold las espera.
-
-    Devuelve una lista de evaluaciones (una entrada por seccion de Competencias).
-    """
-    dim_rules = recuperar_dimension_rules(codigo_curso)
-    if not dim_rules:
-        return []
-
-    evaluaciones = []
-    for nombre, contenido in secciones.items():
-        if len(contenido) < 20:
-            continue
-        secciones_mapeadas = secciones_pda_validas(nombre)
-        if secciones_mapeadas and "Competencias" in secciones_mapeadas:
-            evaluaciones.append({
-                "nombre_seccion": nombre,
-                "contenido": contenido,
-                "lineamientos": dim_rules,
-            })
-
-    return evaluaciones
+    return evaluaciones, hallazgos_ausentes
 
 
 def analizar_pda(
@@ -281,11 +275,7 @@ def analizar_pda(
     emit("structural_done", {"hallazgos": len(hallazgos_estructurales)})
 
     emit("llm_prep_start", {})
-    evaluaciones = preparar_evaluacion(secciones, codigo_curso, top_k=top_k)
-
-    # Evaluacion separada para reglas de dimension (no ranquean bien semanticamente)
-    if codigo_curso:
-        evaluaciones += preparar_evaluaciones_dimension(secciones, codigo_curso)
+    evaluaciones, hallazgos_ausentes = preparar_evaluacion(secciones, codigo_curso)
     emit("llm_prep_done", {"num_evaluaciones": len(evaluaciones)})
 
     template = cargar_prompt_template()
@@ -302,6 +292,14 @@ def analizar_pda(
             }
         ],
     }
+
+    # Hallazgos deterministicos para reglas cuya seccion destino no existe
+    # en el PDA (o esta vacia): el sistema los emite sin consultar al LLM.
+    if hallazgos_ausentes:
+        reporte["resultados"].append({
+            "seccion": "__seccion_ausente_global__",
+            "hallazgos": hallazgos_ausentes,
+        })
 
     total = len(evaluaciones)
     for idx, eval_info in enumerate(evaluaciones, start=1):
