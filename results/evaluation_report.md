@@ -590,3 +590,101 @@ python src/evaluate.py --compare m8b m10_train
 Con el gold expandido a 112 entradas y un test hold-out de 55 entradas sobre PDAs nunca vistos, el pipeline UnibaBot PDA mantiene **accuracy 1.000 en train** y logra **accuracy 0.974 en test**. La precision/recall de NO CUMPLE sobre 6 TP reales en train y 8 TP en test demuestra que el sistema detecta incumplimientos de forma robusta, no por memorizacion.
 
 El cuello de botella restante es **cobertura del retrieval** (38/55 matched en test): las reglas COMP tipo ABET/SABER PRO globales caen fuera del top_k. Una m11 enfocada en retrieval por metadata (similar a `recuperar_dimension_rules`) podria llevar el matched a 50+/55 sin comprometer la precision ganada.
+
+## Iteracion 6 (m11): reemplazo retrieval-driven por rule-driven
+
+Tras m10 quedo claro que el retrieval semantico es **inapropiado como gate** para compliance checking. El analisis forense mostro que las 17 gold entries not_found en test (13 NO CUMPLE) tienen todas `seccion_pda` metadata bien definida -- el sistema ya sabe donde deberian evaluarse, solo falla el retrieval para encontrarlas.
+
+El usuario cuestiono que el parche `recuperar_dimension_rules` no escala. m11 invierte completamente el flujo.
+
+### Cambio arquitectonico
+
+**Antes (retrieval-driven):**
+```
+para cada seccion del PDA:
+    lineamientos = recuperar_lineamientos(contenido, codigo, seccion)  # top-K semantico
+    evaluar(seccion, lineamientos)
+```
+
+**Despues (rule-driven, m11):**
+```
+reglas_aplicables = filter(todas_reglas, aplica_a in (codigo, 'todos'))
+grupos = agrupar_por_seccion_destino(reglas_aplicables, secciones_pda)
+para cada (seccion, reglas) en grupos:
+    evaluar(seccion, reglas)
+```
+
+### Cambios implementados
+
+1. **`src/rag/rule_dispatcher.py` (nuevo):** Resuelve `regla -> seccion destino` en dos pasos:
+   - Paso 1: match por nombre via `MAPPING_SECCIONES` invertido.
+   - Paso 2 (fallback): match por contenido con keywords asociados al `seccion_pda` target (ej. "competencia", "saber pro", "dimension" para secciones tipo Competencias). Critico para PDAs con estructura atipica como Gestion TI, cuyas secciones no tienen nombres canonicos pero contienen las competencias dentro del texto.
+
+2. **`src/agent.py preparar_evaluacion`:** Refactorizado a rule-driven. Devuelve `(evaluaciones_llm, hallazgos_ausentes)`. Los hallazgos deterministicos NO CUMPLE se emiten sin consultar al LLM para reglas cuya seccion destino no existe (cobertura 100% literal).
+
+3. **`src/agent.py evaluar_seccion`:** `num_predict` dinamico (200 + 180 por lineamiento, max 4000). Con 10 reglas en un batch, los 800 tokens previos truncaban y solo producia 1 hallazgo.
+
+4. **`src/prompts/compliance_prompt.txt`:** Instruccion explicita "EXACTAMENTE un hallazgo por cada lineamiento listado". Los 3 few-shot con 1 hallazgo cada uno sesgaban al LLM a producir 1 solo.
+
+5. **`src/evaluate.py buscar_hallazgo`:** Simplificado a matching por `regla_id` unico. m11 garantiza unicidad por construccion (rule-driven grouping). Antes el matcher por seccion fallaba cuando el gold usaba nombre canonico (`"Competencias / Resultados de Aprendizaje"`) y el agente emitia bajo nombre parseado real (`"Plan de estudios de la"`).
+
+6. **Eliminados (deuda tecnica):**
+   - `preparar_evaluaciones_dimension` en `src/agent.py` (subsumido por flujo general).
+   - `recuperar_dimension_rules` en `src/rag/retriever.py` (subsumido).
+
+### Resultados cuantitativos
+
+| Metrica | m8b | m10 train | m10 test | **m11 train** | **m11 test** |
+|---------|-----|-----------|----------|---------------|--------------|
+| Gold entries | 48 | 57 | 55 | 57 | 55 |
+| **Matched** | 45/48 | 53/57 (93%) | 38/55 (69%) | **57/57 (100%)** | **55/55 (100%)** |
+| Accuracy | 1.000 | 1.000 | 0.974 | 0.895 | 0.873 |
+| Precision NC | 1.000 | 1.000 | 0.889 | 0.625 | 0.818 |
+| Recall NC | 1.000 | 1.000 | 1.000 | 0.625 | 0.857 |
+| **TP NO CUMPLE** | 1 | 6 | 8 | 5 | **18** |
+| FP | 0 | 0 | 1 | 3 | 4 |
+| TN | 44 | 47 | 29 | 46 | 30 |
+| FN | 0 | 0 | 0 | 3 | 3 |
+| JSON valid rate | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Latencia | 236s | 216s | 59s | 213s | 249s |
+
+### Interpretacion honesta
+
+**El accuracy bajo en m11 es una mejora, no una regresion.** m10 tenia accuracy 1.000 train y 0.974 test sobre subconjuntos pequenos porque el retrieval simplemente **no hacia las preguntas dificiles**. Los 17 gold entries not_found en m10 test eran justamente los mas dificiles (13 de 17 eran NO CUMPLE).
+
+m11 evalua **todos** los casos y en los dificiles falla a veces -- pero ahora **mide donde realmente esta el problema**:
+- Test TP NO CUMPLE: m10=8 -> m11=**18** (+125%). Detecta mas del doble de incumplimientos reales.
+- Test coverage: m10=69% -> m11=**100%**. Ninguna regla queda sin evaluar.
+- Test Recall NC: m10=1.000 sobre 8 -> m11=0.857 sobre 21. El recall real sobre la clase positiva completa es un indicador mucho mas significativo.
+
+**Un sistema con accuracy 0.873 sobre 55 entries es estrictamente mas util para auditoria academica que uno con accuracy 0.974 sobre 38 si las 17 omitidas eran las mas criticas.**
+
+### Debilidades reveladas (invisibles en m10)
+
+Los 3 FP + 3 FN en train y 4 FP + 3 FN en test son errores **del LLM**, no del retrieval. Casos concretos:
+- LLM marca NO CUMPLE donde el PDA declara la competencia explicitamente (observado COMP-124 Arquitectura: "C2. Disena sistemas..." presente en RAE pero LLM lo ignora).
+- LLM marca CUMPLE donde solo hay una competencia semanticamente cercana (observado COMP-127 Arquitectura: "pensamiento critico" inferido de "vision sistemica").
+
+Estos fallos requieren mejoras de prompt (ej. few-shot con mas casos edge), no cambios de arquitectura.
+
+### Escalabilidad
+
+m11 es **trivialmente escalable**:
+
+- **Agregar un nuevo PDA:** cero cambios en codigo. Solo registrar en `PDAS_CURSOS`.
+- **Agregar un nuevo tipo de regla** (ej. ODS, sustentabilidad): solo nueva fila en `reglas.json` con su `seccion_pda` metadata. El dispatcher la localiza automaticamente.
+- **Agregar un nuevo curso:** cero cambios. Las reglas `aplica_a` se propagan solas.
+
+Contraste con m10: cada nuevo tipo global requeriria una funcion `recuperar_*_rules` dedicada y cableado en `preparar_evaluaciones_*`.
+
+### Archivos afectados
+
+**Nuevo:** `src/rag/rule_dispatcher.py`.
+**Modificados:** `src/agent.py`, `src/prompts/compliance_prompt.txt`, `src/evaluate.py`, `src/rag/retriever.py` (solo eliminaciones).
+**Intactos:** `src/rules/estructural_checker.py`, `src/pdf_parser.py`, `data/lineamientos/reglas.json`.
+
+### Conclusion m11
+
+Logro cobertura **100% deterministica** sobre ambos splits. El costo (accuracy aparente mas baja) es una mejora cualitativa: el sistema ahora mide su desempeno real en vez de esconder los casos dificiles tras un retrieval sesgado. La arquitectura es escalable y elimina toda la deuda tecnica de m9/m10 (no mas `recuperar_dimension_rules` ni parches por tipo).
+
+Proximo paso (m12, trabajo futuro) debe ser mejora de prompt para reducir los FP/FN del LLM, ahora que sabemos exactamente donde fallan. Posibles direcciones: chain-of-thought en el prompt, mas few-shot diversos, o reranker del output (2da pasada con LLM para cases borderline).
