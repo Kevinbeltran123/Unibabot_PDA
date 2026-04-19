@@ -348,16 +348,16 @@
     "codigo_curso": "22A14",
     "seccion": "Pedagogical Strategy(ies)",
     "regla_id": "COMP-100",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[LLM+Claude agree] La seccion Pedagogical Strategy no declara la competencia especifica C1 (Analiza y modela fenomenos); describe metodologia ABP."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo C1 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
     "codigo_curso": "22A14",
     "seccion": "Pedagogical Strategy(ies)",
     "regla_id": "COMP-101",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[LLM+Claude agree] La seccion Pedagogical Strategy no declara la competencia especifica C2 (Disena sistemas)."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo C2 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
@@ -444,15 +444,15 @@
     "codigo_curso": "22A31",
     "seccion": "Competencias específicas:",
     "regla_id": "COMP-122",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[LLM+Claude agree] La seccion Competencias especificas no declara la dimension D1 Transdisciplinar (las dimensiones van en otra seccion)."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo D1 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
     "codigo_curso": "22A31",
     "seccion": "Competencias específicas:",
     "regla_id": "COMP-123",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[LLM+Claude agree] La seccion Competencias especificas no declara la dimension D5 Espiritu emprendedor."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo D5 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   }
 ]

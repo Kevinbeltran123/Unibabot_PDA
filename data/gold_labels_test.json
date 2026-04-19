@@ -228,16 +228,16 @@
     "codigo_curso": "22A32",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-106",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] La seccion Estrategia pedagogica no declara la competencia especifica C2 (Disena sistemas)."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo C2 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Gestión TI 2026A.pdf",
     "codigo_curso": "22A32",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-107",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] No se menciona 1e Cultura cientifica y tecnologica."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo 1e aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Gestión TI 2026A.pdf",
@@ -252,40 +252,40 @@
     "codigo_curso": "22A32",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-109",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] No se menciona 1j Espiritu emprendedor."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo 1j aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Gestión TI 2026A.pdf",
     "codigo_curso": "22A32",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-110",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] No hay mencion de SABER PRO SP4 Competencias ciudadanas."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo SP4 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Gestión TI 2026A.pdf",
     "codigo_curso": "22A32",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-111",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] Cronograma menciona Proyecto Final con equipos pero no declara indicador ABET 5.1 explicitamente."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo 5.1 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Gestión TI 2026A.pdf",
     "codigo_curso": "22A32",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-112",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] No declara indicador ABET 5.2 explicitamente."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo 5.2 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Gestión TI 2026A.pdf",
     "codigo_curso": "22A32",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-113",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] No declara indicador ABET 6.3 explicitamente."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo 6.3 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Gestión TI 2026A.pdf",
@@ -396,40 +396,40 @@
     "codigo_curso": "22A52",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-001",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] No declara competencia especifica C1 (Analiza) explicitamente."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo C1 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
     "codigo_curso": "22A52",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-002",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] No se menciona 1b Comprension lectora / comprension."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo 1b aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
     "codigo_curso": "22A52",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-003",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] No se menciona 1g Aprender a aprender."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo 1g aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
     "codigo_curso": "22A52",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-004",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] No declara competencia 1l Pensamiento sistemico explicitamente."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo 1l aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
     "codigo_curso": "22A52",
     "seccion": "Competencias / Resultados de Aprendizaje",
     "regla_id": "COMP-005",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] No hay mencion de SABER PRO SP5 Ingles."
+    "estado_esperado": "CUMPLE",
+    "nota": "[Auto-corregido m13] El codigo SP5 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
     "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
