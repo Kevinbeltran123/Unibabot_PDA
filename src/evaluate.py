@@ -268,7 +268,7 @@ def comparar_runs(tag_a: str, tag_b: str):
 def main():
     parser = argparse.ArgumentParser(description="Evaluar pipeline UnibaBot PDA")
     parser.add_argument("--tag", type=str, help="Tag para guardar esta corrida (ej: baseline, m2_filter)")
-    parser.add_argument("--modelo", type=str, default="llama3.2", help="Modelo a usar (default: llama3.2)")
+    parser.add_argument("--modelo", type=str, default="qwen2.5:14b", help="Modelo a usar (default: qwen2.5:14b)")
     parser.add_argument("--compare", nargs=2, metavar=("TAG_A", "TAG_B"), help="Comparar dos runs guardados")
     parser.add_argument("--reuse", action="store_true", help="Reutilizar reportes guardados del tag (no re-correr el pipeline)")
     parser.add_argument(
