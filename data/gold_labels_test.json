@@ -1,0 +1,442 @@
+[
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-001",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion 'Arquitectura de Software 1. Información general' contiene 4/4 campos basicos de informacion general"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-002",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion 'Estrategia(s) pedagógica(s)' declara estrategia pedagogica valida"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-003",
+    "estado_esperado": "CUMPLE",
+    "nota": "Contexto encontrado en seccion '2. Contexto de la asignatura'"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-004",
+    "estado_esperado": "CUMPLE",
+    "nota": "Descripcion y proposito en seccion '2. Contexto de la asignatura'"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-005",
+    "estado_esperado": "CUMPLE",
+    "nota": "RAEs declarados en/cerca de seccion '4. Resultados de Aprendizaje Esperados (RAE)'"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-006",
+    "estado_esperado": "CUMPLE",
+    "nota": "PDA declara 3/4 tipos de competencias (especifica/generica/saberpro/dimension)"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-007",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion 'valoración y la retroalimentación' incluye porcentajes y fechas"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-008",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion '7. Cronograma de actividades' presente; cronograma detallado en contenido"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-009",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion 'Bibliografía Básica:' contiene referencias bibliograficas"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-010",
+    "estado_esperado": "CUMPLE",
+    "nota": "Politicas encontradas en/cerca de seccion '9. Políticas y acuerdos para el buen funcionamient'"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "__global__",
+    "regla_id": "EST-011",
+    "estado_esperado": "CUMPLE",
+    "nota": "fecha del encuadre en 'Fecha del encuadre pedagógico:', seccion 'Revisado y aprobado' presente"
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
+    "regla_id": "COMP-124",
+    "estado_esperado": "CUMPLE",
+    "nota": "[Claude tiebreaker] El RAE declara textualmente \"C2. Disena sistemas, componentes o procesos, para satisfacer requerimientos, restricciones, especificaciones tecnicas relacionadas con los sistemas de informacion y el desarrollo de software, considerando aspectos tecnicos, humanos y economicos.\" La regla es satisfecha; el LLM se equivoco al marcar NO CUMPLE."
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
+    "regla_id": "COMP-125",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[LLM+Claude agree] La seccion RAE no declara la competencia especifica C3 (Formula y evalua proyectos)."
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
+    "regla_id": "COMP-126",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[LLM+Claude agree] No se menciona 1a: Comunicacion en lengua materna."
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
+    "regla_id": "COMP-127",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[LLM+Claude agree] No se menciona 1h: Pensamiento critico."
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
+    "regla_id": "COMP-128",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[LLM+Claude agree] RAE menciona 'vision sistemica' pero no declara competencia 1l (Pensamiento sistemico) explicitamente."
+  },
+  {
+    "pda_file": "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf",
+    "codigo_curso": "22A35",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-129",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No hay mencion de SABER PRO SP2 Lectura critica."
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-001",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion 'Gestión de TI 1. Información general' contiene 4/4 campos basicos de informacion general"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-002",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion 'Estrategia(s) pedagógica(s)' declara estrategia pedagogica valida"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-003",
+    "estado_esperado": "CUMPLE",
+    "nota": "Contexto encontrado en seccion 'Plan de estudios de la'"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-004",
+    "estado_esperado": "CUMPLE",
+    "nota": "Descripcion y proposito en seccion 'Plan de estudios de la'"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-005",
+    "estado_esperado": "CUMPLE",
+    "nota": "RAEs declarados en/cerca de seccion 'Plan de estudios de la'"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-006",
+    "estado_esperado": "CUMPLE",
+    "nota": "PDA declara 4/4 tipos de competencias (especifica/generica/saberpro/dimension)"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-007",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "Seccion 'retroalimentación Fecha' incompleta"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-008",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion '7. Cronograma de actividades' presente; cronograma detallado en contenido"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-009",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion '(bibliografía y' contiene referencias bibliograficas"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-010",
+    "estado_esperado": "CUMPLE",
+    "nota": "Politicas encontradas en/cerca de seccion '(bibliografía y'"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "__global__",
+    "regla_id": "EST-011",
+    "estado_esperado": "CUMPLE",
+    "nota": "fecha del encuadre en 'Fecha del encuadre pedagógico:', seccion 'Revisado y aprobado' presente"
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-106",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] La seccion Estrategia pedagogica no declara la competencia especifica C2 (Disena sistemas)."
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-107",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No se menciona 1e Cultura cientifica y tecnologica."
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-108",
+    "estado_esperado": "CUMPLE",
+    "nota": "[Claude annotator] Estrategia pedagogica declara 'Trabajo colaborativo, promoviendo el desarrollo de competencias en liderazgo, planificacion y toma de decisiones' -- equivalente a 1i Trabajo en equipo."
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-109",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No se menciona 1j Espiritu emprendedor."
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-110",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No hay mencion de SABER PRO SP4 Competencias ciudadanas."
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-111",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] Cronograma menciona Proyecto Final con equipos pero no declara indicador ABET 5.1 explicitamente."
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-112",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No declara indicador ABET 5.2 explicitamente."
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-113",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No declara indicador ABET 6.3 explicitamente."
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "Competencias",
+    "regla_id": "COMP-114",
+    "estado_esperado": "CUMPLE",
+    "nota": "[Claude annotator] Estrategia pedagogica declara 'Dimension D1 Transdisciplinar D6 Regional' explicitamente."
+  },
+  {
+    "pda_file": "PDA - Gestión TI 2026A.pdf",
+    "codigo_curso": "22A32",
+    "seccion": "Competencias",
+    "regla_id": "COMP-115",
+    "estado_esperado": "CUMPLE",
+    "nota": "[Claude annotator] Estrategia pedagogica declara 'D6 Regional' explicitamente."
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-001",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion 'Pensamiento Computacional 1. Información general' contiene 4/4 campos basicos de informacion general"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-002",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion 'Estrategia(s) pedagógica(s)' declara estrategia pedagogica valida"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-003",
+    "estado_esperado": "CUMPLE",
+    "nota": "Contexto encontrado en seccion 'Plan de estudios de la'"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-004",
+    "estado_esperado": "CUMPLE",
+    "nota": "Descripcion y proposito en seccion 'Plan de estudios de la'"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-005",
+    "estado_esperado": "CUMPLE",
+    "nota": "RAEs declarados en/cerca de seccion 'Plan de estudios de la'"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-006",
+    "estado_esperado": "CUMPLE",
+    "nota": "PDA declara 4/4 tipos de competencias (especifica/generica/saberpro/dimension)"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-007",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "Seccion 'valoración y la retroalimentación' incompleta"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-008",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "Seccion de cronograma no encontrada"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-009",
+    "estado_esperado": "CUMPLE",
+    "nota": "Seccion '9. Bibliografía c' contiene referencias bibliograficas"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-010",
+    "estado_esperado": "CUMPLE",
+    "nota": "Politicas encontradas en/cerca de seccion '9. Bibliografía c'"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "__global__",
+    "regla_id": "EST-011",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "Ni fecha de encuadre ni seccion de aprobacion encontradas"
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-001",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No declara competencia especifica C1 (Analiza) explicitamente."
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-002",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No se menciona 1b Comprension lectora / comprension."
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-003",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No se menciona 1g Aprender a aprender."
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-004",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No declara competencia 1l Pensamiento sistemico explicitamente."
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "Competencias / Resultados de Aprendizaje",
+    "regla_id": "COMP-005",
+    "estado_esperado": "NO CUMPLE",
+    "nota": "[Claude annotator] No hay mencion de SABER PRO SP5 Ingles."
+  },
+  {
+    "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
+    "codigo_curso": "22A52",
+    "seccion": "Competencias",
+    "regla_id": "COMP-006",
+    "estado_esperado": "CUMPLE",
+    "nota": "[Claude annotator] Estrategia pedagogica declara 'Dimension Internacional' explicitamente (=D4)."
+  }
+]
