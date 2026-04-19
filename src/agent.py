@@ -21,6 +21,8 @@ from rag.rule_dispatcher import (
     formatear_regla_como_lineamiento,
     reglas_aplicables,
 )
+from rules.declaracion_checker import tiene_codigo_canonico, verificar_declaraciones
+from rules.declaracion_extractor import extraer_declaraciones
 from rules.estructural_checker import hallazgo, verificar_estructurales
 from schemas import ReporteSeccion
 
@@ -191,16 +193,19 @@ def evaluar_seccion(
 def preparar_evaluacion(
     secciones: dict[str, str],
     codigo_curso: str | None = None,
+    reglas_filtro: list[dict] | None = None,
 ) -> tuple[list[dict], list[dict]]:
-    """Prepara evaluaciones para el LLM usando iteracion sobre reglas (m11).
+    """Prepara evaluaciones para el LLM usando iteracion sobre reglas (m11/m13).
 
     Flujo rule-driven (no retrieval):
-    1. Iterar sobre todas las reglas aplicables al curso.
+    1. Iterar sobre reglas aplicables al curso (o las provistas via reglas_filtro).
     2. Agrupar por la seccion destino (via metadata seccion_pda).
     3. Producir una evaluacion por (seccion, reglas).
 
-    Reglas cuya seccion destino no existe en el PDA quedan en un grupo
-    especial que produce hallazgos NO CUMPLE deterministicos.
+    Desde m13: el caller suele pasar reglas_filtro con solo las reglas SIN
+    codigo canonico (las canonicas se manejan con extractor+matcher
+    deterministico). En la practica este pipeline LLM-compliance suele
+    quedar vacio porque 168/168 reglas no-EST tienen codigo canonico.
 
     Returns:
         (evaluaciones_llm, hallazgos_deterministicos_ausentes).
@@ -208,7 +213,9 @@ def preparar_evaluacion(
     if not codigo_curso:
         return [], []
 
-    reglas = reglas_aplicables(codigo_curso)
+    reglas = reglas_filtro if reglas_filtro is not None else reglas_aplicables(codigo_curso)
+    if not reglas:
+        return [], []
     grupos = agrupar_reglas_por_seccion(reglas, secciones)
 
     evaluaciones = []
@@ -274,8 +281,31 @@ def analizar_pda(
     hallazgos_estructurales = verificar_estructurales(secciones)
     emit("structural_done", {"hallazgos": len(hallazgos_estructurales)})
 
+    # m13: extractor LLM de declaraciones (1 call) + matcher deterministico
+    hallazgos_declaraciones: list[dict] = []
+    reglas_sin_codigo: list[dict] = []
+    if codigo_curso:
+        emit("extract_start", {})
+        declaraciones = extraer_declaraciones(secciones, modelo=modelo)
+        reglas_app = reglas_aplicables(codigo_curso)
+        reglas_canonicas = [r for r in reglas_app if tiene_codigo_canonico(r)]
+        reglas_sin_codigo = [r for r in reglas_app if not tiene_codigo_canonico(r)]
+        hallazgos_declaraciones = verificar_declaraciones(reglas_canonicas, declaraciones)
+        emit("extract_done", {
+            "declaraciones": declaraciones,
+            "canonicas": len(reglas_canonicas),
+            "sin_codigo": len(reglas_sin_codigo),
+            "hallazgos": len(hallazgos_declaraciones),
+        })
+
     emit("llm_prep_start", {})
-    evaluaciones, hallazgos_ausentes = preparar_evaluacion(secciones, codigo_curso)
+    # Si codigo_curso esta definido, el extractor ya proceso las canonicas.
+    # Pasar reglas_filtro=[] (lista vacia explicita) para desactivar LLM compliance.
+    # Sin codigo_curso, comportamiento legacy: evaluar todo via LLM.
+    reglas_filtro = reglas_sin_codigo if codigo_curso else None
+    evaluaciones, hallazgos_ausentes = preparar_evaluacion(
+        secciones, codigo_curso, reglas_filtro=reglas_filtro,
+    )
     emit("llm_prep_done", {"num_evaluaciones": len(evaluaciones)})
 
     template = cargar_prompt_template()
@@ -292,6 +322,14 @@ def analizar_pda(
             }
         ],
     }
+
+    # m13: hallazgos deterministicos producidos por extractor+matcher.
+    # Cubren las 168 reglas no-EST con codigo canonico (C1, 1b, SP5, D4, ABET X.Y).
+    if hallazgos_declaraciones:
+        reporte["resultados"].append({
+            "seccion": "__declaraciones_global__",
+            "hallazgos": hallazgos_declaraciones,
+        })
 
     # Hallazgos deterministicos para reglas cuya seccion destino no existe
     # en el PDA (o esta vacia): el sistema los emite sin consultar al LLM.
