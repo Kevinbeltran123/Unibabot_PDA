@@ -29,11 +29,11 @@ PROMPT_PATH = ROOT / "src" / "prompts" / "compliance_prompt.txt"
 RETRY_PROMPT_PATH = ROOT / "src" / "prompts" / "retry_prompt.txt"
 
 # Modelos disponibles (registrados en ollama)
-MODELO_BASELINE = "llama3.2"
-MODELO_FINETUNED = "unibabot-pda"
-MODELO_8B = "llama3.1:8b"
-# Default es ahora el 8B porque alcanza accuracy 1.000 en el gold dataset
-MODELO_DEFAULT = MODELO_8B
+MODELO_QWEN = "qwen2.5:14b"
+# Default es Qwen 2.5 14B desde m12 (eval confirmo accuracy +1.8pp test,
+# precision NC perfecta 1.000 en train, recall NC +4.8pp en test vs
+# Llama 3.1 8B). Llama eliminado del sistema.
+MODELO_DEFAULT = MODELO_QWEN
 
 # Contrato del callback de progreso: (evento, datos) -> None
 # Eventos emitidos por analizar_pda:
@@ -337,8 +337,8 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Uso: python agent.py <ruta_al_pdf> [codigo_curso] [modelo]")
-        print("  modelo: 'baseline' (llama3.2) o 'finetuned' (unibabot-pda). Default: baseline")
-        print("Ejemplo: python agent.py 'PDAs/tu_pda.pdf' 22A14 finetuned")
+        print("  modelo: alias 'qwen' (default qwen2.5:14b) o nombre crudo de otro modelo ollama")
+        print("Ejemplo: python agent.py 'PDAs/tu_pda.pdf' 22A14 qwen")
         sys.exit(1)
 
     pdf_path = sys.argv[1]
@@ -346,10 +346,9 @@ if __name__ == "__main__":
 
     # Aliases + fallback a nombre crudo (permite probar modelos ad-hoc)
     aliases = {
-        "baseline": MODELO_BASELINE,
-        "finetuned": MODELO_FINETUNED,
-        "8b": MODELO_8B,
-        "large": MODELO_8B,
+        "qwen": MODELO_QWEN,
+        "14b": MODELO_QWEN,
+        "default": MODELO_QWEN,
     }
     if len(sys.argv) > 3:
         modelo = aliases.get(sys.argv[3], sys.argv[3])
@@ -358,8 +357,8 @@ if __name__ == "__main__":
 
     reporte = analizar_pda(pdf_path, codigo, modelo=modelo)
 
-    # Guardar reporte con sufijo del modelo para no pisar el del otro
-    sufijo = "finetuned" if modelo == MODELO_FINETUNED else "baseline"
+    # Guardar reporte con sufijo del modelo
+    sufijo = modelo.replace(":", "-").replace("/", "_")
     output_path = ROOT / "results" / f"reporte_{sufijo}.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(reporte, f, ensure_ascii=False, indent=2)
