@@ -39,15 +39,16 @@ PDAS_CURSOS = {
 }
 
 
-def cargar_gold() -> list[dict]:
+def cargar_gold(path: Path | None = None) -> list[dict]:
     """Carga los gold labels. Cada entrada tiene:
     pda_file, codigo_curso, seccion, regla_id, estado_esperado.
     """
-    if not GOLD_PATH.exists():
-        print(f"Gold labels no encontrado en {GOLD_PATH}")
+    gold_path = Path(path) if path else GOLD_PATH
+    if not gold_path.exists():
+        print(f"Gold labels no encontrado en {gold_path}")
         print("Crea el archivo con al menos 30 entradas etiquetadas a mano.")
         sys.exit(1)
-    with open(GOLD_PATH, encoding="utf-8") as f:
+    with open(gold_path, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -144,16 +145,29 @@ def calcular_json_valid_rate(reportes: dict[str, dict]) -> float:
     return validos / total if total > 0 else 0.0
 
 
-def ejecutar_pipeline(modelo: str, tag: str) -> tuple[dict[str, dict], float]:
-    """Corre analizar_pda sobre los 4 PDAs y devuelve los reportes + latencia total.
+def ejecutar_pipeline(
+    modelo: str,
+    tag: str,
+    pdas_incluidos: set[str] | None = None,
+) -> tuple[dict[str, dict], float]:
+    """Corre analizar_pda sobre los PDAs especificados.
 
-    Persiste los reportes en results/reports_<tag>.json para permitir
-    recalculo de metricas sin volver a correr el pipeline completo.
+    Args:
+        modelo: modelo ollama a usar.
+        tag: etiqueta para persistir reports_<tag>.json.
+        pdas_incluidos: si se provee, solo procesa PDAs cuyo nombre esta
+            en este conjunto. Permite correr evals sobre subsets definidos
+            por el gold activo (train vs test).
+
+    Persiste los reportes en results/reports_<tag>.json.
     """
     reportes = {}
     start = time.time()
 
     for pdf_name, codigo_curso in PDAS_CURSOS.items():
+        if pdas_incluidos is not None and pdf_name not in pdas_incluidos:
+            continue
+
         pdf_path = PDAS_DIR / pdf_name
         if not pdf_path.exists():
             print(f"  Saltando {pdf_name} (no encontrado)")
@@ -249,6 +263,13 @@ def main():
     parser.add_argument("--modelo", type=str, default="llama3.2", help="Modelo a usar (default: llama3.2)")
     parser.add_argument("--compare", nargs=2, metavar=("TAG_A", "TAG_B"), help="Comparar dos runs guardados")
     parser.add_argument("--reuse", action="store_true", help="Reutilizar reportes guardados del tag (no re-correr el pipeline)")
+    parser.add_argument(
+        "--gold-path",
+        type=str,
+        default=None,
+        help="Ruta al archivo de gold labels (default: data/gold_labels.json). "
+        "Usar data/gold_labels_test.json para eval hold-out.",
+    )
     args = parser.parse_args()
 
     if args.compare:
@@ -258,8 +279,11 @@ def main():
     if not args.tag:
         parser.error("Se requiere --tag o --compare")
 
-    gold = cargar_gold()
-    print(f"Gold labels cargados: {len(gold)} entradas")
+    gold_path = Path(args.gold_path) if args.gold_path else GOLD_PATH
+    gold = cargar_gold(gold_path)
+    print(f"Gold labels cargados desde {gold_path.name}: {len(gold)} entradas")
+
+    pdas_en_gold = {g["pda_file"] for g in gold}
 
     if args.reuse:
         reportes = cargar_reportes(args.tag)
@@ -270,7 +294,7 @@ def main():
         latencia = 0.0
     else:
         print(f"\nCorriendo pipeline con modelo '{args.modelo}'...")
-        reportes, latencia = ejecutar_pipeline(args.modelo, args.tag)
+        reportes, latencia = ejecutar_pipeline(args.modelo, args.tag, pdas_incluidos=pdas_en_gold)
 
     print("\nCalculando metricas...")
     metricas_acc = calcular_accuracy(reportes, gold)
