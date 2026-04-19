@@ -34,7 +34,9 @@ PDAS_CURSOS = {
     "PDA - Intelligent Agents 2026A-01.docx.pdf": "22A14",
     "PDA - Sistemas de Control Automatico 2026A GR01.pdf": "22A12",
     "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf": "22A31",
-    "PDA-Modelos y Simulación- 2026A.pdf": None,  # no esta en competenciascursos
+    "PDA - Arquitectura de Software - 2026A - Gr03 LM.pdf": "22A35",
+    "PDA - Gestión TI 2026A.pdf": "22A32",
+    "PDA - Pensamiento computacional 2026A - Firmas.pdf": "22A52",
 }
 
 

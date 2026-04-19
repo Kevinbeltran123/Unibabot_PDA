@@ -6,8 +6,12 @@ para permitir filtrado por tipo, seccion, y curso.
 """
 
 import json
+import sys
 import chromadb
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from rag.embeddings import get_embedding_function
 
 ROOT = Path(__file__).parent.parent.parent
 REGLAS_PATH = ROOT / "data" / "lineamientos" / "reglas.json"
@@ -36,6 +40,7 @@ def crear_coleccion(reset: bool = False) -> chromadb.Collection:
     collection = client.get_or_create_collection(
         name="lineamientos",
         metadata={"hnsw:space": "cosine"},
+        embedding_function=get_embedding_function(),
     )
     return collection
 

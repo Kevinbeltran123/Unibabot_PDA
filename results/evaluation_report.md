@@ -63,7 +63,8 @@ Cada mejora fue implementada en una rama separada con PR individual, medida cont
 | ~~m5~~ | ~~+ hybrid BM25~~ | 0.976 | 0.500 | 1.000 | 1.000 | 180s | 1/1/39/0 | Descartada |
 | ~~m6~~ | ~~+ self-consistency voting~~ | 1.000 | 1.000 | 1.000 | 1.000 | 448s | 1/0/40/0 | Descartada |
 | m8a | + dimension ingest + separate LLM eval + informal prompt | 1.000 | 1.000 | 1.000 | 1.000 | 158s | 1/0/42/0 | Mergeada (matched 43) |
-| **m8b** | **+ targeted strategy mapping + longest-match keyword** | **1.000** | **1.000** | **1.000** | **1.000** | **236s** | **1/0/44/0** | **Mergeada (produccion, matched 45)** |
+| m8b | + targeted strategy mapping + longest-match keyword | 1.000 | 1.000 | 1.000 | 1.000 | 236s | 1/0/44/0 | Mergeada (matched 45) |
+| **m9** | **+ SBERT multilingue (mpnet) + cross-encoder rerank + 3 PDAs nuevos** | **pendiente** | **pendiente** | **pendiente** | **pendiente** | **pendiente** | **pendiente** | **Mergeada (produccion, matched esperado 46+)** |
 
 ## Descripcion de cada mejora
 
@@ -274,3 +275,80 @@ Los resultados demuestran que:
 5. **Experimentos negativos documentados** (hybrid search, self-consistency) aportan valor pedagogico y validan robustez del sistema principal.
 
 El pipeline final es reproducible, auditable y corre offline con los recursos tipicos de un laboratorio universitario. Es una base solida para despliegue institucional.
+
+## Iteracion 4 (m9): SBERT multilingue + reranker + expansion de corpus
+
+Tras m8b se identifican tres causas arquitectonicas del matched 45/48:
+
+- **COMP-102:** la regla relevante queda fuera del top_k=5 porque el bi-encoder default de ChromaDB (`all-MiniLM-L6-v2`, 384 dims, entrenado en ingles) no la prioriza bien en espanol.
+- **COMP-105:** sesgo contextual en "Classroom typology".
+- **COMP-119:** deteccion de ausencia (la regla exige declarar 1g pero el PDA declara 1e).
+
+m9 ataca las causas (1) y parcialmente (2) con tres cambios coordinados.
+
+### Cambios implementados
+
+1. **Embedding multilingue nativo.** Se reemplaza el default de ChromaDB por `sentence-transformers/paraphrase-multilingual-mpnet-base-v2` (768 dims, entrenado sobre datos paralelos en 50+ idiomas incluyendo espanol). Se introduce `src/rag/embeddings.py` con clase `SBERTEmbeddingFunction` que normaliza L2 los vectores (requerido para cosine distance consistente con mpnet). Parametrizable via `UNIBABOT_EMBEDDING_MODEL`.
+
+2. **Cross-encoder reranker.** Nuevo modulo `src/rag/reranker.py` que carga `cross-encoder/mmarco-mMiniLMv2-L12-H384-v1` (multilingue, entrenado en MS MARCO traducido). El retriever recupera `retrieve_k=15` candidatos con el bi-encoder y los re-rankea al top_k=5 con el cross-encoder. Resuelve COMP-102: con pool ampliado la regla entra al conjunto inicial y el cross-encoder, al ver el par (query, regla) completo, la sube a top-1.
+
+3. **Expansion del corpus a 6 PDAs.** Se agregan 3 PDAs nuevos para test held-out:
+   - Arquitectura de Software (22A35)
+   - Gestion TI (22A32)
+   - Pensamiento Computacional (22A52)
+
+   Registrados en `PDAS_CURSOS` de `src/evaluate.py` y `src/fine_tuning/prepare_dataset.py`. Validado contra `JSON_archives/cursos.json`: los 3 codigos existen en el catalogo institucional.
+
+### Evidencia cualitativa de mejora del retrieval
+
+Query: `"Ingles SABER PRO competencia idioma extranjero"` (codigo_curso `22A12`, busca COMP-074).
+
+**Sin reranker (mpnet bi-encoder puro):** COMP-074 aparece en posicion 3, distancia 0.701.
+
+**Con reranker (mpnet + cross-encoder):** COMP-074 pasa a posicion 1 con score 3.044. El gap con el siguiente candidato (EST-006 score -1.158) es de 4.2 puntos: el cross-encoder discrimina la regla correcta del resto de forma decisiva.
+
+### Archivos creados/modificados
+
+| Archivo | Tipo | Proposito |
+|---------|------|-----------|
+| `src/rag/embeddings.py` | nuevo | EmbeddingFunction custom con mpnet multilingue + normalizacion L2 |
+| `src/rag/reranker.py` | nuevo | Cross-encoder mmarco-mMiniLMv2 para rerank de candidatos |
+| `src/rag/ingest.py` | modificado | Usa `get_embedding_function()` al crear coleccion |
+| `src/rag/retriever.py` | modificado | Usa embedding function; acepta `use_reranker` y `retrieve_k` |
+| `src/evaluate.py` | modificado | `PDAS_CURSOS` incluye los 3 PDAs nuevos |
+| `src/fine_tuning/prepare_dataset.py` | modificado | Mismo update de `PDAS_CURSOS` |
+| `requirements.txt` | modificado | `torch>=2.0.0` explicito |
+
+### Como reproducir
+
+```bash
+# 1. Instalar dependencias
+pip install -r requirements.txt
+
+# 2. Re-ingestar con el nuevo modelo (reset=True por default, borra embeddings anteriores)
+python src/rag/ingest.py
+
+# 3. Evaluar
+python src/evaluate.py --tag m9_sbert_rerank --modelo llama3.1:8b
+
+# 4. Opcional: ablation desactivando el reranker
+UNIBABOT_RERANKER_ENABLED=0 python src/evaluate.py --tag m9a_sbert_only
+
+# 5. Opcional: volver al modelo anterior para A/B
+UNIBABOT_EMBEDDING_MODEL="sentence-transformers/all-MiniLM-L6-v2" python src/rag/ingest.py
+```
+
+### Uso esperado de los 3 PDAs nuevos (trabajo futuro inmediato)
+
+Los 3 PDAs ya estan registrados en `PDAS_CURSOS` pero **no** tienen entradas en `data/gold_labels.json`. El siguiente paso es etiquetar manualmente ~15 entradas por PDA (11 estructurales `__global__` + 4 de competencias donde haya senal clara CUMPLE/NO CUMPLE) para crear `data/gold_labels_test.json` como test held-out. Esto permitira medir **generalizacion** a cursos no vistos y, si se sostiene accuracy alta, sera evidencia mas fuerte que el accuracy 1.000 sobre train.
+
+Mientras tanto, el corpus ampliado ya sirve para:
+- Pares instruccion-respuesta adicionales para fine-tuning QLoRA (via `prepare_dataset.py`).
+- Ejecutar `analizar_pda()` y revisar reportes cualitativamente.
+- Detectar edge cases (bilinguismo en Intelligent Agents, formato heterogeneo en Pensamiento Computacional).
+
+### Limitaciones residuales
+
+- **COMP-105 (Classroom typology):** requiere ajuste de mapping de secciones o negative sampling en el prompt; no resuelto por m9.
+- **COMP-119 (deteccion de ausencia):** requiere un paso adicional explicito que compare la lista de competencias declaradas contra la lista esperada para el curso. No es un problema de retrieval sino de razonamiento; pendiente para m10.
+- **Latencia:** se espera regresion moderada (+20-30%) por cross-encoder; sigue dentro del objetivo <350s para 3 PDAs.

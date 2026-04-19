@@ -6,6 +6,8 @@ import chromadb
 from pathlib import Path
 
 from rag.seccion_mapping import secciones_pda_validas
+from rag.embeddings import get_embedding_function
+from rag.reranker import rerank_candidatos, reranker_disponible
 
 ROOT = Path(__file__).parent.parent.parent
 CHROMA_PATH = ROOT / "data" / "chroma_db"
@@ -13,7 +15,10 @@ CHROMA_PATH = ROOT / "data" / "chroma_db"
 
 def obtener_coleccion() -> chromadb.Collection:
     client = chromadb.PersistentClient(path=str(CHROMA_PATH))
-    return client.get_collection("lineamientos")
+    return client.get_collection(
+        "lineamientos",
+        embedding_function=get_embedding_function(),
+    )
 
 
 def _construir_filtro(codigo_curso: str | None, nombre_seccion: str | None) -> dict | None:
@@ -44,7 +49,8 @@ def _construir_filtro(codigo_curso: str | None, nombre_seccion: str | None) -> d
     return {"$and": filtros}
 
 
-def recuperar_dimension_rules(codigo_curso: str) -> list[dict]:
+def recuperar_dimension_rules(codigo_curso: str) -> list[dict]:  # noqa: D401
+
     """Recupera todas las reglas de dimension para un curso directamente por metadata.
 
     Se usa para garantizar que las reglas de dimension siempre aparezcan en el
@@ -71,30 +77,37 @@ def recuperar_lineamientos(
     top_k: int = 5,
     codigo_curso: str | None = None,
     nombre_seccion: str | None = None,
+    use_reranker: bool = True,
+    retrieve_k: int = 15,
 ) -> list[dict]:
     """Busca las reglas mas relevantes para un fragmento de texto.
 
     Args:
         texto: contenido a buscar (se usa para busqueda semantica)
-        top_k: cuantos resultados devolver
+        top_k: cuantos resultados devolver tras rerank
         codigo_curso: codigo del curso (ej: "22A14") para filtrar reglas por aplica_a
         nombre_seccion: nombre de la seccion detectada por el parser para filtrar
             reglas por seccion_pda via MAPPING_SECCIONES
+        use_reranker: si True, recupera retrieve_k candidatos con bi-encoder
+            y los re-rankea con cross-encoder multilingue, devolviendo top_k.
+        retrieve_k: tamanio del pool inicial antes del rerank (ignorado si
+            use_reranker=False).
 
     Returns:
-        Lista de diccionarios con las reglas recuperadas y su distancia.
+        Lista de diccionarios con las reglas recuperadas.
     """
     collection = obtener_coleccion()
 
     where = _construir_filtro(codigo_curso, nombre_seccion)
 
+    n_initial = retrieve_k if (use_reranker and reranker_disponible()) else top_k
+
     result = collection.query(
         query_texts=[texto],
-        n_results=top_k,
+        n_results=n_initial,
         where=where,
     )
 
-    #Transformar resultado a lista de dicts
     lineamientos = []
     for i in range(len(result["documents"][0])):
         lineamientos.append({
@@ -105,7 +118,10 @@ def recuperar_lineamientos(
             "seccion_pda": result["metadatas"][0][i]["seccion_pda"],
         })
 
-    return lineamientos
+    if use_reranker and reranker_disponible() and lineamientos:
+        lineamientos = rerank_candidatos(texto, lineamientos, top_k=top_k)
+
+    return lineamientos[:top_k]
 
 
 
