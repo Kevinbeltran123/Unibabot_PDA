@@ -64,7 +64,7 @@ Cada mejora fue implementada en una rama separada con PR individual, medida cont
 | ~~m6~~ | ~~+ self-consistency voting~~ | 1.000 | 1.000 | 1.000 | 1.000 | 448s | 1/0/40/0 | Descartada |
 | m8a | + dimension ingest + separate LLM eval + informal prompt | 1.000 | 1.000 | 1.000 | 1.000 | 158s | 1/0/42/0 | Mergeada (matched 43) |
 | m8b | + targeted strategy mapping + longest-match keyword | 1.000 | 1.000 | 1.000 | 1.000 | 236s | 1/0/44/0 | Mergeada (matched 45) |
-| **m9** | **+ SBERT multilingue (mpnet) + cross-encoder rerank + 3 PDAs nuevos** | **pendiente** | **pendiente** | **pendiente** | **pendiente** | **pendiente** | **pendiente** | **Mergeada (produccion, matched esperado 46+)** |
+| m9 | + SBERT multilingue (mpnet) + cross-encoder rerank | 0.947 | 0.333 | 1.000 | 1.000 | 247s | 1/2/35/0 | **Mergeada pero con regresion**: matched 38/48 (baja vs m8b 45/48), 2 FP nuevos |
 
 ## Descripcion de cada mejora
 
@@ -347,8 +347,54 @@ Mientras tanto, el corpus ampliado ya sirve para:
 - Ejecutar `analizar_pda()` y revisar reportes cualitativamente.
 - Detectar edge cases (bilinguismo en Intelligent Agents, formato heterogeneo en Pensamiento Computacional).
 
-### Limitaciones residuales
+### Resultados cuantitativos (gold_labels.json, 3 PDAs originales, 48 entradas)
 
+| Metrica | m8b (baseline) | m9 (SBERT + rerank) | Delta |
+|---------|----------------|---------------------|-------|
+| Accuracy | 1.000 | 0.947 | **-0.053** |
+| Matched | 45/48 | 38/48 | **-7** |
+| Precision NO CUMPLE | 1.000 | 0.333 | **-0.667** |
+| Recall NO CUMPLE | 1.000 | 1.000 | 0 |
+| JSON valid rate | 1.000 | 1.000 | 0 |
+| Latencia total (4→3 PDAs) | 236s | 247s | +11s |
+| TP/FP/TN/FN | 1/0/44/0 | 1/2/35/0 | +2 FP, -9 TN |
+
+### Hallazgo honesto: regresion respecto a m8b
+
+Los numeros muestran una **regresion** frente a m8b, no la mejora esperada. Desagregacion:
+
+- **Matched cae 45→38.** El cambio de embedding (mpnet vs all-MiniLM-L6-v2) produce rankings distintos. Secciones que antes matcheaban a una regla por seccion_pda ahora dejan fuera esa regla del top-k reranqueado. El filtrado estricto por `seccion_pda` + reranker combinados son demasiado restrictivos: recuperan menos reglas pero no necesariamente las correctas del gold.
+- **FP sube 0→2.** El cross-encoder mueve reglas diferentes al top, y el LLM ocasionalmente las marca como NO CUMPLE donde el gold dice CUMPLE.
+- **Recall NO CUMPLE se mantiene en 1.000** y **JSON valid rate en 1.000**: las partes sensibles a formato no se rompieron.
+- **Latencia +11s** es aceptable, descartando la hipotesis de que el reranker sea caro.
+
+### Interpretacion
+
+El embedding multilingue y el reranker son correctos en isolation (evidencia cualitativa confirmada: COMP-074 sube de pos 3 a pos 1 con rerank, gap de 4.2 puntos). El problema es la **interaccion con el filtro por `seccion_pda`**: al restringir a `retrieve_k=15` pre-filtrados + rerank posterior, se elimina tolerancia para gold entries con mapping de seccion imperfecto. m8b compensaba la mediocridad del bi-encoder con un pool top-5 directo; m9 hace un pool mas grande pero el filtro deja ese pool con pocos candidatos relevantes.
+
+### Acciones correctivas (m9.1 pendiente)
+
+1. **Relajar filtro cuando el pool es pequeno.** Si `retrieve_k` filtrado devuelve <5 candidatos, desactivar el filtro de `seccion_pda` para esa query especifica (mantener solo el filtro de curso). Esto restaura tolerancia sin sacrificar especificidad donde si la hay.
+2. **Ablation con embedding nuevo pero sin reranker.** Aislar si la regresion viene del embedding o del reranker. Correr `UNIBABOT_RERANKER_ENABLED=0 python src/evaluate.py --tag m9a_sbert_only`.
+3. **Aumentar `top_k` a 7 cuando hay filtro por seccion activo.** Mas margen para que el gold entry este en el conjunto final.
+
+### Decision
+
+El commit de m9 se mantiene en main porque:
+- El codigo es correcto y la infraestructura (embedding function custom, reranker modular, nuevos PDAs registrados) es valiosa independiente del numero final.
+- La regresion es cuantitativa pero **no arquitectonica**: el bi-encoder y reranker funcionan (evidencia cualitativa); el problema esta en los hiperparametros de filtrado.
+- Revertir perderia la plomeria que m9.1 necesitara.
+
+Sin embargo, m9 **no se declara la version de produccion**. m8b sigue siendo el baseline de produccion documentado hasta que m9.1 corrija la regresion o m9 se reverta. El usuario puede forzar el comportamiento m8b temporalmente con:
+
+```bash
+UNIBABOT_EMBEDDING_MODEL="sentence-transformers/all-MiniLM-L6-v2" python src/rag/ingest.py
+UNIBABOT_RERANKER_ENABLED=0 python src/evaluate.py --tag m8b_restored
+```
+
+### Limitaciones residuales tras m9
+
+- **Regresion en matched / FPs** (descrita arriba). Requiere m9.1.
 - **COMP-105 (Classroom typology):** requiere ajuste de mapping de secciones o negative sampling en el prompt; no resuelto por m9.
 - **COMP-119 (deteccion de ausencia):** requiere un paso adicional explicito que compare la lista de competencias declaradas contra la lista esperada para el curso. No es un problema de retrieval sino de razonamiento; pendiente para m10.
-- **Latencia:** se espera regresion moderada (+20-30%) por cross-encoder; sigue dentro del objetivo <350s para 3 PDAs.
+- **Gold held-out sobre los 3 PDAs nuevos** aun no etiquetado; la evaluacion m9 corrio solo sobre los 3 PDAs originales (gold_labels.json sin entradas para los nuevos).
