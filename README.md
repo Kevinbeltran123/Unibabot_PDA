@@ -2,11 +2,18 @@
 
 Agente inteligente para la verificacion automatizada de Planes de Desarrollo Academico (PDA) de la Universidad de Ibague. El sistema recibe un PDA en formato PDF, lo evalua contra 179 lineamientos institucionales codificados, y genera un reporte estructurado de cumplimiento.
 
-**Accuracy sobre gold dataset:** 1.000 (sistema final tras 5 mejoras mergeadas + 2 descartadas como experimentos negativos)
+**Resultados sobre gold dataset expandido (112 entradas, 6 PDAs reales):**
+
+| Split | Accuracy | Precision NC | Recall NC | Matched | Latencia |
+|-------|----------|--------------|-----------|---------|----------|
+| Train (57 entradas, 3 PDAs) | **0.965** | **1.000** | 0.500 | 57/57 | ~95s |
+| Test hold-out (55 entradas, 3 PDAs nuevos) | **0.982** | 0.900 | **1.000** | 55/55 | ~120s |
+
+*m13 extractor deterministico + Qwen 2.5 14B. NC = clase NO CUMPLE (incumplimientos reales). Train: PDAs vistos durante el desarrollo. Test: PDAs nunca tocados.*
 
 ## Contexto
 
-Cada semestre, las oficinas de los programas academicos de la Universidad de Ibague deben verificar manualmente que mas de 20 PDAs cumplan con los lineamientos institucionales. Este proceso es lento, inconsistente y propenso a errores. UnibaBot PDA automatiza esta verificacion mediante un pipeline hibrido que combina verificacion rule-based determinista, busqueda semantica filtrada (RAG), y un modelo de lenguaje Llama 3.1 8B corriendo localmente en un MacBook Pro M3 18GB.
+Cada semestre, las oficinas de los programas academicos de la Universidad de Ibague deben verificar manualmente que mas de 20 PDAs cumplan con los lineamientos institucionales. Este proceso es lento, inconsistente y propenso a errores. UnibaBot PDA automatiza esta verificacion mediante un pipeline hibrido que combina verificacion rule-based determinista, despacho explicito de reglas por seccion, y extraccion de declaraciones con **Qwen 2.5 14B** corriendo localmente en un MacBook Pro M3 18GB.
 
 ## Arquitectura
 
@@ -17,36 +24,41 @@ PDF del PDA
 [1. Extraccion + segmentacion]   src/pdf_parser.py
     |                            PyMuPDF + SECCIONES_CONOCIDAS bilingue
     v
-[2. Rule-based determinista]     src/rules/estructural_checker.py
-    |                            11 checkers (EST-001 a EST-011)
+[2. Rule-based estructural]      src/rules/estructural_checker.py
+    |                            11 checkers deterministicos (EST-001..011)
     |                            100% precision en reglas estructurales
     v
-[3. RAG con filtro por seccion]  src/rag/retriever.py + seccion_mapping.py
-    |                            ChromaDB + filtro aplica_a + filtro seccion_pda
-    |                            179 reglas, ~5 relevantes por seccion
+[3. Despacho de reglas]          src/rag/rule_dispatcher.py
+    |                            Mapea 168 reglas (reglas.json) a secciones del PDA
+    |                            Match por nombre de seccion + fallback por keywords
     v
-[4. Prompt con few-shot]         src/prompts/compliance_prompt.txt
-    |                            3 ejemplos (2 CUMPLE + 1 NO CUMPLE)
+[4. Extraccion de declaraciones] src/rules/declaracion_extractor.py
+    |                            1 llamada LLM por PDA (Qwen 2.5 14B)
+    |                            Extrae codigos canonicos (C1, 1b, SP5, D4, ABET X.Y)
+    |                            src/prompts/extraccion_prompt.txt
     v
-[5. LLM + validacion Pydantic]   src/agent.py + src/schemas.py
-    |                            Llama 3.1 8B via ollama
-    |                            Retry automatico si JSON invalido
+[5. Matcher deterministico]      src/rules/declaracion_checker.py
+    |                            Regex por tipo + set intersection
+    |                            Compliance 100% reproducible y auditable
     v
 [6. Reporte estructurado]        results/reports_<tag>.json
                                  regla_id / estado / evidencia / correccion
 ```
 
-**Resultados sobre gold dataset de 48 entradas etiquetadas:**
+**Evolucion de resultados — hitos principales:**
 
-| Metrica | Baseline (Llama 3.2 3B) | Final (pipeline completo) |
-|---------|--------------------------|---------------------------|
-| Accuracy | 0.351 | **1.000** |
-| Precision NO CUMPLE | 0.000 | **1.000** |
-| Recall NO CUMPLE | 0.000 | **1.000** |
-| JSON valid rate | 0.986 | **1.000** |
-| Latencia (4 PDAs) | 565s | 189s |
+| Hito | Descripcion | Accuracy | Prec NC | Recall NC | Matched | Latencia |
+|------|-------------|----------|---------|-----------|---------|----------|
+| baseline | Llama 3.2 3B sin mejoras (gold 48) | 0.351 | 0.000 | 0.000 | 37/48 | 565s |
+| m8b | Pipeline RAG+LLM completo (Llama 3.1 8B, gold 48) | 1.000* | 1.000 | 1.000 | 45/48 | 236s |
+| m11 | Rule-driven: 100% cobertura (gold 57+55) | 0.895 / 0.873 | 0.625 / 0.818 | 0.625 / 0.857 | 57/57 + 55/55 | 213s / 249s |
+| m12 | Qwen 2.5 14B como modelo LLM (gold 57+55) | 0.930 / 0.891 | 1.000 / 0.826 | 0.500 / 0.905 | 57/57 + 55/55 | 441s / 366s |
+| **m13 Train** | **Extractor deterministico** | **0.965** | **1.000** | **0.500** | **57/57** | **~95s** |
+| **m13 Test** | **Hold-out 3 PDAs nuevos** | **0.982** | **0.900** | **1.000** | **55/55** | **~120s** |
 
-Ver [results/evaluation_report.md](results/evaluation_report.md) y [results/accuracy_progression.md](results/accuracy_progression.md) para el detalle por mejora.
+*m8b: accuracy 1.000 sobre 45/48 entradas matcheadas, 3 excluidas por retrieval semantico. El salto de m8b a m11 no es una regresion: m11 introdujo evaluacion 100% deterministica revelando incumplimientos que el retrieval semantico omitia por no recuperarlos en el top-k.*
+
+Ver [results/evaluation_report.md](results/evaluation_report.md) y [results/accuracy_progression.md](results/accuracy_progression.md) para el detalle completo por iteracion.
 
 ## Estructura del proyecto
 
@@ -55,26 +67,40 @@ Unibabot_PDA/
   src/
     pdf_parser.py                # Extraccion y segmentacion de PDAs
     agent.py                     # Pipeline completo del agente
-    evaluate.py                  # Script de medicion contra gold dataset
+    evaluate.py                  # Evaluacion contra gold dataset (train/test)
     generar_reglas.py            # Genera reglas desde JSON_archives/
     schemas.py                   # Modelos Pydantic para validacion estricta
     prompts/
-      compliance_prompt.txt      # Prompt con 3 ejemplos few-shot
-      retry_prompt.txt           # Prompt de retry si JSON invalido
-    rag/
-      ingest.py                  # Carga reglas en ChromaDB
-      retriever.py               # Busqueda semantica con filtros
-      seccion_mapping.py         # Mapping keyword_parser -> [seccion_pda]
+      extraccion_prompt.txt      # Prompt de extraccion de codigos declarados (m13)
+      compliance_prompt.txt      # Prompt de evaluacion LLM (fallback legacy)
+      retry_prompt.txt           # Prompt de retry para JSON invalido
     rules/
       estructural_checker.py     # 11 checkers rule-based (EST-001..011)
+      declaracion_extractor.py   # Extractor LLM de codigos canonicos (m13)
+      declaracion_checker.py     # Matcher deterministico (m13)
+    rag/
+      rule_dispatcher.py         # Despacho de reglas a secciones del PDA (m11)
+      seccion_mapping.py         # Mapping keyword_parser -> [seccion_pda]
+      ingest.py                  # Carga reglas en ChromaDB (opt-in)
+      retriever.py               # Busqueda semantica (opt-in, no es el default)
+      embeddings.py              # SBERT custom embedding function (opt-in)
+      reranker.py                # Cross-encoder reranker (opt-in)
     fine_tuning/
       prepare_dataset.py         # Genera pares instruccion-respuesta
       generar_outputs.py         # Genera outputs con Llama 3.2
+    tooling/
+      generar_gold_exhaustivo.py # Pipeline de generacion del gold dataset
+      anotar_claude_train.py     # Anotacion Claude para split de train
+      anotar_claude_test.py      # Anotacion Claude para split de test
+      fusionar_gold.py           # Fusion de candidatos nuevos con gold existente
+      limpiar_gold_modelos.py    # Elimina entradas huerfanas del gold
+      corregir_gold_contra_pda.py# Correccion determinista de gold mal etiquetado
   data/
     lineamientos/
-      reglas.json                # 179 reglas codificadas
-    gold_labels.json             # Gold dataset (48 entradas etiquetadas)
-    chroma_db/                   # Base vectorial persistida (gitignored)
+      reglas.json                # 179 reglas codificadas (11 EST + 168 COMP)
+    gold_labels.json             # Gold dataset train (57 entradas, 3 PDAs)
+    gold_labels_test.json        # Gold dataset test hold-out (55 entradas, 3 PDAs)
+    chroma_db/                   # Base vectorial persistida (gitignored, opt-in)
     training_dataset.jsonl       # 42 ejemplos de entrenamiento (fine-tuning v1)
     validation_dataset.jsonl     # 5 ejemplos de validacion
   models/
@@ -82,14 +108,18 @@ Unibabot_PDA/
   notebooks/
     fine_tuning.ipynb            # Notebook para Google Colab (QLoRA)
   results/
-    evaluation_report.md         # Reporte final con metricas completas
-    accuracy_progression.md      # Tabla por mejora + analisis
+    evaluation_report.md         # Reporte completo con metricas por iteracion (m1-m13)
+    accuracy_progression.md      # Tabla de progresion de accuracy (m1-m13)
     metrics_<tag>.json           # Metricas por snapshot (gitignored)
     reports_<tag>.json           # Reportes crudos del agente (gitignored)
-  PDAs/                          # PDAs reales en PDF (4 documentos, gitignored)
-  JSON_archives/                 # Datos institucionales (ABET, competencias)
-  Docs/                          # Documentacion academica y presentaciones
-  ROADMAP.md                     # Plan de implementacion por fases
+  PDAs/                          # PDAs reales en PDF (6 documentos, gitignored)
+  JSON_archives/                 # Datos institucionales (ABET, competencias, cursos)
+  Docs/                          # Documentacion tecnica y academica
+    ARCHITECTURE.md              # Arquitectura tecnica del sistema (m13)
+    EXPLICACION_TECNICA.md       # Documentacion exhaustiva para presentacion
+  streamlit_app.py               # Interfaz web (Streamlit)
+  webapp/                        # Componentes adicionales de la UI web
+  ROADMAP.md                     # Plan de implementacion historico
   CLAUDE.md                      # Instrucciones del proyecto
   requirements.txt               # Dependencias Python
 ```
@@ -97,9 +127,9 @@ Unibabot_PDA/
 ## Requisitos
 
 - Python 3.12+
-- ollama con Llama 3.1 8B (default) y/o Llama 3.2 3B (baseline comparativo)
-- MacBook Pro M3 18GB o equivalente (para el 8B)
-- Google Colab con GPU T4 (opcional, solo si se quiere re-intentar fine-tuning)
+- **ollama** con Qwen 2.5 14B (default) y/o Llama 3.1 8B (comparativo)
+- MacBook Pro M3 18GB o equivalente (Qwen 2.5 14B requiere ~9GB de VRAM)
+- Google Colab con GPU T4 (solo si se quiere re-intentar fine-tuning con QLoRA)
 
 ## Instalacion
 
@@ -116,10 +146,11 @@ pip install -r requirements.txt
 # Instalar y configurar ollama
 brew install ollama
 brew services start ollama
-ollama pull llama3.1:8b      # modelo de produccion (default)
-ollama pull llama3.2         # baseline para comparacion (opcional)
+ollama pull qwen2.5:14b      # modelo de produccion (default, ~9GB)
+ollama pull llama3.1:8b      # comparativo legacy (opcional)
+ollama pull llama3.2         # baseline original (opcional)
 
-# Ingestar reglas en ChromaDB
+# Generar reglas e ingestar en ChromaDB (necesario para la UI y opt-in RAG)
 python src/generar_reglas.py
 python src/rag/ingest.py
 ```
@@ -135,22 +166,20 @@ streamlit run streamlit_app.py
 Abre la UI en `http://localhost:8501`. El flujo es:
 
 1. Subir un PDA en PDF, opcionalmente escribir el codigo del curso (ej: `22A14`) y elegir modelo.
-2. Al pulsar "Analizar PDA" se ve el progreso en vivo seccion por seccion (reutiliza los mismos eventos que la CLI).
+2. Al pulsar "Analizar PDA" se ve el progreso en vivo seccion por seccion.
 3. El reporte se muestra con metricas globales, tabs (Estructural / Por seccion / Resumen) y acordeones con badges coloreados por hallazgo.
 4. Cada reporte se guarda automaticamente en `results/history/` y aparece en el sidebar para consultar despues sin re-analizar.
-
-La UI es una capa delgada sobre `analizar_pda` de [src/agent.py](src/agent.py); toda la logica del pipeline sigue siendo la misma que usa la CLI, y ambos canales pueden convivir sin interferirse.
 
 ### Analizar un PDA (CLI)
 
 ```bash
-# Default: usa Llama 3.1 8B (accuracy 1.000 sobre gold)
+# Default: usa Qwen 2.5 14B (m13, accuracy 0.982 en test hold-out)
 python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14
 
 # Con modelo explicito
-python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 baseline    # llama3.2 3B
-python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 8b          # llama3.1 8B
-python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 llama3.1:8b # nombre crudo
+python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 qwen    # Qwen 2.5 14B (default)
+python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 8b      # Llama 3.1 8B (legacy)
+python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 baseline # Llama 3.2 3B (baseline)
 ```
 
 El segundo argumento es el codigo del curso (opcional). Si se proporciona, el sistema filtra las reglas de competencias especificas de ese curso. El reporte se guarda en `results/reporte_<modelo>.json`.
@@ -158,8 +187,11 @@ El segundo argumento es el codigo del curso (opcional). Si se proporciona, el si
 ### Evaluar contra gold dataset
 
 ```bash
-# Corre los 4 PDAs y calcula metricas contra data/gold_labels.json
-python src/evaluate.py --tag mi_experimento --modelo llama3.1:8b
+# Evaluar train (3 PDAs originales, 57 entradas)
+python src/evaluate.py --tag mi_experimento --modelo qwen2.5:14b
+
+# Evaluar test hold-out (3 PDAs nuevos, 55 entradas)
+python src/evaluate.py --gold-path data/gold_labels_test.json --tag mi_experimento_test --modelo qwen2.5:14b
 
 # Comparar dos runs guardados
 python src/evaluate.py --compare baseline mi_experimento
@@ -171,14 +203,14 @@ python src/evaluate.py --tag baseline --reuse
 ### Explorar un PDF
 
 ```bash
-# Ver bloques crudos con metadata
+# Ver bloques crudos con metadata de fuente
 python src/pdf_parser.py "../PDAs/tu_pda.pdf" --bloques
 
 # Ver secciones segmentadas
 python src/pdf_parser.py "../PDAs/tu_pda.pdf" --secciones
 ```
 
-### Probar el retriever
+### Probar el retriever (opt-in, experimentos RAG)
 
 ```bash
 python src/rag/retriever.py "resultados de aprendizaje" 22A14
@@ -195,18 +227,14 @@ python src/rag/retriever.py "resultados de aprendizaje" 22A14
 ### Registrar modelo fine-tuneado en ollama
 
 ```bash
-# Crear Modelfile
 cat > Modelfile << 'EOF'
 FROM ./llama-3.2-3b-instruct.Q4_K_M.gguf
 PARAMETER temperature 0.1
 SYSTEM Eres un evaluador academico de la Universidad de Ibague que verifica el cumplimiento de Planes de Desarrollo Academico (PDA).
 EOF
 
-# Registrar en ollama
 ollama create unibabot-pda -f Modelfile
 ```
-
-Despues, cambiar `MODELO = "llama3.2"` a `MODELO = "unibabot-pda"` en `src/agent.py`.
 
 ## Base de conocimiento
 
@@ -230,7 +258,9 @@ Tipos de reglas generadas:
 | ABET | 36 | "Debe cubrir indicador 1.1: Analiza un problema de ingenieria..." |
 | Dimension | 15 | "Debe declarar dimension D4: Internacional" |
 
-## Fine-tuning
+## Fine-tuning (artefacto historico)
+
+El fine-tuning con QLoRA fue la primera estrategia explorada (m7). El modelo fine-tuneado entro en loops de generacion y fue descartado. Las mejoras sistematicas de ingenieria del pipeline (m8-m13) superaron con creces los resultados del fine-tuning sin sus riesgos.
 
 | Parametro | Valor |
 |-----------|-------|
@@ -241,7 +271,26 @@ Tipos de reglas generadas:
 | Learning rate | 2e-4 |
 | Batch size efectivo | 8 (2 x 4 gradient accumulation) |
 | Hardware | Google Colab T4 (16GB VRAM) |
-| Resultado | Train loss 1.64 -> 1.26, Val loss 1.52 -> 1.15 |
+| Resultado | Train loss 1.64 -> 1.26, Val loss 1.52 -> 1.15 (pero loops en inferencia) |
+
+## Decisiones tecnicas clave
+
+1. **LLM para extraccion, no para razonamiento:** El LLM es fuerte extrayendo codigos ("C1", "SP5") de texto, pero debil razonando si una declaracion informal cumple una regla formal. m13 separa los dos roles: LLM extrae, codigo Python decide.
+
+2. **Rule-driven vs retrieval-driven:** m11 invirtio el flujo. En vez de "busca semanticamente las reglas mas similares al texto", el sistema ahora "para cada regla aplicable al curso, encuentra la seccion del PDA donde debe declararse". Esto garantiza cobertura 100%.
+
+3. **Determinismo en compliance:** El veredicto final de cumplimiento es 100% reproducible (regex + set intersection). Solo la fase de extraccion tiene estocasticidad.
+
+4. **Infraestructura RAG como opt-in:** ChromaDB, SBERT multilingue y cross-encoder reranker (m9) existen en el codigo pero no son el pipeline de produccion. Se pueden activar con variables de entorno para experimentacion.
+
+5. **Gold dataset como evidencia de generalizacion:** El test hold-out con 3 PDAs nunca vistos durante el desarrollo (accuracy 0.982) demuestra que el sistema no memoriza patrones de los PDAs de entrenamiento.
+
+## Limitaciones identificadas
+
+1. **Recall NC en train = 0.500:** El extractor ocasionalmente no detecta declaraciones semanticamente correctas pero con formulacion inusual (ej: "vision sistemica" en lugar del codigo "1h: Pensamiento critico").
+2. **1 FP residual en test:** Un caso edge donde el extractor sobre-detecta D4 en Agentes Inteligentes por la frase "international dimension integrated".
+3. **Parser dependiente del formato PDF:** PDAs con tablas complejas o escaneados como imagen pueden no segmentarse correctamente.
+4. **Dataset de 6 PDAs:** Mas PDAs (20+) permitirian metricas estadisticamente mas robustas para la clase NC.
 
 ## Autores
 
