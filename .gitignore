@@ -65,6 +65,5 @@ checkpoints/
 
 # === Proyecto ===
 CLAUDE.md
-Docs/*.aux
-Docs/*.log
+Docs/
 "PDA - Intelligent Agents 2026A-01.docx.pdf"
