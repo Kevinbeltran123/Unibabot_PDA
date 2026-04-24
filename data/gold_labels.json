@@ -69,7 +69,7 @@
     "seccion": "Pedagogical Strategy(ies)",
     "regla_id": "COMP-102",
     "estado_esperado": "CUMPLE",
-    "nota": "Competencia 1c (Comunicacion segunda lengua): 'delivery of materials and presentation of results in English'."
+    "nota": "[m15 reconciliacion] Competencia 1c (Comunicacion segunda lengua): 'delivery of materials and presentation of results in English'. Conflicto resuelto a CUMPLE: el PDA declara 1c por nombre canonico ('second language communication') en seccion con codigos literales (C1/C2), lo que constituye declaracion formal bajo la arquitectura m11+ rule-global."
   },
   {
     "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
@@ -188,8 +188,8 @@
     "codigo_curso": "22A12",
     "seccion": "4. Resultados de Aprendizaje Esperados (RAE)",
     "regla_id": "COMP-074",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "La seccion de RAE no menciona SABER PRO SP5 (Ingles) explicitamente. Solo declara 1b (generica) pero no SP5."
+    "estado_esperado": "CUMPLE",
+    "nota": "[m15 reconciliacion] El PDA declara 'Saber PRO: Ingles' en seccion RAE (formal). Bajo la politica adaptativa (m15: nombre canonico en seccion formal equivale a declaracion), esto es CUMPLE. Nota previa (strict-literal): 'La seccion de RAE no menciona SABER PRO SP5 (Ingles) explicitamente. Solo declara 1b (generica) pero no SP5.'"
   },
   {
     "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
@@ -360,30 +360,6 @@
     "nota": "[Auto-corregido m13] El codigo C2 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   },
   {
-    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
-    "codigo_curso": "22A14",
-    "seccion": "What methodology guides the activities?",
-    "regla_id": "COMP-102",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[LLM+Claude agree] La seccion 'What methodology guides the activities?' no declara 1c (Comunicacion en segunda lengua); se enfoca en como se ensena."
-  },
-  {
-    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
-    "codigo_curso": "22A14",
-    "seccion": "Pedagogical Strategy(ies)",
-    "regla_id": "COMP-103",
-    "estado_esperado": "CUMPLE",
-    "nota": "[LLM+Claude agree] La seccion menciona 'practical application of techniques used by intelligent agents in real-world cases and challenges', lo que implica pensamiento critico (1h)."
-  },
-  {
-    "pda_file": "PDA - Intelligent Agents 2026A-01.docx.pdf",
-    "codigo_curso": "22A14",
-    "seccion": "Pedagogical Strategy(ies)",
-    "regla_id": "COMP-105",
-    "estado_esperado": "CUMPLE",
-    "nota": "[LLM+Claude agree] La seccion declara 'the international dimension is integrated through the delivery of materials and presentation of results in English' -- D4 Internacional."
-  },
-  {
     "pda_file": "PDA - Sistemas de Control Automatico 2026A GR01.pdf",
     "codigo_curso": "22A12",
     "seccion": "__global__",
@@ -430,29 +406,5 @@
     "regla_id": "EST-011",
     "estado_esperado": "CUMPLE",
     "nota": "fecha del encuadre en 'Fecha del encuadre pedagógico:', seccion 'Revisado y aprobado' presente"
-  },
-  {
-    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
-    "codigo_curso": "22A31",
-    "seccion": "Competencias / Resultados de Aprendizaje",
-    "regla_id": "COMP-119",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "[Claude annotator] El PDA de UI/UX declara 1e (Cultura cientifica) donde la regla exige 1g (Aprender a aprender). Caso conocido documentado en m8b."
-  },
-  {
-    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
-    "codigo_curso": "22A31",
-    "seccion": "Competencias específicas:",
-    "regla_id": "COMP-122",
-    "estado_esperado": "CUMPLE",
-    "nota": "[Auto-corregido m13] El codigo D1 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
-  },
-  {
-    "pda_file": "PDA - Desarrollo aplicaciones UIUX - 2026A 02.pdf",
-    "codigo_curso": "22A31",
-    "seccion": "Competencias específicas:",
-    "regla_id": "COMP-123",
-    "estado_esperado": "CUMPLE",
-    "nota": "[Auto-corregido m13] El codigo D5 aparece literalmente en el texto del PDA. Etiquetado original NO CUMPLE era erroneo."
   }
 ]

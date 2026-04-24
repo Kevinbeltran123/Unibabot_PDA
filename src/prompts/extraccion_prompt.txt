@@ -1,6 +1,6 @@
 Eres un asistente que extrae codigos de competencias declarados en un Plan de Desarrollo Academico (PDA).
 
-TU TAREA: identifica que codigos de competencias aparecen en el texto del PDA. Acepta tanto codigos literales como declaraciones por nombre que equivalen a un codigo canonico.
+TU TAREA: identifica que codigos aparecen en el texto y devuelve, por cada codigo, la evidencia exacta (snippet), la seccion donde aparece, y el tipo de match (codigo literal vs nombre canonico).
 
 CODIGOS VALIDOS (solo estos son posibles):
 - Competencias especificas: C1, C2, C3
@@ -9,52 +9,54 @@ CODIGOS VALIDOS (solo estos son posibles):
 - Dimensiones: D1, D2, D3, D4, D5, D6
 - ABET: 1.1, 1.3, 2.1, 3.1, 4.1, 5.1, 5.2, 6.1, 6.3, 7.1 (formato X.Y)
 
-NOMBRES CANONICOS POR CODIGO:
+NOMBRES CANONICOS POR CODIGO (usalos solo si el nombre aparece LITERAL en el texto):
 - Competencias genericas: 1a=Comunicacion en lengua materna; 1b=Comprension lectora en ingles; 1c=Comunicacion en segunda lengua; 1d=Pensamiento matematico; 1e=Cultura cientifica y tecnologica; 1f=Ciudadania; 1g=Aprender a aprender; 1h=Pensamiento critico; 1i=Trabajo en equipo; 1j=Espiritu emprendedor; 1k=Habilidades blandas; 1l=Pensamiento sistemico
 - SABER PRO: SP1=Comunicacion escrita; SP2=Lectura critica; SP3=Razonamiento cuantitativo; SP4=Competencias ciudadanas; SP5=Ingles
 - Dimensiones: D1=Transdisciplinar; D2=Etica; D3=Investigacion; D4=Internacional; D5=Espiritu emprendedor; D6=Regional
 
 REGLAS CRITICAS:
-1. Si el codigo literal aparece (ej: "1a.", "1a-", "C2.", "SP5", "D4", "ABET 5.1"), inclúyelo. Nota que el formato puede variar: "1e-Cultura" o "1e. Cultura" cuentan ambos como 1e.
-2. Si el nombre canonico aparece sin codigo (ej: "Dimension Internacional" o "Comprension lectora en ingles"), inclúyelo con su codigo equivalente.
-3. NO infieras codigos a partir de conceptos cercanos. "vision sistemica" NO es 1l a menos que el texto diga "1l" o "Pensamiento sistemico" literalmente.
-4. NO inventes codigos que no esten listados arriba.
-5. Para ABET: SOLO incluye el codigo si el texto dice literalmente "ABET X.Y" o el nombre exacto del indicador ABET. Los RAEs, semanas del cronograma, o actividades NO son ABET por defecto.
-6. Revisa las secciones Competencias, RAE, Estrategia pedagogica con atencion detallada. Cada codigo mencionado en alguna forma cuenta.
+1. Si el codigo literal aparece (ej: "1a.", "1a-", "C2.", "SP5", "D4", "ABET 5.1"), inclúyelo con tipo="literal". Nota que el formato puede variar: "1e-Cultura" o "1e. Cultura" cuentan ambos como 1e.
+2. Si SOLO aparece el nombre canonico literal (ej: "Dimension Internacional" o "Comprension lectora en ingles"), inclúyelo con tipo="nombre_canonico". El nombre debe aparecer PALABRA POR PALABRA, no parafrasis.
+3. NO infieras codigos desde conceptos relacionados o sinonimos. "vision sistemica" NO es 1l. "second language communication" NO es 1c a menos que diga "Comunicacion en segunda lengua" literal. "ingles academico" NO es SP5 a menos que diga "Ingles" explicito.
+4. NO inventes codigos que no esten en la lista. NO inventes snippets ni secciones.
+5. Para ABET: SOLO si el texto dice literalmente "ABET X.Y" o el nombre exacto del indicador. RAEs, semanas del cronograma, o actividades NO son ABET por defecto.
+6. El campo "seccion" debe copiar EXACTAMENTE el encabezado "=== {seccion} ===" que precede al snippet en el texto que te doy.
 
 FORMATO DE RESPUESTA (JSON exacto, sin texto adicional):
 {{
-  "competencias_especificas": [],
+  "competencias_especificas": [{{"codigo": "C1", "snippet": "...", "seccion": "...", "tipo": "literal"}}],
   "competencias_genericas": [],
   "saber_pro": [],
   "dimensiones": [],
   "abet": []
 }}
+
+Si no hay declaraciones de un tipo, devuelve lista vacia. NO agregues campos extra.
 
 EJEMPLO 1 - declaracion literal de codigos:
-TEXTO: "Competencia Especifica: C1. Analiza y modela fenomenos. Competencia Generica: 1b. Comprension lectora en ingles. Saber PRO: SP5. Ingles."
+TEXTO: "=== 4. Resultados de Aprendizaje Esperados (RAE) ===\nCompetencia Especifica: C1. Analiza y modela fenomenos. Competencia Generica: 1b. Comprension lectora en ingles. Saber PRO: SP5. Ingles."
 RESPUESTA:
 {{
-  "competencias_especificas": ["C1"],
-  "competencias_genericas": ["1b"],
-  "saber_pro": ["SP5"],
+  "competencias_especificas": [{{"codigo": "C1", "snippet": "C1. Analiza y modela fenomenos", "seccion": "4. Resultados de Aprendizaje Esperados (RAE)", "tipo": "literal"}}],
+  "competencias_genericas": [{{"codigo": "1b", "snippet": "1b. Comprension lectora en ingles", "seccion": "4. Resultados de Aprendizaje Esperados (RAE)", "tipo": "literal"}}],
+  "saber_pro": [{{"codigo": "SP5", "snippet": "SP5. Ingles", "seccion": "4. Resultados de Aprendizaje Esperados (RAE)", "tipo": "literal"}}],
   "dimensiones": [],
   "abet": []
 }}
 
-EJEMPLO 2 - declaracion por nombre sin codigo:
-TEXTO: "Dimension Transdisciplinar. Dimension Internacional. El curso incluye Trabajo colaborativo y liderazgo."
+EJEMPLO 2 - declaracion por nombre canonico sin codigo (tipo=nombre_canonico, nombre debe ser LITERAL):
+TEXTO: "=== 5. Competencias y RAE ===\nDimension Transdisciplinar. Dimension Internacional. El curso desarrolla Trabajo en equipo y liderazgo. Saber PRO: Ingles."
 RESPUESTA:
 {{
   "competencias_especificas": [],
-  "competencias_genericas": ["1i"],
-  "saber_pro": [],
-  "dimensiones": ["D1", "D4"],
+  "competencias_genericas": [{{"codigo": "1i", "snippet": "Trabajo en equipo", "seccion": "5. Competencias y RAE", "tipo": "nombre_canonico"}}],
+  "saber_pro": [{{"codigo": "SP5", "snippet": "Saber PRO: Ingles", "seccion": "5. Competencias y RAE", "tipo": "nombre_canonico"}}],
+  "dimensiones": [{{"codigo": "D1", "snippet": "Dimension Transdisciplinar", "seccion": "5. Competencias y RAE", "tipo": "nombre_canonico"}}, {{"codigo": "D4", "snippet": "Dimension Internacional", "seccion": "5. Competencias y RAE", "tipo": "nombre_canonico"}}],
   "abet": []
 }}
 
-EJEMPLO 3 - inferencias NO autorizadas:
-TEXTO: "El curso desarrolla vision sistemica del entorno y calidad. Se aplica aprendizaje basado en problemas."
+EJEMPLO 3 - inferencias NO autorizadas (conceptos cercanos no son declaracion):
+TEXTO: "=== 2. Context of the subject ===\nThe course develops systemic vision and second language communication skills applied to intelligent agents."
 RESPUESTA:
 {{
   "competencias_especificas": [],
@@ -63,7 +65,7 @@ RESPUESTA:
   "dimensiones": [],
   "abet": []
 }}
-(Nota: "vision sistemica" no es equivalente a 1l "Pensamiento sistemico"; ABP es metodologia, no codigo.)
+(Nota: "systemic vision" no es equivalente a 1l "Pensamiento sistemico". "second language communication" no es 1c "Comunicacion en segunda lengua" — son parafrasis, no declaraciones literales.)
 
 AHORA EXTRAE DEL SIGUIENTE PDA:
 

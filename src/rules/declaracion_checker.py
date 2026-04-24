@@ -94,13 +94,22 @@ def _hallazgo(regla_id: str, regla_desc: str, cumple: bool, evidencia: str, corr
 
 def verificar_declaraciones(
     reglas_aplicables: list[dict],
-    declaraciones: dict[str, list[str]],
+    declaraciones: dict[str, list[dict]],
 ) -> list[dict]:
     """Produce hallazgos deterministicos comparando reglas vs declaraciones.
 
-    Para cada regla con codigo canonico extraible:
-    - Si el codigo esta en la lista de declaraciones correspondiente: CUMPLE.
-    - Si no: NO CUMPLE.
+    Cada entrada en `declaraciones[key]` es un dict enriquecido con
+    {codigo, snippet, seccion, tipo, valida, motivo_rechazo}. Decisiones:
+
+    - Si hay declaracion `valida=True` con `tipo=literal`: CUMPLE, alta
+      confianza. Evidencia cita snippet + seccion.
+    - Si hay declaracion `valida=True` con `tipo=nombre_canonico`: CUMPLE
+      con warning en evidencia (el PDA no uso el codigo literal). La
+      `correccion` sugiere agregar el codigo explicito para auditoria.
+    - Si no hay declaracion valida: NO CUMPLE. Si hay declaraciones
+      INVALIDAS del mismo codigo, se reporta por que se rechazaron (util
+      para que el auditor entienda la diferencia entre "no se menciona"
+      y "se menciona pero no formalmente").
 
     Reglas sin codigo canonico se omiten (caller las manda al LLM fallback).
     """
@@ -112,18 +121,48 @@ def verificar_declaraciones(
 
         tipo = regla["tipo"]
         key = TIPO_A_KEY.get(tipo)
-        declarados = set(declaraciones.get(key, []))
+        decls = declaraciones.get(key, [])
 
-        cumple = codigo in declarados
-        if cumple:
-            evidencia = f"PDA declara {codigo} (detectado por extractor en seccion competencias/RAE)"
-        else:
+        validas = [d for d in decls if d.get("valida") and d.get("codigo") == codigo]
+        rechazadas = [d for d in decls if not d.get("valida") and d.get("codigo") == codigo]
+
+        # Preferir declaracion literal si existe (mayor confianza).
+        literal = next((d for d in validas if d.get("tipo") == "literal"), None)
+        por_nombre = next((d for d in validas if d.get("tipo") == "nombre_canonico"), None)
+
+        if literal:
             evidencia = (
-                f"PDA no declara {codigo}. Declaraciones encontradas para {key}: "
-                f"{sorted(declarados) or 'ninguna'}"
+                f"PDA declara {codigo} literal en seccion '{literal['seccion']}': "
+                f"\"{literal['snippet']}\""
             )
-        correccion = f"Agregar declaracion explicita de {codigo} en la seccion correspondiente" if not cumple else None
-        hallazgos.append(_hallazgo(regla["id"], regla["descripcion"], cumple, evidencia, correccion))
+            hallazgos.append(_hallazgo(regla["id"], regla["descripcion"], True, evidencia, None))
+            continue
+
+        if por_nombre:
+            evidencia = (
+                f"PDA declara {codigo} por nombre canonico en seccion "
+                f"'{por_nombre['seccion']}': \"{por_nombre['snippet']}\". "
+                f"Recomendacion: usar codigo {codigo} explicito para auditoria sin ambiguedad."
+            )
+            hallazgos.append(_hallazgo(regla["id"], regla["descripcion"], True, evidencia, None))
+            continue
+
+        # NO CUMPLE: construir evidencia informativa desde rechazadas si las hay.
+        if rechazadas:
+            r = rechazadas[0]
+            evidencia = (
+                f"PDA no declara {codigo} formalmente. "
+                f"Mencion relacionada encontrada en seccion '{r['seccion']}' "
+                f"(\"{r['snippet']}\"), rechazada: {r['motivo_rechazo']}."
+            )
+        else:
+            declarados_validos = sorted({d["codigo"] for d in decls if d.get("valida")})
+            evidencia = (
+                f"PDA no declara {codigo}. Declaraciones validas encontradas para {key}: "
+                f"{declarados_validos or 'ninguna'}"
+            )
+        correccion = f"Agregar declaracion explicita de {codigo} en una seccion formal (Competencias / RAE)"
+        hallazgos.append(_hallazgo(regla["id"], regla["descripcion"], False, evidencia, correccion))
     return hallazgos
 
 
@@ -136,10 +175,22 @@ if __name__ == "__main__":
         {"id": "COMP-005", "tipo": "saber_pro", "descripcion": "debe declarar SABER PRO SP5: Ingles"},
     ]
     declaraciones_test = {
-        "competencias_especificas": ["C1"],
-        "competencias_genericas": ["1a", "1e", "1j"],
-        "saber_pro": ["SP2"],
-        "dimensiones": ["D1", "D6"],
+        "competencias_especificas": [
+            {"codigo": "C1", "snippet": "C1. X", "seccion": "RAE", "tipo": "literal", "valida": True, "motivo_rechazo": None},
+        ],
+        "competencias_genericas": [
+            {"codigo": "1a", "snippet": "1a. Ciudadania", "seccion": "RAE", "tipo": "literal", "valida": True, "motivo_rechazo": None},
+            {"codigo": "1e", "snippet": "1e. Cultura", "seccion": "RAE", "tipo": "literal", "valida": True, "motivo_rechazo": None},
+            {"codigo": "1j", "snippet": "1j. Emprendedor", "seccion": "RAE", "tipo": "literal", "valida": True, "motivo_rechazo": None},
+            {"codigo": "1g", "snippet": "aprender en contexto", "seccion": "Context", "tipo": "nombre_canonico", "valida": False, "motivo_rechazo": "seccion no formal"},
+        ],
+        "saber_pro": [
+            {"codigo": "SP2", "snippet": "SP2. Lectura", "seccion": "RAE", "tipo": "literal", "valida": True, "motivo_rechazo": None},
+        ],
+        "dimensiones": [
+            {"codigo": "D1", "snippet": "D1 Transdisciplinar", "seccion": "Competencias", "tipo": "literal", "valida": True, "motivo_rechazo": None},
+            {"codigo": "D6", "snippet": "D6 Regional", "seccion": "Competencias", "tipo": "literal", "valida": True, "motivo_rechazo": None},
+        ],
         "abet": [],
     }
 
