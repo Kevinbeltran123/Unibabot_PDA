@@ -93,28 +93,42 @@ def _seleccionar_texto_relevante(secciones: dict[str, str], max_chars: int = 900
     Exclusiones duras (no pasan aunque contengan codigos):
     bibliografia, cronograma, firmas -- son largos y solo ruido.
     """
-    bloques = []
+    # Dos listas: bloques con match de nombre (prioritarios) y bloques que
+    # solo matchean por contenido (fallback). Se emiten en ese orden para que
+    # si el budget max_chars se agota, lo haga en el fallback y no en un bloque
+    # de alta relevancia. Necesario con Docling porque 'Informacion general'
+    # puede contener 40K+ chars de tabla extraida que matchea el patron de
+    # codigos canonicos por accidente (1a, C1, etc. dentro del texto).
+    bloques_nombre = []
+    bloques_fallback = []
     for nombre, contenido in secciones.items():
         nombre_norm = nombre.lower()
 
         if nombre == "PREAMBULO" or len(contenido) < 30:
             continue
-        # Exclusion dura
         if any(kw in nombre_norm for kw in KEYWORDS_SECCIONES_EXCLUIR):
             continue
 
-        # Inclusion por nombre
-        incluir = any(kw in nombre_norm for kw in KEYWORDS_SECCIONES_RELEVANTES)
+        if any(kw in nombre_norm for kw in KEYWORDS_SECCIONES_RELEVANTES):
+            bloques_nombre.append(f"=== {nombre} ===\n{contenido}")
+        elif re.search(PATRON_CODIGO_EN_CONTENIDO, contenido):
+            # Fallback: extraer solo lineas con codigos + 1 linea de contexto.
+            # Necesario con Docling porque "Informacion general" puede tener
+            # 43K chars de tabla donde la unica info relevante (ej. fila
+            # "Dimension: D1 ... D6") esta al medio. Volcar la seccion
+            # entera truncaria los codigos antes de que lleguen al LLM.
+            lineas = contenido.split("\n")
+            relevantes = []
+            for i, linea in enumerate(lineas):
+                if re.search(PATRON_CODIGO_EN_CONTENIDO, linea):
+                    if i > 0 and (not relevantes or relevantes[-1] != lineas[i - 1]):
+                        relevantes.append(lineas[i - 1])
+                    relevantes.append(linea)
+            snippet = "\n".join(relevantes)
+            if snippet:
+                bloques_fallback.append(f"=== {nombre} (snippets) ===\n{snippet}")
 
-        # Fallback por contenido: solo si hay codigos canonicos literales
-        if not incluir:
-            if re.search(PATRON_CODIGO_EN_CONTENIDO, contenido):
-                incluir = True
-
-        if incluir:
-            bloques.append(f"=== {nombre} ===\n{contenido}")
-
-    texto = "\n\n".join(bloques)
+    texto = "\n\n".join(bloques_nombre + bloques_fallback)
     if len(texto) > max_chars:
         texto = texto[:max_chars] + "\n...[texto truncado]"
     return texto

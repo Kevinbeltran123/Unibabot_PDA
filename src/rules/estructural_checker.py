@@ -102,7 +102,10 @@ def check_EST_001(secciones: dict) -> dict:
 def check_EST_002(secciones: dict) -> dict:
     """Al menos una estrategia pedagogica."""
     regla = "Todo PDA debe declarar al menos una estrategia pedagogica"
-    resultado = find_seccion(secciones, ["estrategia", "pedagogical strategy"])
+    # Fallback a busqueda por contenido: con Docling, la estrategia queda
+    # dentro de "Metodologia" y no emite seccion separada con "estrategia"
+    # en el nombre. El fallback busca "estrategia" en el contenido.
+    resultado = find_seccion_fallback(secciones, ["estrategia", "pedagogical strategy"])
     if not resultado:
         return hallazgo("EST-002", regla, False, "Seccion de estrategia pedagogica no encontrada", "Agregar seccion con al menos una estrategia pedagogica")
 
@@ -249,8 +252,11 @@ def check_EST_010(secciones: dict) -> dict:
 def check_EST_011(secciones: dict) -> dict:
     """Fecha del encuadre pedagogico + revisado y aprobado."""
     regla = "Todo PDA debe registrar la fecha del encuadre pedagogico y ser revisado y aprobado"
-    resultado_encuadre = find_seccion(secciones, ["encuadre pedagogico", "pedagogical agreement"])
-    resultado_aprobado = find_seccion(secciones, ["revisado y aprobado", "reviewed and approved"])
+    # Fallback a busqueda por contenido: con Docling, "Encuadre pedagogico"
+    # y "Revisado y aprobado" suelen quedar absorbidos en "1. Informacion
+    # general" (Docling los detecta como parrafos, no como secciones propias).
+    resultado_encuadre = find_seccion_fallback(secciones, ["encuadre pedagogico", "pedagogical agreement"])
+    resultado_aprobado = find_seccion_fallback(secciones, ["revisado y aprobado", "reviewed and approved"])
 
     if not resultado_encuadre and not resultado_aprobado:
         return hallazgo("EST-011", regla, False, "Ni fecha de encuadre ni seccion de aprobacion encontradas", "Agregar fecha del encuadre y seccion de firmas de aprobacion")

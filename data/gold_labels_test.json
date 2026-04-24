@@ -188,8 +188,8 @@
     "codigo_curso": "22A32",
     "seccion": "__global__",
     "regla_id": "EST-007",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "Seccion 'retroalimentación Fecha' incompleta"
+    "estado_esperado": "CUMPLE",
+    "nota": "Corregido en m14: Docling extrae la tabla completa (7-8 % y 3-5 fechas). Gold anterior se basaba en parser viejo fragmentado."
   },
   {
     "pda_file": "PDA - Gestión TI 2026A.pdf",
@@ -356,8 +356,8 @@
     "codigo_curso": "22A52",
     "seccion": "__global__",
     "regla_id": "EST-007",
-    "estado_esperado": "NO CUMPLE",
-    "nota": "Seccion 'valoración y la retroalimentación' incompleta"
+    "estado_esperado": "CUMPLE",
+    "nota": "Corregido en m14: Docling extrae la tabla completa (7-8 % y 3-5 fechas). Gold anterior se basaba en parser viejo fragmentado."
   },
   {
     "pda_file": "PDA - Pensamiento computacional 2026A - Firmas.pdf",
