@@ -20,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from agent import analizar_pda
+from common.exceptions import LLMUnavailableError, UnibabotError
 from common.logging_config import get_logger, setup_logging
 
 logger = get_logger(__name__)
@@ -188,7 +189,14 @@ def ejecutar_pipeline(
         try:
             reporte = analizar_pda(str(pdf_path), codigo_curso, modelo=modelo)
             reportes[pdf_name] = reporte
-        except Exception as e:
+        except LLMUnavailableError as e:
+            # ollama caido / modelo faltante: sin LLM no hay continuidad,
+            # abortar el run entero con mensaje accionable.
+            logger.error("eval_aborted_ollama_unavailable", error=str(e))
+            print(f"\nERROR FATAL: {e}")
+            sys.exit(2)
+        except UnibabotError as e:
+            # Fallo especifico del pipeline en este PDA: log, skip, continuar.
             logger.error(
                 "pda_analysis_failed",
                 pda=pdf_name,
@@ -197,6 +205,11 @@ def ejecutar_pipeline(
             )
             print(f"  ERROR: {e}")
             reportes[pdf_name] = {"resultados": [], "error": str(e)}
+        except Exception as e:
+            # Errores no tipados: propagar para fail-loud. Si este path
+            # se dispara, falta agregar el tipo de error a exceptions.py.
+            logger.exception("pda_analysis_unknown_error", pda=pdf_name)
+            raise
 
     elapsed = time.time() - start
 

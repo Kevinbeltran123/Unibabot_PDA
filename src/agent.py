@@ -15,6 +15,7 @@ from pydantic import ValidationError
 sys.path.insert(0, str(Path(__file__).parent))
 
 from common.logging_config import get_logger, setup_logging
+from common.ollama_client import chat as llm_chat
 from pdf_parser import parsear_pda
 from rag.rule_dispatcher import (
     SECCION_AUSENTE,
@@ -153,7 +154,7 @@ def evaluar_seccion(
     num_predict = min(4000, max(800, 200 + 180 * len(lineamientos)))
 
     # Intento 1
-    response = ollama.chat(
+    texto_respuesta = llm_chat(
         model=modelo,
         messages=[{"role": "user", "content": prompt}],
         options={
@@ -162,7 +163,6 @@ def evaluar_seccion(
             "stop": ["<|eot_id|>", "<|end_of_text|>"],
         },
     )
-    texto_respuesta = response["message"]["content"]
 
     reporte = parsear_y_validar(texto_respuesta)
     if reporte is not None:
@@ -175,7 +175,7 @@ def evaluar_seccion(
             error="JSON invalido o estructura incorrecta",
             nombre_seccion=nombre_seccion,
         )
-        response = ollama.chat(
+        texto_respuesta = llm_chat(
             model=modelo,
             messages=[{"role": "user", "content": retry_prompt}],
             options={
@@ -184,7 +184,6 @@ def evaluar_seccion(
                 "stop": ["<|eot_id|>", "<|end_of_text|>"],
             },
         )
-        texto_respuesta = response["message"]["content"]
         reporte = parsear_y_validar(texto_respuesta)
         if reporte is not None:
             return reporte.model_dump()

@@ -24,6 +24,7 @@ from docling_core.types.doc import (
     TitleItem,
 )
 
+from common.exceptions import PDFParseError
 from common.text import normalizar as _normalizar_common
 
 
@@ -103,7 +104,16 @@ def parsear_pda(pdf_path: str) -> dict[str, str]:
     - Secciones vacias o con contenido trivial (<10 chars) se omiten.
     """
     converter = _get_converter()
-    result = converter.convert(str(pdf_path))
+    try:
+        result = converter.convert(str(pdf_path))
+    except Exception as e:
+        # Docling puede fallar por PDF corrupto, demasiado grande (OOM),
+        # formato no soportado. Envolvemos en PDFParseError para que el
+        # caller (evaluate.py / streamlit) pueda manejar el fallo con
+        # contexto sin depender del tipo interno de Docling.
+        raise PDFParseError(
+            f"Docling no pudo parsear '{pdf_path}': {e}"
+        ) from e
     doc = result.document
 
     secciones: dict[str, list[str]] = {"PREAMBULO": []}

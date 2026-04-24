@@ -31,7 +31,9 @@ import ollama
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from common.exceptions import LLMError, LLMUnavailableError
 from common.logging_config import get_logger
+from common.ollama_client import chat as llm_chat
 from rules.nombres_canonicos import nombre_canonico_en_snippet, normalizar_texto
 
 logger = get_logger(__name__)
@@ -423,7 +425,7 @@ def extraer_declaraciones(
     prompt = template.replace("{texto_pda}", texto_relevante)
 
     try:
-        response = ollama.chat(
+        texto_respuesta = llm_chat(
             model=modelo,
             messages=[{"role": "user", "content": prompt}],
             options={
@@ -432,8 +434,15 @@ def extraer_declaraciones(
                 "stop": ["<|eot_id|>", "<|end_of_text|>"],
             },
         )
-        texto_respuesta = response["message"]["content"]
-    except Exception as e:
+    except LLMUnavailableError:
+        # ollama caido o modelo no instalado: fatal, propagar para que
+        # evaluate.py / streamlit / agent.py CLI puedan abortar con mensaje
+        # accionable al usuario.
+        logger.error("ollama_unavailable_fatal", model=modelo)
+        raise
+    except LLMError as e:
+        # Timeout o respuesta invalida: recuperable devolviendo vacio,
+        # downstream reportara NO CUMPLE para todas las reglas canonicas.
         logger.error("llm_call_failed", model=modelo, error=str(e), exc_info=True)
         return {k: [] for k in DECLARACIONES_VACIAS}
 
