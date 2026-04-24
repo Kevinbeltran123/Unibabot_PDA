@@ -59,21 +59,15 @@ def normalizar_texto(texto: str) -> str:
     """Strip acentos + lowercase + colapsar whitespace y separadores
     tabulares para comparacion flexible.
 
-    Trata pipes (`|`) y tabs como whitespace porque Docling renderiza
-    tablas como markdown pipe format; el LLM normalmente concatena celdas
-    al producir snippets (ej. `"| Competencia | C1. ... |"` en el PDA
-    contra `"Competencia: C1. ..."` en el snippet).
+    Wrapper thin sobre `common.text.normalizar(..., collapse_whitespace=True)`.
+    Preservado como funcion modulo-local porque
+    `src/rules/declaracion_extractor.py` la importa desde aqui.
     """
-    import re as _re
-    texto = texto.lower()
-    reemplazos = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"}
-    for k, v in reemplazos.items():
-        texto = texto.replace(k, v)
-    # tratar pipes y tabs como whitespace (tablas markdown)
-    texto = _re.sub(r"[|\t]+", " ", texto)
-    # colapsar cualquier whitespace a un solo espacio
-    texto = _re.sub(r"\s+", " ", texto).strip()
-    return texto
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from common.text import normalizar
+    return normalizar(texto, collapse_whitespace=True)
 
 
 def nombre_canonico_en_snippet(codigo: str, snippet: str) -> bool:

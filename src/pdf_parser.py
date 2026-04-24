@@ -24,6 +24,8 @@ from docling_core.types.doc import (
     TitleItem,
 )
 
+from common.text import normalizar as _normalizar_common
+
 
 _CONVERTER: DocumentConverter | None = None
 
@@ -40,13 +42,13 @@ def _get_converter() -> DocumentConverter:
 
 
 def normalizar(texto: str) -> str:
-    """Quita acentos, numeros de seccion y caracteres especiales para comparacion."""
-    texto = texto.lower().strip()
-    texto = re.sub(r"^\d+[\.\)]\s*", "", texto)
-    reemplazos = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"}
-    for original, reemplazo in reemplazos.items():
-        texto = texto.replace(original, reemplazo)
-    return texto
+    """Quita acentos, numeros de seccion y caracteres especiales para comparacion.
+
+    Wrapper de `common.text.normalizar(..., strip_numbering=True)`. Preservado
+    como funcion modulo-local porque `src/rules/estructural_checker.py` la
+    importa desde pdf_parser.
+    """
+    return _normalizar_common(texto, strip_numbering=True)
 
 
 def _tabla_a_texto(table_item: TableItem, doc: DoclingDocument) -> str:

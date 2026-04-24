@@ -6,6 +6,13 @@ Permite filtrar reglas por tipo de seccion en el retriever, evitando que
 reglas de competencias aparezcan al evaluar informacion general y viceversa.
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from common.text import normalizar as _normalizar_common
+
 # Mapeo: keyword del nombre de seccion (lowercase, normalizado) -> lista de seccion_pda validas
 # El matching es por substring: si el nombre de seccion CONTIENE alguno de estos keywords,
 # se consideran validas las secciones_pda listadas.
@@ -97,12 +104,12 @@ MAPPING_SECCIONES = {
 
 
 def normalizar_nombre(nombre: str) -> str:
-    """Quita acentos y pasa a minusculas para matching."""
-    texto = nombre.lower().strip()
-    reemplazos = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"}
-    for original, reemplazo in reemplazos.items():
-        texto = texto.replace(original, reemplazo)
-    return texto
+    """Quita acentos y pasa a minusculas para matching.
+
+    Wrapper thin sobre `common.text.normalizar` sin flags: no strippea
+    numeros, porque los keywords del MAPPING pueden empezar con digitos.
+    """
+    return _normalizar_common(nombre)
 
 
 def secciones_pda_validas(nombre_seccion: str) -> list[str] | None:
