@@ -2,14 +2,14 @@
 
 Agente inteligente para la verificacion automatizada de Planes de Desarrollo Academico (PDA) de la Universidad de Ibague. El sistema recibe un PDA en formato PDF, lo evalua contra 179 lineamientos institucionales codificados, y genera un reporte estructurado de cumplimiento.
 
-**Resultados sobre gold dataset expandido (112 entradas, 6 PDAs reales):**
+**Resultados sobre gold dataset (106 entradas, 6 PDAs reales) — produccion m16:**
 
 | Split | Accuracy | Precision NC | Recall NC | Matched | Latencia |
 |-------|----------|--------------|-----------|---------|----------|
-| Train (57 entradas, 3 PDAs) | **0.965** | **1.000** | 0.500 | 57/57 | ~95s |
-| Test hold-out (55 entradas, 3 PDAs nuevos) | **0.982** | 0.900 | **1.000** | 55/55 | ~120s |
+| Train (51 entradas, 3 PDAs) | **1.000** | **1.000** | **1.000** | 51/51 | ~290s |
+| Test hold-out (55 entradas, 3 PDAs nuevos) | **1.000** | **1.000** | **1.000** | 55/55 | ~330s |
 
-*m13 extractor deterministico + Qwen 2.5 14B. NC = clase NO CUMPLE (incumplimientos reales). Train: PDAs vistos durante el desarrollo. Test: PDAs nunca tocados.*
+*Docling + extraccion por evidencia + Qwen 2.5 14B. NC = clase NO CUMPLE (incumplimientos reales). Train: PDAs vistos durante el desarrollo. Test: PDAs nunca tocados.*
 
 ## Contexto
 
@@ -22,7 +22,7 @@ PDF del PDA
     |
     v
 [1. Extraccion + segmentacion]   src/pdf_parser.py
-    |                            PyMuPDF + SECCIONES_CONOCIDAS bilingue
+    |                            Docling + segmentacion por secciones
     v
 [2. Rule-based estructural]      src/rules/estructural_checker.py
     |                            11 checkers deterministicos (EST-001..011)
@@ -53,8 +53,11 @@ PDF del PDA
 | m8b | Pipeline RAG+LLM completo (Llama 3.1 8B, gold 48) | 1.000* | 1.000 | 1.000 | 45/48 | 236s |
 | m11 | Rule-driven: 100% cobertura (gold 57+55) | 0.895 / 0.873 | 0.625 / 0.818 | 0.625 / 0.857 | 57/57 + 55/55 | 213s / 249s |
 | m12 | Qwen 2.5 14B como modelo LLM (gold 57+55) | 0.930 / 0.891 | 1.000 / 0.826 | 0.500 / 0.905 | 57/57 + 55/55 | 441s / 366s |
-| **m13 Train** | **Extractor deterministico** | **0.965** | **1.000** | **0.500** | **57/57** | **~95s** |
-| **m13 Test** | **Hold-out 3 PDAs nuevos** | **0.982** | **0.900** | **1.000** | **55/55** | **~120s** |
+| m13 | Extractor+matcher deterministico | 0.965 / 0.982 | 1.000 / 0.900 | 0.500 / 1.000 | 57/57 + 55/55 | ~95s / ~120s |
+| m14 | Docling reemplaza PyMuPDF | 0.965 / 1.000 | 1.000 / 1.000 | 0.500 / 1.000 | 57/57 + 55/55 | ~85s / ~80s |
+| **m15 Train** | **Extraccion por evidencia (gold consolidado 51+55)** | **1.000** | **1.000** | **1.000** | **51/51** | **~290s** |
+| **m15 Test** | **Hold-out 3 PDAs nuevos** | **1.000** | **1.000** | **1.000** | **55/55** | **~330s** |
+| m16 | Infraestructura produccion: common/, logging, excepciones | **1.000** | **1.000** | **1.000** | 51/51 + 55/55 | ~290s / ~330s |
 
 *m8b: accuracy 1.000 sobre 45/48 entradas matcheadas, 3 excluidas por retrieval semantico. El salto de m8b a m11 no es una regresion: m11 introdujo evaluacion 100% deterministica revelando incumplimientos que el retrieval semantico omitia por no recuperarlos en el top-k.*
 
@@ -70,6 +73,11 @@ Unibabot_PDA/
     evaluate.py                  # Evaluacion contra gold dataset (train/test)
     generar_reglas.py            # Genera reglas desde JSON_archives/
     schemas.py                   # Modelos Pydantic para validacion estricta
+    common/
+      text.py                    # Normalizacion de texto (normalizar())
+      logging_config.py          # Logging estructurado con structlog + @timed
+      exceptions.py              # Excepciones tipadas (UnibabotError, LLMError...)
+      ollama_client.py           # Wrapper ollama con timeout configurable
     prompts/
       extraccion_prompt.txt      # Prompt de extraccion de codigos declarados (m13)
       compliance_prompt.txt      # Prompt de evaluacion LLM (fallback legacy)
@@ -85,20 +93,10 @@ Unibabot_PDA/
       retriever.py               # Busqueda semantica (opt-in, no es el default)
       embeddings.py              # SBERT custom embedding function (opt-in)
       reranker.py                # Cross-encoder reranker (opt-in)
-    fine_tuning/
-      prepare_dataset.py         # Genera pares instruccion-respuesta
-      generar_outputs.py         # Genera outputs con Llama 3.2
-    tooling/
-      generar_gold_exhaustivo.py # Pipeline de generacion del gold dataset
-      anotar_claude_train.py     # Anotacion Claude para split de train
-      anotar_claude_test.py      # Anotacion Claude para split de test
-      fusionar_gold.py           # Fusion de candidatos nuevos con gold existente
-      limpiar_gold_modelos.py    # Elimina entradas huerfanas del gold
-      corregir_gold_contra_pda.py# Correccion determinista de gold mal etiquetado
   data/
     lineamientos/
       reglas.json                # 179 reglas codificadas (11 EST + 168 COMP)
-    gold_labels.json             # Gold dataset train (57 entradas, 3 PDAs)
+    gold_labels.json             # Gold dataset train (51 entradas, 3 PDAs)
     gold_labels_test.json        # Gold dataset test hold-out (55 entradas, 3 PDAs)
     chroma_db/                   # Base vectorial persistida (gitignored, opt-in)
     training_dataset.jsonl       # 42 ejemplos de entrenamiento (fine-tuning v1)
@@ -108,8 +106,8 @@ Unibabot_PDA/
   notebooks/
     fine_tuning.ipynb            # Notebook para Google Colab (QLoRA)
   results/
-    evaluation_report.md         # Reporte completo con metricas por iteracion (m1-m13)
-    accuracy_progression.md      # Tabla de progresion de accuracy (m1-m13)
+    evaluation_report.md         # Reporte completo con metricas por iteracion (m1-m16)
+    accuracy_progression.md      # Tabla de progresion de accuracy (m1-m16)
     metrics_<tag>.json           # Metricas por snapshot (gitignored)
     reports_<tag>.json           # Reportes crudos del agente (gitignored)
   PDAs/                          # PDAs reales en PDF (6 documentos, gitignored)
@@ -287,10 +285,10 @@ El fine-tuning con QLoRA fue la primera estrategia explorada (m7). El modelo fin
 
 ## Limitaciones identificadas
 
-1. **Recall NC en train = 0.500:** El extractor ocasionalmente no detecta declaraciones semanticamente correctas pero con formulacion inusual (ej: "vision sistemica" en lugar del codigo "1h: Pensamiento critico").
-2. **1 FP residual en test:** Un caso edge donde el extractor sobre-detecta D4 en Agentes Inteligentes por la frase "international dimension integrated".
-3. **Parser dependiente del formato PDF:** PDAs con tablas complejas o escaneados como imagen pueden no segmentarse correctamente.
-4. **Dataset de 6 PDAs:** Mas PDAs (20+) permitirian metricas estadisticamente mas robustas para la clase NC.
+1. **Latencia de extraccion:** ~290-330s por PDA. La fase de extraccion enriquecida por evidencia con Qwen 2.5 14B domina el tiempo total de inferencia.
+2. **Parser dependiente del formato PDF:** PDAs con tablas complejas o escaneados como imagen pueden no segmentarse correctamente. Docling mejora notablemente sobre PyMuPDF pero no es infalible.
+3. **Dataset de 6 PDAs:** Mas PDAs (20+) permitirian metricas estadisticamente mas robustas para la clase NC.
+4. **Declaraciones informales sin codigo canonico:** El extractor puede no detectar competencias descritas con lenguaje muy informal cuando no hay ni codigo literal ni nombre canonico reconocible en el texto.
 
 ## Autores
 
