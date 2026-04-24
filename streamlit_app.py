@@ -17,6 +17,10 @@ import streamlit as st
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT / "src"))
 
+from common.logging_config import setup_logging
+
+setup_logging()
+
 from agent import (
     MODELO_DEFAULT,
     MODELO_QWEN,

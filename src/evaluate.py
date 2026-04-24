@@ -20,6 +20,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from agent import analizar_pda
+from common.logging_config import get_logger, setup_logging
+
+logger = get_logger(__name__)
 
 ROOT = Path(__file__).parent.parent
 PDAS_DIR = ROOT / "PDAs"
@@ -186,6 +189,12 @@ def ejecutar_pipeline(
             reporte = analizar_pda(str(pdf_path), codigo_curso, modelo=modelo)
             reportes[pdf_name] = reporte
         except Exception as e:
+            logger.error(
+                "pda_analysis_failed",
+                pda=pdf_name,
+                error=str(e),
+                exc_info=True,
+            )
             print(f"  ERROR: {e}")
             reportes[pdf_name] = {"resultados": [], "error": str(e)}
 
@@ -326,4 +335,5 @@ def main():
 
 
 if __name__ == "__main__":
+    setup_logging()
     main()

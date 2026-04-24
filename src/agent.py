@@ -14,6 +14,7 @@ from pydantic import ValidationError
 # Asegurar que src/ este en el path para imports
 sys.path.insert(0, str(Path(__file__).parent))
 
+from common.logging_config import get_logger, setup_logging
 from pdf_parser import parsear_pda
 from rag.rule_dispatcher import (
     SECCION_AUSENTE,
@@ -25,6 +26,8 @@ from rules.declaracion_checker import tiene_codigo_canonico, verificar_declaraci
 from rules.declaracion_extractor import extraer_declaraciones
 from rules.estructural_checker import hallazgo, verificar_estructurales
 from schemas import ReporteSeccion
+
+logger = get_logger(__name__)
 
 ROOT = Path(__file__).parent.parent
 PROMPT_PATH = ROOT / "src" / "prompts" / "compliance_prompt.txt"
@@ -52,13 +55,18 @@ ProgressCallback = Callable[[str, dict], None]
 
 
 def _default_progress(event: str, data: dict) -> None:
-    """Callback por defecto: replica exactamente el stdout previo al refactor.
+    """Callback por defecto: replica exactamente el stdout previo al refactor
+    Y emite el evento al logger estructurado (stderr).
 
-    Solo los eventos que la CLI imprimia antes producen output. El resto
+    Solo los eventos que la CLI imprimia antes producen stdout. El resto
     (structural_done, llm_prep_done, section_eval_done, done) permanecen
-    silenciosos para que `python src/agent.py ...` siga teniendo el mismo
-    stdout byte-a-byte, y scripts como evaluate.py no noten el cambio.
+    silenciosos por CLI pero TODOS se emiten como `logger.info(event, **data)`
+    para que produccion pueda capturar el flujo completo por JSON logs.
     """
+    # logger estructurado: siempre emite, para cualquier evento
+    logger.info(event, **data)
+
+    # stdout: solo los eventos que la CLI emitia pre-refactor, byte-a-byte
     if event == "parsing_start":
         print(f"Parseando PDF: {data['pdf_path']}")
         print(f"Modelo: {data['modelo']}")
@@ -372,6 +380,8 @@ def analizar_pda(
 # --- CLI ---
 if __name__ == "__main__":
     import sys
+
+    setup_logging()
 
     if len(sys.argv) < 2:
         print("Uso: python agent.py <ruta_al_pdf> [codigo_curso] [modelo]")

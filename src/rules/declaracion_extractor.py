@@ -31,7 +31,10 @@ import ollama
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from common.logging_config import get_logger
 from rules.nombres_canonicos import nombre_canonico_en_snippet, normalizar_texto
+
+logger = get_logger(__name__)
 
 ROOT = Path(__file__).parent.parent.parent
 PROMPT_PATH = ROOT / "src" / "prompts" / "extraccion_prompt.txt"
@@ -431,12 +434,16 @@ def extraer_declaraciones(
         )
         texto_respuesta = response["message"]["content"]
     except Exception as e:
-        print(f"[extraer_declaraciones] Error LLM: {e}")
+        logger.error("llm_call_failed", model=modelo, error=str(e), exc_info=True)
         return {k: [] for k in DECLARACIONES_VACIAS}
 
     raw = _extraer_json_de_respuesta(texto_respuesta)
     if raw is None:
-        print(f"[extraer_declaraciones] No se pudo parsear JSON. Respuesta: {texto_respuesta[:200]}")
+        logger.error(
+            "llm_json_parse_failed",
+            model=modelo,
+            response_preview=texto_respuesta[:200],
+        )
         return {k: [] for k in DECLARACIONES_VACIAS}
 
     return _limpiar_declaraciones(raw, secciones)
