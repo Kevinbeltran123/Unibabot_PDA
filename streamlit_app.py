@@ -18,10 +18,8 @@ ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT / "src"))
 
 from agent import (
-    MODELO_8B,
-    MODELO_BASELINE,
     MODELO_DEFAULT,
-    MODELO_FINETUNED,
+    MODELO_QWEN,
     analizar_pda,
 )
 from webapp.components.history_sidebar import render_history_sidebar
@@ -40,9 +38,7 @@ TMP_UPLOADS = ROOT / "tmp" / "uploads"
 TMP_UPLOADS.mkdir(parents=True, exist_ok=True)
 
 MODELOS_UI = {
-    "Llama 3.1 8B (default, accuracy 1.000)": MODELO_8B,
-    "Llama 3.2 (baseline, rapido)": MODELO_BASELINE,
-    "unibabot-pda (fine-tuned)": MODELO_FINETUNED,
+    "Qwen 2.5 14B (m15, accuracy 1.000)": MODELO_QWEN,
 }
 
 
