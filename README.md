@@ -96,24 +96,17 @@ Unibabot_PDA/
       correction_writer.py       # Texto prescriptivo por hallazgo NO CUMPLE
       summary_writer.py          # Resumenes ejecutivo (oficina) + didactico (docente)
     rag/
-      rule_dispatcher.py         # Despacho de reglas a secciones del PDA (m11)
-      seccion_mapping.py         # Mapping keyword_parser -> [seccion_pda]
-      ingest.py                  # Carga reglas en ChromaDB (opt-in)
-      retriever.py               # Busqueda semantica (opt-in, no es el default)
-      embeddings.py              # SBERT custom embedding function (opt-in)
-      reranker.py                # Cross-encoder reranker (opt-in)
+      rule_dispatcher.py         # PRODUCCION: despacho determinista por seccion (m11+)
+      seccion_mapping.py         # PRODUCCION: keyword_parser -> [seccion_pda]
+      ingest.py                  # ALTERNATIVO: ingesta semantica en ChromaDB (m0-m10)
+      retriever.py               # ALTERNATIVO: busqueda semantica top-k (m0-m10)
+      embeddings.py              # ALTERNATIVO: SBERT custom embedding function
+      reranker.py                # ALTERNATIVO: cross-encoder reranker (m9)
   data/
     lineamientos/
       reglas.json                # 179 reglas codificadas (11 EST + 168 COMP)
     gold_labels.json             # Gold dataset train (51 entradas, 3 PDAs)
     gold_labels_test.json        # Gold dataset test hold-out (55 entradas, 3 PDAs)
-    chroma_db/                   # Base vectorial persistida (gitignored, opt-in)
-    training_dataset.jsonl       # 42 ejemplos de entrenamiento (fine-tuning v1)
-    validation_dataset.jsonl     # 5 ejemplos de validacion
-  models/
-    unibabot-pda.gguf            # Fine-tuned v1 (descartado, artefacto historico)
-  notebooks/
-    fine_tuning.ipynb            # Notebook para Google Colab (QLoRA)
   results/
     evaluation_report.md         # Reporte completo con metricas por iteracion (m1-m16)
     accuracy_progression.md      # Tabla de progresion de accuracy (m1-m16)
@@ -138,7 +131,6 @@ Unibabot_PDA/
 - Python 3.12+
 - **ollama** con Qwen 2.5 14B (default) y/o Llama 3.1 8B (comparativo)
 - MacBook Pro M3 18GB o equivalente (Qwen 2.5 14B requiere ~9GB de VRAM)
-- Google Colab con GPU T4 (solo si se quiere re-intentar fine-tuning con QLoRA)
 
 ## Instalacion
 
@@ -159,9 +151,8 @@ ollama pull qwen2.5:14b      # modelo de produccion (default, ~9GB)
 ollama pull llama3.1:8b      # comparativo legacy (opcional)
 ollama pull llama3.2         # baseline original (opcional)
 
-# Generar reglas e ingestar en ChromaDB (necesario para la UI y opt-in RAG)
+# Generar reglas a partir de los datos institucionales
 python src/generar_reglas.py
-python src/rag/ingest.py
 ```
 
 ## Uso
@@ -225,32 +216,6 @@ python src/pdf_parser.py "../PDAs/tu_pda.pdf" --bloques
 python src/pdf_parser.py "../PDAs/tu_pda.pdf" --secciones
 ```
 
-### Probar el retriever (opt-in, experimentos RAG)
-
-```bash
-python src/rag/retriever.py "resultados de aprendizaje" 22A14
-```
-
-### Fine-tuning (Google Colab)
-
-1. Abrir `notebooks/fine_tuning.ipynb` en Google Colab
-2. Seleccionar Runtime -> Change runtime type -> GPU T4
-3. Subir `data/training_dataset.jsonl` y `data/validation_dataset.jsonl`
-4. Ejecutar todas las celdas en orden
-5. Descargar el modelo GGUF generado
-
-### Registrar modelo fine-tuneado en ollama
-
-```bash
-cat > Modelfile << 'EOF'
-FROM ./llama-3.2-3b-instruct.Q4_K_M.gguf
-PARAMETER temperature 0.1
-SYSTEM Eres un evaluador academico de la Universidad de Ibague que verifica el cumplimiento de Planes de Desarrollo Academico (PDA).
-EOF
-
-ollama create unibabot-pda -f Modelfile
-```
-
 ## Base de conocimiento
 
 Las 179 reglas se generan automaticamente cruzando los datos de `JSON_archives/`:
@@ -273,20 +238,16 @@ Tipos de reglas generadas:
 | ABET | 36 | "Debe cubrir indicador 1.1: Analiza un problema de ingenieria..." |
 | Dimension | 15 | "Debe declarar dimension D4: Internacional" |
 
-## Fine-tuning (artefacto historico)
+## Dos caminos: rule-driven vs RAG semantico
 
-El fine-tuning con QLoRA fue la primera estrategia explorada (m7). El modelo fine-tuneado entro en loops de generacion y fue descartado. Las mejoras sistematicas de ingenieria del pipeline (m8-m13) superaron con creces los resultados del fine-tuning sin sus riesgos.
+El proyecto exploro dos arquitecturas antes de quedarse con la actual. Ambos siguen en el repo como evidencia comparativa:
 
-| Parametro | Valor |
-|-----------|-------|
-| Modelo base | Llama 3.2 3B Instruct |
-| Tecnica | QLoRA (4-bit NF4 + LoRA r=16) |
-| Dataset | 42 train + 5 validation (formato Alpaca) |
-| Epochs | 3 |
-| Learning rate | 2e-4 |
-| Batch size efectivo | 8 (2 x 4 gradient accumulation) |
-| Hardware | Google Colab T4 (16GB VRAM) |
-| Resultado | Train loss 1.64 -> 1.26, Val loss 1.52 -> 1.15 (pero loops en inferencia) |
+- **Rule-driven (PRODUCCION, m11+):** `rag/rule_dispatcher.py` + `rag/seccion_mapping.py`. Despacha cada regla a la seccion del PDA donde debe declararse via match por nombre + keyword fallback. Sin embeddings, sin base vectorial, sin dependencias ML pesadas. **Mas escalable**: 168 reglas hoy, miles manana, mismo costo en tiempo de inferencia (O(n) lookup en memoria).
+- **RAG semantico (ALTERNATIVO, m0-m10):** `rag/ingest.py` + `rag/retriever.py` + `rag/embeddings.py` + `rag/reranker.py`. ChromaDB + SBERT multilingue + cross-encoder reranker recuperaban reglas top-k por similitud. Funcional pero mas costoso (ingesta inicial, persistencia de la base vectorial, dependencias) y con problemas de cobertura: m11 demostro que pasar a despacho explicito subio la cobertura del gold de 38/55 a 55/55.
+
+Tambien se exploro **fine-tuning con QLoRA (m7)**: Llama 3.2 3B fine-tuneado con 42 ejemplos en Colab T4. El modelo entro en loops de generacion y fue descartado. La mejora vino despues por ingenieria del pipeline (m8-m13), no por especializacion del modelo. Los scripts y datasets de fine-tuning si fueron eliminados; solo queda registro en el reporte IEEE y en `Docs/secciones/10_fine_tuning.md`.
+
+Ver `Docs/UnibaBot_PDA.tex` y `results/evaluation_report.md` para el detalle de cada iteracion.
 
 ## Decisiones tecnicas clave
 
@@ -296,7 +257,7 @@ El fine-tuning con QLoRA fue la primera estrategia explorada (m7). El modelo fin
 
 3. **Determinismo en compliance:** El veredicto final de cumplimiento es 100% reproducible (regex + set intersection). Solo la fase de extraccion tiene estocasticidad.
 
-4. **Infraestructura RAG como opt-in:** ChromaDB, SBERT multilingue y cross-encoder reranker (m9) existen en el codigo pero no son el pipeline de produccion. Se pueden activar con variables de entorno para experimentacion.
+4. **Despacho explicito sin retrieval semantico:** `rule_dispatcher.py` mapea cada regla al nombre de seccion del PDA donde debe declararse, con keyword-fallback cuando el nombre no matchea. No hay base vectorial ni embeddings en produccion: el matching es por strings normalizados, 100% reproducible, sin dependencias ML pesadas, y escalable a miles de reglas sin re-indexacion. La via RAG semantica (`ingest.py`/`retriever.py`/`embeddings.py`/`reranker.py`) sigue en `src/rag/` como referencia comparativa.
 
 5. **Gold dataset como evidencia de generalizacion:** El test hold-out con 3 PDAs nunca vistos durante el desarrollo (accuracy 0.982) demuestra que el sistema no memoriza patrones de los PDAs de entrenamiento.
 

@@ -5,6 +5,8 @@
 **Plazo:** ~3 semanas (28 marzo - 18 abril 2026)
 **Hardware:** MacBook Pro M3 18GB (Llama 3.2 3B local via ollama) + Google Colab T4 (fine-tuning)
 
+> **Nota historica:** Este documento es el roadmap original (Fases 0-6) tal como se planeo a finales de marzo de 2026. Describe la arquitectura RAG + fine-tuning que se exploro en las primeras iteraciones (m0-m7). El pipeline de produccion actual es distinto: rule-driven + extraccion deterministica con Qwen 2.5 14B. Ver [README.md](README.md) para la arquitectura vigente, y la seccion **Iteraciones post-roadmap (m7-m17)** al final de este archivo para la evolucion completa.
+
 ---
 
 ## Vision general del pipeline
