@@ -91,6 +91,29 @@ def render_upload() -> None:
                 options=list(MODELOS_UI.keys()),
                 index=0,
             )
+        st.markdown("**Enriquecimientos LLM (opcionales)**")
+        col_enriq, col_resumen = st.columns(2)
+        with col_enriq:
+            enriquecer = st.toggle(
+                "Correcciones enriquecidas",
+                value=False,
+                help=(
+                    "Genera texto prescriptivo con codigo literal entre "
+                    "comillas para cada NO CUMPLE. Cacheado: la segunda "
+                    "corrida del mismo PDA es instantanea. +15s primera vez."
+                ),
+            )
+        with col_resumen:
+            resumen = st.toggle(
+                "Resumenes ejecutivo y didactico",
+                value=False,
+                help=(
+                    "Anade dos resumenes al inicio del reporte: uno para "
+                    "la oficina del programa y otro para el docente. "
+                    "Cacheado. +15s primera vez."
+                ),
+            )
+
         with st.expander("Opciones avanzadas"):
             top_k = st.slider("top_k (lineamientos por seccion)", 3, 10, 5)
 
@@ -108,10 +131,19 @@ def render_upload() -> None:
                 codigo=codigo_curso.strip() or None,
                 modelo=MODELOS_UI[modelo_label],
                 top_k=top_k,
+                enriquecer=enriquecer,
+                generar_resumen=resumen,
             )
 
 
-def ejecutar_analisis(uploaded_file, codigo: str | None, modelo: str, top_k: int) -> None:
+def ejecutar_analisis(
+    uploaded_file,
+    codigo: str | None,
+    modelo: str,
+    top_k: int,
+    enriquecer: bool = False,
+    generar_resumen: bool = False,
+) -> None:
     """Dispara analizar_pda con progreso en vivo y rerun al modo resultados."""
     pdf_path = guardar_pdf_temporal(uploaded_file)
     inicio = time.time()
@@ -124,6 +156,8 @@ def ejecutar_analisis(uploaded_file, codigo: str | None, modelo: str, top_k: int
                 modelo=modelo,
                 top_k=top_k,
                 on_progress=on_progress,
+                enriquecer_correcciones=enriquecer,
+                generar_resumen=generar_resumen,
             )
         except Exception as exc:
             pdf_path.unlink(missing_ok=True)

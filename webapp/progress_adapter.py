@@ -49,6 +49,10 @@ def seguimiento_analisis(nombre_pdf: str) -> Iterator[tuple]:
                 llm_prep_done       {num_evaluaciones}
                 section_eval_start  {index, total, name}
                 section_eval_done   {index, total, name, cumple, no_cumple}
+                enrichment_start    {n_no_cumple}     # m17, opcional
+                enrichment_done     {n_enriquecidos}  # m17
+                summary_start       {}                # m17, opcional
+                summary_done        {ok}              # m17
                 done                {total_secciones}
             """
             if event == "parsing_start":
@@ -76,6 +80,24 @@ def seguimiento_analisis(nombre_pdf: str) -> Iterator[tuple]:
                 idx = data["index"]
                 total = data["total"]
                 progress_bar.progress(idx / total, text=f"{idx} / {total}")
+            elif event == "enrichment_start":
+                n = data.get("n_no_cumple", 0)
+                if n > 0:
+                    status.update(label=f"Enriqueciendo {n} correccion(es) via LLM...")
+                    status_text.write(
+                        f"Generando texto prescriptivo para {n} hallazgo(s) NO CUMPLE"
+                    )
+            elif event == "enrichment_done":
+                n = data.get("n_enriquecidos", 0)
+                if n > 0:
+                    status_text.write(f"Correcciones enriquecidas: {n}")
+            elif event == "summary_start":
+                status.update(label="Generando resumenes ejecutivo y didactico...")
+            elif event == "summary_done":
+                if data.get("ok"):
+                    status_text.write("Resumenes generados correctamente")
+                else:
+                    status_text.write("Resumenes no disponibles (LLM fallo)")
             elif event == "done":
                 progress_bar.progress(1.0, text="Completado")
 

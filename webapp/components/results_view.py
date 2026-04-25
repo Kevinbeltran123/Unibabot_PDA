@@ -44,12 +44,19 @@ def _badge_estado(estado: str) -> str:
 
 
 def _render_hallazgo(hallazgo: dict) -> None:
-    """Renderiza un hallazgo individual como bloque visual."""
+    """Renderiza un hallazgo individual como bloque visual.
+
+    Si existe `correccion_enriquecida` (m17 enrichment), se muestra como
+    correccion principal y la `correccion` templada queda como
+    referencia plegable. Asi se preserva auditabilidad sin sacrificar
+    accionabilidad.
+    """
     estado = hallazgo.get("estado", "")
     regla_id = hallazgo.get("regla_id", "")
     regla = hallazgo.get("regla", "")
     evidencia = hallazgo.get("evidencia", "")
     correccion = hallazgo.get("correccion") or ""
+    correccion_enriq = hallazgo.get("correccion_enriquecida") or ""
 
     header = _badge_estado(estado)
     if regla_id:
@@ -58,8 +65,28 @@ def _render_hallazgo(hallazgo: dict) -> None:
     st.markdown(f"**{regla}**")
     if evidencia:
         st.markdown(f"> _Evidencia:_ {evidencia}")
-    if estado == "NO CUMPLE" and correccion:
-        st.info(f"**Correccion sugerida:** {correccion}")
+
+    if estado == "NO CUMPLE":
+        if correccion_enriq:
+            st.info(f"**Correccion sugerida (LLM):** {correccion_enriq}")
+            if correccion:
+                with st.expander("Ver correccion templada (referencia)"):
+                    st.markdown(correccion)
+        elif correccion:
+            st.info(f"**Correccion sugerida:** {correccion}")
+    st.divider()
+
+
+def _render_resumenes(resumenes: dict) -> None:
+    """Card con los dos resumenes generados por el LLM (m17 enrichment)."""
+    st.subheader("Resumenes generados")
+    tab_oficina, tab_docente = st.tabs(["Oficina del programa", "Docente"])
+    with tab_oficina:
+        oficina = resumenes.get("oficina") or "(no disponible)"
+        st.info(oficina)
+    with tab_docente:
+        docente = resumenes.get("docente") or "(no disponible)"
+        st.success(docente)
     st.divider()
 
 
@@ -124,6 +151,11 @@ def render_results(reporte: dict) -> None:
     col2.metric("Cumple", cumple)
     col3.metric("No cumple", no_cumple, delta=None)
     col4.metric("Secciones PDA", len(secciones_pda))
+
+    # m17: si el reporte trae los dos resumenes, se renderizan al inicio.
+    resumenes = reporte.get("resumenes")
+    if resumenes:
+        _render_resumenes(resumenes)
 
     col_meta, col_download = st.columns([3, 1])
     with col_meta:
