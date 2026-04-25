@@ -376,3 +376,32 @@ Fase 0 (datos + entorno)
 ```
 
 Nota: Las Fases 1 y 2 pueden avanzarse en paralelo una vez que la Fase 0 este lista.
+
+---
+
+## Iteraciones post-roadmap (m7 - m17)
+
+El roadmap original (Fases 0-6) se cerro con el reporte IEEE entregado. Despues vinieron iteraciones adicionales que llevaron al sistema a produccion. Estas se documentan en detalle en `Docs/secciones/11_historial_mejoras.md` y `results/accuracy_progression.md`. Resumen:
+
+| Iteracion | Cambio principal | Resultado clave |
+|-----------|------------------|-----------------|
+| m7 | Fine-tuning QLoRA Llama 3.2 3B | DESCARTADO (loops de generacion, dataset insuficiente) |
+| m8 | Rule-based hybrid (11 EST en Python puro) | +57.6 accuracy points |
+| m11 | Rule-driven (despacho explicito reemplaza retrieval semantico) | Cobertura 100% (38/55 -> 55/55) |
+| m12 | Qwen 2.5 14B reemplaza Llama 3.1 8B | Mejor precision en espanol y JSON |
+| m13 | Extractor + matcher deterministico (LLM solo extrae) | 3-4x mas rapido, recall NC 1.000 |
+| m14 | Docling reemplaza PyMuPDF | Tablas preservadas, parsing robusto |
+| m15 | Extraccion enriquecida con evidencia + validador anti-alucinacion | **Train AND test 1.000** |
+| m16 | Infraestructura: structlog + excepciones tipadas + ollama wrapper con timeout | Sin regresion, observabilidad production-ready |
+| **m17** | **Enrichment LLM opt-in (correcciones prescriptivas + resumenes oficina/docente) con cache idempotente** | **Sin regresion en metricas; UX accionable activable via flags --enriquecer y --resumen** |
+
+### m17 — Enrichment LLM (post-evaluacion)
+
+m17 anade dos comportamientos opt-in que NO cambian el motor de cumplimiento:
+
+1. **Correcciones enriquecidas:** una llamada LLM por hallazgo NO CUMPLE produce texto prescriptivo con codigo literal entre comillas y posicion exacta dentro del PDA. Anti-alucinacion: el prompt incluye el contenido real de la seccion como contexto de estilo.
+2. **Resumenes ejecutivo + didactico:** una llamada LLM al final genera dos textos con audiencias diferenciadas. "oficina" (3-4 frases, tercera persona, decision rapida); "docente" (4-6 frases, segunda persona formal, didactico).
+
+Ambos cacheados en disco con SHA-256 sobre `(modelo, prompt, inputs)`. Esto da idempotencia bit-a-bit cuando nada cambia y cache miss limpio cuando se edita el prompt. Defaults `False` en `analizar_pda()`: `evaluate.py` y batch runs no pagan latencia extra.
+
+Ver `Docs/secciones/15_enrichment_llm.md` para detalles tecnicos completos.

@@ -2,14 +2,14 @@
 
 Agente inteligente para la verificacion automatizada de Planes de Desarrollo Academico (PDA) de la Universidad de Ibague. El sistema recibe un PDA en formato PDF, lo evalua contra 179 lineamientos institucionales codificados, y genera un reporte estructurado de cumplimiento.
 
-**Resultados sobre gold dataset (106 entradas, 6 PDAs reales) — produccion m16:**
+**Resultados sobre gold dataset (106 entradas, 6 PDAs reales) — produccion m17:**
 
 | Split | Accuracy | Precision NC | Recall NC | Matched | Latencia |
 |-------|----------|--------------|-----------|---------|----------|
 | Train (51 entradas, 3 PDAs) | **1.000** | **1.000** | **1.000** | 51/51 | ~290s |
 | Test hold-out (55 entradas, 3 PDAs nuevos) | **1.000** | **1.000** | **1.000** | 55/55 | ~330s |
 
-*Docling + extraccion por evidencia + Qwen 2.5 14B. NC = clase NO CUMPLE (incumplimientos reales). Train: PDAs vistos durante el desarrollo. Test: PDAs nunca tocados.*
+*Docling + extraccion por evidencia + Qwen 2.5 14B. NC = clase NO CUMPLE (incumplimientos reales). Train: PDAs vistos durante el desarrollo. Test: PDAs nunca tocados. m17 anade enrichment LLM opt-in (correcciones prescriptivas + resumenes ejecutivo/didactico) sin afectar las metricas de cumplimiento.*
 
 ## Contexto
 
@@ -58,6 +58,9 @@ PDF del PDA
 | **m15 Train** | **Extraccion por evidencia (gold consolidado 51+55)** | **1.000** | **1.000** | **1.000** | **51/51** | **~290s** |
 | **m15 Test** | **Hold-out 3 PDAs nuevos** | **1.000** | **1.000** | **1.000** | **55/55** | **~330s** |
 | m16 | Infraestructura produccion: common/, logging, excepciones | **1.000** | **1.000** | **1.000** | 51/51 + 55/55 | ~290s / ~330s |
+| **m17** | **Enrichment LLM opt-in (correcciones prescriptivas + resumenes), cache idempotente** | **1.000** | **1.000** | **1.000** | 51/51 + 55/55 | ~290s / ~330s* |
+
+*m17 no toca el motor de cumplimiento: las metricas se mantienen identicas por construccion (`evaluate.py` lee solo `regla_id` y `estado`). El enrichment anade `correccion_enriquecida` y `resumenes` al reporte cuando se activan los flags `--enriquecer` y `--resumen`. Latencia adicional con cache frio: +30-45s; con cache caliente: 0ms (idempotencia bit-a-bit).
 
 *m8b: accuracy 1.000 sobre 45/48 entradas matcheadas, 3 excluidas por retrieval semantico. El salto de m8b a m11 no es una regresion: m11 introdujo evaluacion 100% deterministica revelando incumplimientos que el retrieval semantico omitia por no recuperarlos en el top-k.*
 
@@ -79,13 +82,19 @@ Unibabot_PDA/
       exceptions.py              # Excepciones tipadas (UnibabotError, LLMError...)
       ollama_client.py           # Wrapper ollama con timeout configurable
     prompts/
-      extraccion_prompt.txt      # Prompt de extraccion de codigos declarados (m13)
-      compliance_prompt.txt      # Prompt de evaluacion LLM (fallback legacy)
-      retry_prompt.txt           # Prompt de retry para JSON invalido
+      extraccion_prompt.txt          # Prompt de extraccion de codigos declarados (m13)
+      compliance_prompt.txt          # Prompt de evaluacion LLM (fallback legacy)
+      retry_prompt.txt               # Prompt de retry para JSON invalido
+      correccion_prescriptiva.txt    # Prompt para correccion enriquecida (m17)
+      resumenes.txt                  # Prompt para resumenes oficina + docente (m17)
     rules/
       estructural_checker.py     # 11 checkers rule-based (EST-001..011)
       declaracion_extractor.py   # Extractor LLM de codigos canonicos (m13)
       declaracion_checker.py     # Matcher deterministico (m13)
+    enrichment/                  # Enrichment LLM opt-in (m17)
+      cache.py                   # Cache en disco SHA-256 (idempotencia bit-a-bit)
+      correction_writer.py       # Texto prescriptivo por hallazgo NO CUMPLE
+      summary_writer.py          # Resumenes ejecutivo (oficina) + didactico (docente)
     rag/
       rule_dispatcher.py         # Despacho de reglas a secciones del PDA (m11)
       seccion_mapping.py         # Mapping keyword_parser -> [seccion_pda]
@@ -110,6 +119,8 @@ Unibabot_PDA/
     accuracy_progression.md      # Tabla de progresion de accuracy (m1-m16)
     metrics_<tag>.json           # Metricas por snapshot (gitignored)
     reports_<tag>.json           # Reportes crudos del agente (gitignored)
+  cache/                         # Cache de enrichment LLM (gitignored, m17)
+    enrichment/                  # Salidas LLM hasheadas SHA-256 por inputs
   PDAs/                          # PDAs reales en PDF (6 documentos, gitignored)
   JSON_archives/                 # Datos institucionales (ABET, competencias, cursos)
   Docs/                          # Documentacion tecnica y academica
@@ -164,23 +175,29 @@ streamlit run streamlit_app.py
 Abre la UI en `http://localhost:8501`. El flujo es:
 
 1. Subir un PDA en PDF, opcionalmente escribir el codigo del curso (ej: `22A14`) y elegir modelo.
-2. Al pulsar "Analizar PDA" se ve el progreso en vivo seccion por seccion.
-3. El reporte se muestra con metricas globales, tabs (Estructural / Por seccion / Resumen) y acordeones con badges coloreados por hallazgo.
-4. Cada reporte se guarda automaticamente en `results/history/` y aparece en el sidebar para consultar despues sin re-analizar.
+2. **Enriquecimientos LLM (opcionales, m17):** dos toggles antes de analizar: "Correcciones enriquecidas" anade texto prescriptivo con codigo literal entre comillas a cada hallazgo NO CUMPLE; "Resumenes ejecutivo y didactico" anade dos resumenes al inicio del reporte (uno para la oficina del programa, otro para el docente). Ambos cacheados: la segunda corrida del mismo PDA es instantanea.
+3. Al pulsar "Analizar PDA" se ve el progreso en vivo seccion por seccion.
+4. El reporte se muestra con metricas globales, tabs (Estructural / Por seccion / Resumen) y acordeones con badges coloreados por hallazgo. Si los toggles de enrichment estaban activos, los resumenes aparecen como card al inicio y la correccion enriquecida queda como principal en cada NO CUMPLE (la templada se conserva como expander de referencia).
+5. Cada reporte se guarda automaticamente en `results/history/` y aparece en el sidebar para consultar despues sin re-analizar.
 
 ### Analizar un PDA (CLI)
 
 ```bash
-# Default: usa Qwen 2.5 14B (m13, accuracy 0.982 en test hold-out)
+# Default: usa Qwen 2.5 14B (m17 produccion, accuracy 1.000 en test hold-out)
 python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14
 
 # Con modelo explicito
 python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 qwen    # Qwen 2.5 14B (default)
 python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 8b      # Llama 3.1 8B (legacy)
 python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 baseline # Llama 3.2 3B (baseline)
+
+# Enrichment LLM opt-in (m17)
+python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 --enriquecer    # correccion prescriptiva por NO CUMPLE
+python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 --resumen       # resumenes oficina + docente
+python src/agent.py "PDAs/PDA - Intelligent Agents 2026A-01.docx.pdf" 22A14 qwen --enriquecer --resumen  # ambos
 ```
 
-El segundo argumento es el codigo del curso (opcional). Si se proporciona, el sistema filtra las reglas de competencias especificas de ese curso. El reporte se guarda en `results/reporte_<modelo>.json`.
+El segundo argumento es el codigo del curso (opcional). Si se proporciona, el sistema filtra las reglas de competencias especificas de ese curso. El reporte se guarda en `results/reporte_<modelo>.json`. Los flags `--enriquecer` y `--resumen` (m17) anaden los campos `correccion_enriquecida` y `resumenes` al reporte; ambos cacheados en `cache/enrichment/` para idempotencia bit-a-bit.
 
 ### Evaluar contra gold dataset
 
