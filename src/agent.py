@@ -16,6 +16,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from common.logging_config import get_logger, setup_logging
 from common.ollama_client import chat as llm_chat
+from enrichment.correction_writer import enriquecer_correccion
+from enrichment.summary_writer import generar_resumenes
 from pdf_parser import parsear_pda
 from rag.rule_dispatcher import (
     SECCION_AUSENTE,
@@ -51,6 +53,10 @@ MODELO_DEFAULT = MODELO_QWEN
 #   llm_prep_done       {num_evaluaciones}
 #   section_eval_start  {index, total, name}
 #   section_eval_done   {index, total, name, cumple, no_cumple}
+#   enrichment_start    {n_no_cumple}        # m17, solo si enriquecer_correcciones=True
+#   enrichment_done     {n_enriquecidos}     # m17
+#   summary_start       {}                   # m17, solo si generar_resumen=True
+#   summary_done        {ok}                 # m17
 #   done                {total_secciones}
 ProgressCallback = Callable[[str, dict], None]
 
@@ -79,6 +85,10 @@ def _default_progress(event: str, data: dict) -> None:
         print("Preparando evaluacion LLM (solo competencias)...")
     elif event == "section_eval_start":
         print(f"  Evaluando: {data['name']}...")
+    elif event == "enrichment_start":
+        print(f"Enriqueciendo {data['n_no_cumple']} correcciones via LLM...")
+    elif event == "summary_start":
+        print("Generando resumenes ejecutivo y didactico...")
 
 
 def cargar_prompt_template() -> str:
@@ -267,6 +277,8 @@ def analizar_pda(
     modelo: str = MODELO_DEFAULT,
     top_k: int = 5,
     on_progress: ProgressCallback | None = None,
+    enriquecer_correcciones: bool = False,
+    generar_resumen: bool = False,
 ) -> dict:
     """Pipeline completo: PDF -> reporte de cumplimiento.
 
@@ -276,6 +288,17 @@ def analizar_pda(
     Si `on_progress` es None, se usa `_default_progress` que replica el
     stdout previo al refactor. La UI de Streamlit pasa un callback custom
     que traduce los eventos a updates visuales (st.status, progress bar).
+
+    Args adicionales (m17 enrichment, ambos default False para preservar
+    comportamiento de evaluate.py y batch runs):
+        enriquecer_correcciones: Si True, anade `correccion_enriquecida`
+            (texto prescriptivo via LLM) a cada hallazgo NO CUMPLE. La
+            correccion templada original (`correccion`) se preserva.
+        generar_resumen: Si True, anade `reporte['resumenes']` con dos
+            textos {oficina, docente}.
+
+    Ambos enrichment usan cache en disco (cache/enrichment/) para
+    idempotencia bit-a-bit cuando los inputs no cambian.
     """
     emit = on_progress or _default_progress
 
@@ -372,6 +395,32 @@ def analizar_pda(
             "no_cumple": no_cumple,
         })
 
+    # m17: enrichment LLM aditivo. Defaults False para no afectar
+    # evaluate.py ni batch runs. Cualquier fallo aqui deja el reporte
+    # original intacto: los nuevos campos simplemente no se anaden.
+    if enriquecer_correcciones:
+        no_cumple_total = [
+            h
+            for r in reporte["resultados"]
+            for h in r.get("hallazgos", [])
+            if h.get("estado") == "NO CUMPLE"
+        ]
+        emit("enrichment_start", {"n_no_cumple": len(no_cumple_total)})
+        n_enriquecidos = 0
+        for h in no_cumple_total:
+            texto = enriquecer_correccion(h, secciones, modelo)
+            if texto:
+                h["correccion_enriquecida"] = texto
+                n_enriquecidos += 1
+        emit("enrichment_done", {"n_enriquecidos": n_enriquecidos})
+
+    if generar_resumen:
+        emit("summary_start", {})
+        resumenes = generar_resumenes(reporte, modelo)
+        if resumenes:
+            reporte["resumenes"] = resumenes
+        emit("summary_done", {"ok": resumenes is not None})
+
     emit("done", {"total_secciones": total})
     return reporte
 
@@ -383,13 +432,22 @@ if __name__ == "__main__":
     setup_logging()
 
     if len(sys.argv) < 2:
-        print("Uso: python agent.py <ruta_al_pdf> [codigo_curso] [modelo]")
+        print("Uso: python agent.py <ruta_al_pdf> [codigo_curso] [modelo] [--enriquecer] [--resumen]")
         print("  modelo: alias 'qwen' (default qwen2.5:14b) o nombre crudo de otro modelo ollama")
-        print("Ejemplo: python agent.py 'PDAs/tu_pda.pdf' 22A14 qwen")
+        print("  --enriquecer: anade correccion_enriquecida via LLM a cada NO CUMPLE")
+        print("  --resumen: anade resumenes ejecutivo y didactico al reporte")
+        print("Ejemplo: python agent.py 'PDAs/tu_pda.pdf' 22A14 qwen --enriquecer --resumen")
         sys.exit(1)
 
-    pdf_path = sys.argv[1]
-    codigo = sys.argv[2] if len(sys.argv) > 2 else None
+    # Separar flags de args posicionales para no romper la API existente.
+    flags = {arg for arg in sys.argv[1:] if arg.startswith("--")}
+    posicionales = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
+
+    enriquecer_flag = "--enriquecer" in flags
+    resumen_flag = "--resumen" in flags
+
+    pdf_path = posicionales[0]
+    codigo = posicionales[1] if len(posicionales) > 1 else None
 
     # Aliases + fallback a nombre crudo (permite probar modelos ad-hoc)
     aliases = {
@@ -397,12 +455,18 @@ if __name__ == "__main__":
         "14b": MODELO_QWEN,
         "default": MODELO_QWEN,
     }
-    if len(sys.argv) > 3:
-        modelo = aliases.get(sys.argv[3], sys.argv[3])
+    if len(posicionales) > 2:
+        modelo = aliases.get(posicionales[2], posicionales[2])
     else:
         modelo = MODELO_DEFAULT
 
-    reporte = analizar_pda(pdf_path, codigo, modelo=modelo)
+    reporte = analizar_pda(
+        pdf_path,
+        codigo,
+        modelo=modelo,
+        enriquecer_correcciones=enriquecer_flag,
+        generar_resumen=resumen_flag,
+    )
 
     # Guardar reporte con sufijo del modelo
     sufijo = modelo.replace(":", "-").replace("/", "_")

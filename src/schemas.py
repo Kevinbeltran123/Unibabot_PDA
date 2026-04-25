@@ -18,8 +18,9 @@ class Hallazgo(BaseModel):
     estado: Literal["CUMPLE", "NO CUMPLE"]
     evidencia: str
     correccion: str | None = None
+    correccion_enriquecida: str | None = None
 
-    @field_validator("correccion", mode="before")
+    @field_validator("correccion", "correccion_enriquecida", mode="before")
     @classmethod
     def _normalizar_null(cls, v):
         """Acepta tanto None como la cadena 'null' (el baseline a veces la emite)."""
@@ -45,3 +46,13 @@ class ReporteSeccion(BaseModel):
 
     seccion: str
     hallazgos: list[Hallazgo]
+
+
+class Resumenes(BaseModel):
+    """Pareja de resumenes ejecutivo/didactico generados por el LLM al final
+    del pipeline. Ambos describen los mismos hallazgos con tono distinto:
+    `oficina` para auditoria rapida; `docente` para retroalimentacion.
+    """
+
+    oficina: str
+    docente: str

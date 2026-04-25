@@ -28,6 +28,10 @@ results/history/*.json
 # Archivos temporales de la webapp (PDFs subidos)
 tmp/
 
+# Cache de enrichment LLM (resumenes y correcciones enriquecidas)
+# Se regenera al primer uso. Mantiene reproducibilidad bit-a-bit por PDA.
+cache/
+
 # === Python ===
 __pycache__/
 *.py[cod]
