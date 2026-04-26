@@ -161,6 +161,7 @@ def ejecutar_pipeline(
     modelo: str,
     tag: str,
     pdas_incluidos: set[str] | None = None,
+    dispatcher: str = "rule",
 ) -> tuple[dict[str, dict], float]:
     """Corre analizar_pda sobre los PDAs especificados.
 
@@ -170,6 +171,9 @@ def ejecutar_pipeline(
         pdas_incluidos: si se provee, solo procesa PDAs cuyo nombre esta
             en este conjunto. Permite correr evals sobre subsets definidos
             por el gold activo (train vs test).
+        dispatcher: "rule" (produccion) o "rag" (camino alternativo, top-k
+            semantico contra ChromaDB). Solo afecta como se selecciona el
+            conjunto de reglas; resto del pipeline identico.
 
     Persiste los reportes en results/reports_<tag>.json.
     """
@@ -187,7 +191,7 @@ def ejecutar_pipeline(
 
         print(f"Procesando: {pdf_name}...")
         try:
-            reporte = analizar_pda(str(pdf_path), codigo_curso, modelo=modelo)
+            reporte = analizar_pda(str(pdf_path), codigo_curso, modelo=modelo, dispatcher=dispatcher)
             reportes[pdf_name] = reporte
         except LLMUnavailableError as e:
             # ollama caido / modelo faltante: sin LLM no hay continuidad,
@@ -300,6 +304,14 @@ def main():
         help="Ruta al archivo de gold labels (default: data/gold_labels.json). "
         "Usar data/gold_labels_test.json para eval hold-out.",
     )
+    parser.add_argument(
+        "--dispatcher",
+        type=str,
+        choices=("rule", "rag"),
+        default="rule",
+        help="Como seleccionar reglas: 'rule' (produccion, cobertura 100%%) o "
+        "'rag' (top-k semantico contra ChromaDB, camino alternativo).",
+    )
     args = parser.parse_args()
 
     if args.compare:
@@ -323,8 +335,10 @@ def main():
         print(f"Reusando reportes guardados para tag '{args.tag}'")
         latencia = 0.0
     else:
-        print(f"\nCorriendo pipeline con modelo '{args.modelo}'...")
-        reportes, latencia = ejecutar_pipeline(args.modelo, args.tag, pdas_incluidos=pdas_en_gold)
+        print(f"\nCorriendo pipeline con modelo '{args.modelo}' dispatcher='{args.dispatcher}'...")
+        reportes, latencia = ejecutar_pipeline(
+            args.modelo, args.tag, pdas_incluidos=pdas_en_gold, dispatcher=args.dispatcher,
+        )
 
     print("\nCalculando metricas...")
     metricas_acc = calcular_accuracy(reportes, gold)
@@ -337,6 +351,7 @@ def main():
     metricas = {
         "tag": args.tag,
         "modelo": args.modelo,
+        "dispatcher": args.dispatcher,
         "total_gold": len(gold),
         "latencia_total_seg": latencia,
         "json_valid_rate": json_valid,

@@ -19,6 +19,7 @@ from common.ollama_client import chat as llm_chat
 from enrichment.correction_writer import enriquecer_correccion
 from enrichment.summary_writer import generar_resumenes
 from pdf_parser import parsear_pda
+from rag.rag_dispatcher import recuperar_reglas_aplicables
 from rag.rule_dispatcher import (
     SECCION_AUSENTE,
     agrupar_reglas_por_seccion,
@@ -279,6 +280,7 @@ def analizar_pda(
     on_progress: ProgressCallback | None = None,
     enriquecer_correcciones: bool = False,
     generar_resumen: bool = False,
+    dispatcher: str = "rule",
 ) -> dict:
     """Pipeline completo: PDF -> reporte de cumplimiento.
 
@@ -299,6 +301,13 @@ def analizar_pda(
 
     Ambos enrichment usan cache en disco (cache/enrichment/) para
     idempotencia bit-a-bit cuando los inputs no cambian.
+
+    Args para benchmark de arquitecturas:
+        dispatcher: "rule" (default, produccion m11+, cobertura 100% por
+            iteracion sobre reglas aplicables) o "rag" (camino alternativo
+            m0-m10, retrieval semantico top-k contra ChromaDB; reglas
+            fuera de top_k jamas se evaluan). Solo afecta como se selecciona
+            el conjunto de reglas; el extractor+matcher es identico.
     """
     emit = on_progress or _default_progress
 
@@ -317,7 +326,12 @@ def analizar_pda(
     if codigo_curso:
         emit("extract_start", {})
         declaraciones = extraer_declaraciones(secciones, modelo=modelo)
-        reglas_app = reglas_aplicables(codigo_curso)
+        # Seleccion del conjunto de reglas a evaluar: rule-driven (default,
+        # cobertura 100%) vs RAG semantico (camino alternativo, top-k por seccion).
+        if dispatcher == "rag":
+            reglas_app = recuperar_reglas_aplicables(secciones, codigo_curso, top_k=top_k)
+        else:
+            reglas_app = reglas_aplicables(codigo_curso)
         reglas_canonicas = [r for r in reglas_app if tiene_codigo_canonico(r)]
         reglas_sin_codigo = [r for r in reglas_app if not tiene_codigo_canonico(r)]
         hallazgos_declaraciones = verificar_declaraciones(reglas_canonicas, declaraciones)
@@ -326,6 +340,7 @@ def analizar_pda(
             "canonicas": len(reglas_canonicas),
             "sin_codigo": len(reglas_sin_codigo),
             "hallazgos": len(hallazgos_declaraciones),
+            "dispatcher": dispatcher,
         })
 
     emit("llm_prep_start", {})
@@ -344,6 +359,7 @@ def analizar_pda(
         "archivo": pdf_path,
         "modelo": modelo,
         "codigo_curso": codigo_curso,
+        "dispatcher": dispatcher,
         "total_secciones": len(evaluaciones),
         "resultados": [
             {
@@ -432,10 +448,11 @@ if __name__ == "__main__":
     setup_logging()
 
     if len(sys.argv) < 2:
-        print("Uso: python agent.py <ruta_al_pdf> [codigo_curso] [modelo] [--enriquecer] [--resumen]")
+        print("Uso: python agent.py <ruta_al_pdf> [codigo_curso] [modelo] [--enriquecer] [--resumen] [--rag]")
         print("  modelo: alias 'qwen' (default qwen2.5:14b) o nombre crudo de otro modelo ollama")
         print("  --enriquecer: anade correccion_enriquecida via LLM a cada NO CUMPLE")
         print("  --resumen: anade resumenes ejecutivo y didactico al reporte")
+        print("  --rag: usa retrieval semantico (camino alternativo) en lugar de rule-driven")
         print("Ejemplo: python agent.py 'PDAs/tu_pda.pdf' 22A14 qwen --enriquecer --resumen")
         sys.exit(1)
 
@@ -445,6 +462,7 @@ if __name__ == "__main__":
 
     enriquecer_flag = "--enriquecer" in flags
     resumen_flag = "--resumen" in flags
+    dispatcher_choice = "rag" if "--rag" in flags else "rule"
 
     pdf_path = posicionales[0]
     codigo = posicionales[1] if len(posicionales) > 1 else None
@@ -466,10 +484,12 @@ if __name__ == "__main__":
         modelo=modelo,
         enriquecer_correcciones=enriquecer_flag,
         generar_resumen=resumen_flag,
+        dispatcher=dispatcher_choice,
     )
 
-    # Guardar reporte con sufijo del modelo
-    sufijo = modelo.replace(":", "-").replace("/", "_")
+    # Guardar reporte con sufijo del modelo + dispatcher
+    sufijo_modelo = modelo.replace(":", "-").replace("/", "_")
+    sufijo = f"{sufijo_modelo}_{dispatcher_choice}"
     output_path = ROOT / "results" / f"reporte_{sufijo}.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(reporte, f, ensure_ascii=False, indent=2)

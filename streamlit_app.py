@@ -114,6 +114,20 @@ def render_upload() -> None:
                 ),
             )
 
+        st.markdown("**Arquitectura del dispatcher**")
+        dispatcher_label = st.radio(
+            "Como se selecciona el conjunto de reglas a evaluar",
+            options=("Rule-driven (produccion, cobertura 100%)", "RAG semantico (alternativo, top-k)"),
+            index=0,
+            horizontal=True,
+            help=(
+                "Rule-driven itera sobre todas las reglas aplicables al curso "
+                "(O(1) lookup, escalable). RAG semantico busca top-k reglas mas "
+                "similares por seccion contra ChromaDB; reglas fuera del top-k "
+                "jamas se evaluan. Mismo extractor+matcher en ambos."
+            ),
+        )
+
         with st.expander("Opciones avanzadas"):
             top_k = st.slider("top_k (lineamientos por seccion)", 3, 10, 5)
 
@@ -126,6 +140,7 @@ def render_upload() -> None:
         if uploaded_file is None:
             st.warning("Debes subir un PDF antes de analizar.")
         else:
+            dispatcher_choice = "rag" if dispatcher_label.startswith("RAG") else "rule"
             ejecutar_analisis(
                 uploaded_file=uploaded_file,
                 codigo=codigo_curso.strip() or None,
@@ -133,6 +148,7 @@ def render_upload() -> None:
                 top_k=top_k,
                 enriquecer=enriquecer,
                 generar_resumen=resumen,
+                dispatcher=dispatcher_choice,
             )
 
 
@@ -143,6 +159,7 @@ def ejecutar_analisis(
     top_k: int,
     enriquecer: bool = False,
     generar_resumen: bool = False,
+    dispatcher: str = "rule",
 ) -> None:
     """Dispara analizar_pda con progreso en vivo y rerun al modo resultados."""
     pdf_path = guardar_pdf_temporal(uploaded_file)
@@ -158,6 +175,7 @@ def ejecutar_analisis(
                 on_progress=on_progress,
                 enriquecer_correcciones=enriquecer,
                 generar_resumen=generar_resumen,
+                dispatcher=dispatcher,
             )
         except Exception as exc:
             pdf_path.unlink(missing_ok=True)
