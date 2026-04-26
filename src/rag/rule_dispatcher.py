@@ -25,11 +25,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from rag.seccion_mapping import (
-    MAPPING_SECCIONES,
-    normalizar_nombre,
-    secciones_pda_validas,
-)
+from rag.seccion_mapping import secciones_pda_validas
+from rag.semantic_fallback import encontrar_seccion_via_semantica
 
 ROOT = Path(__file__).parent.parent.parent
 REGLAS_PATH = ROOT / "data" / "lineamientos" / "reglas.json"
@@ -54,38 +51,6 @@ def reglas_aplicables(codigo_curso: str | None) -> list[dict]:
     ]
 
 
-# Keywords para fallback por contenido cuando el nombre de seccion no matchea
-# el seccion_pda target via MAPPING_SECCIONES.
-FALLBACK_KEYWORDS_POR_SECCION_PDA = {
-    "Competencias": [
-        "competencia", "saber pro", "saber-pro", "dimension", "dimensión",
-        "abet", "rae", "resultado de aprendizaje", "competence",
-    ],
-    "Competencias / Resultados de Aprendizaje": [
-        "competencia", "saber pro", "saber-pro", "dimension", "dimensión",
-        "abet", "rae", "resultado de aprendizaje", "competence", "c1.", "c2.", "c3.",
-    ],
-    "Resultados de Aprendizaje Esperados": [
-        "resultado de aprendizaje", "rae", "learning outcome",
-        "c1.", "c2.", "c3.", "competencia",
-    ],
-    "Informacion general": [
-        "programa academico", "academic program", "semestre", "creditos",
-        "modalidad", "profesor", "horario",
-    ],
-    "Estrategia pedagogica": [
-        "aprendizaje basado", "metodologia", "estrategia", "abp",
-        "pedagogic", "classroom",
-    ],
-}
-
-
-def _seccion_contiene_keywords(contenido: str, keywords: list[str]) -> int:
-    """Cuenta cuantos keywords aparecen en el contenido (normalizado)."""
-    norm = normalizar_nombre(contenido)
-    return sum(1 for kw in keywords if kw in norm)
-
-
 def encontrar_seccion_destino(
     regla: dict,
     secciones_pda: dict[str, str],
@@ -94,10 +59,10 @@ def encontrar_seccion_destino(
 
     Estrategia en 2 pasos:
     1. Match por nombre via MAPPING_SECCIONES invertido (rapido, preciso).
-    2. Si falla, fallback por contenido: buscar keywords asociados al
-       seccion_pda target dentro del texto de cada seccion. La seccion
-       con mas keywords matcheando gana (ej. en Gestion TI, la seccion
-       "Plan de estudios" contiene "competencia" / "RAE" en su texto).
+    2. Si falla, rescate semantico via cross-encoder: puntua
+       (regla.descripcion, contenido) para cada seccion del PDA y
+       devuelve la mejor si pasa el threshold del modelo. Reemplaza
+       el diccionario hardcoded de keywords pre-refactor.
 
     Devuelve el nombre real de la seccion o None si ninguna matchea.
     """
@@ -123,22 +88,8 @@ def encontrar_seccion_destino(
             con_contenido = candidatas_nombre
         return min(con_contenido, key=lambda n: len(n))
 
-    # Paso 2: fallback por contenido
-    keywords = FALLBACK_KEYWORDS_POR_SECCION_PDA.get(seccion_pda_target, [])
-    if not keywords:
-        return None
-
-    mejor_nombre = None
-    mejor_score = 0
-    for nombre_pda, contenido in secciones_pda.items():
-        if nombre_pda == "PREAMBULO" or len(contenido) < 50:
-            continue
-        score = _seccion_contiene_keywords(contenido, keywords)
-        if score > mejor_score:
-            mejor_score = score
-            mejor_nombre = nombre_pda
-
-    return mejor_nombre if mejor_score >= 2 else None
+    # Paso 2: rescate semantico (modelo se carga lazy en la primera invocacion)
+    return encontrar_seccion_via_semantica(regla, secciones_pda)
 
 
 def agrupar_reglas_por_seccion(
