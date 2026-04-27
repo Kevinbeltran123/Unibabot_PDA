@@ -72,3 +72,23 @@ checkpoints/
 CLAUDE.md
 Docs/
 "PDA - Intelligent Agents 2026A-01.docx.pdf"
+
+# === Backend FastAPI (m18+) ===
+.env
+.env.local
+data/unibabot.db
+data/unibabot.db-journal
+data/reports/*/
+!data/reports/.gitkeep
+*.log
+
+# === Frontend Next.js (m18+) ===
+web/node_modules/
+web/.next/
+web/out/
+web/.env.local
+web/.env*.local
+web/.turbo/
+web/coverage/
+web/playwright-report/
+web/test-results/
