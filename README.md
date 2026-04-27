@@ -157,7 +157,34 @@ python src/generar_reglas.py
 
 ## Uso
 
-### Interfaz web (Streamlit)
+### Interfaz web "produccion" (FastAPI + Next.js, m18)
+
+Stack alternativo orientado a entrega final: autenticacion por usuario, cola asincrona de jobs, frontend con dark mode y descarga de reportes. Streamlit sigue funcionando para presentaciones de avance; este stack es opt-in.
+
+```bash
+# 1. Backend
+pip install -r requirements-api.txt
+cp .env.example .env  # configurar JWT_SECRET con: openssl rand -hex 32
+docker run --rm -d --name unibabot-redis -p 6379:6379 redis:7-alpine
+make dev-api      # uvicorn FastAPI en :8000
+make dev-worker   # worker RQ en otra terminal
+
+# 2. Frontend
+cd web
+cp .env.local.example .env.local
+npm install
+npm run dev       # Next.js en http://localhost:3000
+```
+
+O con Docker Compose (un solo comando):
+
+```bash
+docker compose up --build
+```
+
+Detalles completos en [docs/PRODUCCION.md](docs/PRODUCCION.md): endpoints REST, variables de entorno, flujo de un analisis con SSE, y comparacion vs Streamlit.
+
+### Interfaz web (Streamlit, demo de avance)
 
 ```bash
 streamlit run streamlit_app.py
