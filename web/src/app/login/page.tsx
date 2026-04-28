@@ -4,10 +4,10 @@ import * as React from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { PasswordInput } from "@/components/ui/password-input";
+import { AuthShell } from "@/components/auth-shell";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
 import { ApiError } from "@/lib/api-client";
@@ -25,64 +25,68 @@ export default function LoginPage() {
       await login(email, password);
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : "Error inesperado";
-      toast({ title: "No se pudo iniciar sesion", description: msg, variant: "destructive" });
+      toast({
+        title: "No se pudo iniciar sesión",
+        description:
+          msg === "Credenciales invalidas"
+            ? "Revisa tu correo y contraseña e intenta de nuevo."
+            : msg,
+        variant: "destructive",
+      });
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-12">
-      <div className="absolute right-4 top-4">
-        <ThemeToggle />
+    <AuthShell>
+      <div className="mb-7">
+        <h1 className="text-[1.75rem] font-medium leading-tight tracking-tight text-foreground">
+          Inicia sesión
+        </h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Accede para revisar tus análisis o iniciar uno nuevo.
+        </p>
       </div>
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-primary">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Universidad de Ibague
-          </div>
-          <CardTitle className="text-2xl">Inicia sesion en UnibaBot PDA</CardTitle>
-          <CardDescription>Verificador automatico de Planes de Desarrollo Academico</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Correo</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@unibague.edu.co"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contrasena</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              Entrar
-            </Button>
-          </form>
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            No tienes cuenta?{" "}
-            <Link href="/register" className="text-primary hover:underline font-medium">
-              Crear una
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+
+      <form onSubmit={onSubmit} className="space-y-5">
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Correo</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="tu@correo.com"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="password">Contraseña</Label>
+          <PasswordInput
+            id="password"
+            autoComplete="current-password"
+            required
+            minLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={submitting}>
+          {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+          Entrar
+        </Button>
+      </form>
+
+      <div className="mt-7 text-sm text-muted-foreground">
+        ¿No tienes cuenta?{" "}
+        <Link
+          href="/register"
+          className="text-foreground underline underline-offset-[3px] decoration-foreground/30 hover:decoration-foreground"
+        >
+          Crear una
+        </Link>
+      </div>
+    </AuthShell>
   );
 }

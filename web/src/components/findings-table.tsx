@@ -1,14 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { Filter, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import type { ResultadoSeccion } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type Filtro = "all" | "CUMPLE" | "NO CUMPLE";
 
+const FILTROS: { value: Filtro; label: string }[] = [
+  { value: "all", label: "Todos" },
+  { value: "CUMPLE", label: "Cumple" },
+  { value: "NO CUMPLE", label: "No cumple" },
+];
+
+/*
+ * Tabla compacta editorial. Sin halos. Header en uppercase mini. Indicador
+ * lateral en la columna ID. Filtros como ribbon de botones de texto.
+ */
 export function FindingsTable({ resultados }: { resultados: ResultadoSeccion[] }) {
   const [filtro, setFiltro] = React.useState<Filtro>("all");
   const [query, setQuery] = React.useState("");
@@ -34,69 +43,89 @@ export function FindingsTable({ resultados }: { resultados: ResultadoSeccion[] }
   }, [resultados, filtro, query]);
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
-            placeholder="Buscar por regla, ID o seccion..."
+            placeholder="Buscar regla, ID o sección"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9"
+            className="pl-6"
           />
         </div>
-        <div className="flex items-center gap-1.5 text-xs">
-          <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-          {(["all", "CUMPLE", "NO CUMPLE"] as Filtro[]).map((f) => (
+        <div className="flex items-center gap-3 text-xs">
+          {FILTROS.map((f) => (
             <button
-              key={f}
-              onClick={() => setFiltro(f)}
+              key={f.value}
+              onClick={() => setFiltro(f.value)}
               className={cn(
-                "px-3 py-1.5 rounded-md font-medium transition-colors",
-                filtro === f
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/70",
+                "py-1 transition-colors",
+                filtro === f.value
+                  ? "text-foreground underline-gold"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {f === "all" ? "Todos" : f}
+              {f.label}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="rounded-lg border overflow-hidden">
+      <div className="border-t border-border">
         <table className="w-full text-sm">
-          <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th className="text-left font-medium px-4 py-2.5">ID</th>
-              <th className="text-left font-medium px-4 py-2.5">Estado</th>
-              <th className="text-left font-medium px-4 py-2.5">Seccion</th>
-              <th className="text-left font-medium px-4 py-2.5">Regla</th>
+          <thead>
+            <tr className="text-left text-[0.625rem] uppercase tracking-institutional text-muted-foreground">
+              <th className="font-medium py-2 pr-4 w-[6.5rem]">Estado</th>
+              <th className="font-medium py-2 pr-4 w-[6rem]">ID</th>
+              <th className="font-medium py-2 pr-4">Regla</th>
+              <th className="font-medium py-2 hidden md:table-cell w-[10rem]">Sección</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody>
             {filas.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={4} className="py-12 text-center text-sm text-muted-foreground border-t border-border">
                   No hay hallazgos para este filtro.
                 </td>
               </tr>
             )}
-            {filas.map((f, i) => (
-              <tr key={`${f.regla_id}-${i}`} className="hover:bg-muted/30 transition-colors">
-                <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{f.regla_id}</td>
-                <td className="px-4 py-2">
-                  <Badge variant={f.estado === "CUMPLE" ? "success" : "destructive"}>{f.estado}</Badge>
-                </td>
-                <td className="px-4 py-2 text-muted-foreground">{f.seccion}</td>
-                <td className="px-4 py-2 max-w-md truncate" title={f.regla}>
-                  {f.regla}
-                </td>
-              </tr>
-            ))}
+            {filas.map((f, i) => {
+              const ok = f.estado === "CUMPLE";
+              return (
+                <tr
+                  key={`${f.regla_id}-${i}`}
+                  className="border-t border-border hover:bg-paper-warm/60 transition-colors"
+                >
+                  <td className="py-2.5 pr-4">
+                    <span
+                      className={cn(
+                        "text-[0.625rem] font-medium uppercase tracking-institutional",
+                        ok ? "text-success" : "text-destructive",
+                      )}
+                    >
+                      {ok ? "Cumple" : "No cumple"}
+                    </span>
+                  </td>
+                  <td className="py-2.5 pr-4 font-mono text-[0.7rem] text-muted-foreground">
+                    {f.regla_id}
+                  </td>
+                  <td className="py-2.5 pr-4 max-w-md truncate text-foreground" title={f.regla}>
+                    {f.regla}
+                  </td>
+                  <td className="py-2.5 hidden md:table-cell text-xs text-muted-foreground truncate">
+                    {f.seccion.replace(/^__|__$|_global_/g, "").replace(/_/g, " ")}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+
+      <p className="text-[0.7rem] text-muted-foreground">
+        {filas.length} de {resultados.reduce((acc, r) => acc + r.hallazgos.length, 0)} hallazgos visibles
+      </p>
     </div>
   );
 }

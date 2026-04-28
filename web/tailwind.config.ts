@@ -6,16 +6,27 @@ const config: Config = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
-      screens: { "2xl": "1400px" },
+      padding: "1.5rem",
+      screens: { "2xl": "1280px" },
     },
     extend: {
       colors: {
         border: "hsl(var(--border))",
+        "border-strong": "hsl(var(--border-strong))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        paper: {
+          DEFAULT: "hsl(var(--background))",
+          warm: "hsl(var(--paper-warm))",
+          tint: "hsl(var(--paper-tint))",
+        },
+        ink: {
+          DEFAULT: "hsl(var(--foreground))",
+          soft: "hsl(var(--foreground) / 0.78)",
+          dim: "hsl(var(--foreground) / 0.6)",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -44,6 +55,10 @@ const config: Config = {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          bright: "hsl(var(--gold-bright))",
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -54,37 +69,54 @@ const config: Config = {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "8px",
+        md: "var(--radius)",
+        sm: "2px",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui"],
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
+      fontSize: {
+        // Tracking ligeramente mas amplio que default para look editorial
+        xs: ["0.75rem", { lineHeight: "1.1rem", letterSpacing: "0.005em" }],
+        sm: ["0.8125rem", { lineHeight: "1.2rem", letterSpacing: "0" }],
+        base: ["0.9375rem", { lineHeight: "1.55rem", letterSpacing: "-0.005em" }],
+        lg: ["1.0625rem", { lineHeight: "1.6rem", letterSpacing: "-0.01em" }],
+        xl: ["1.25rem", { lineHeight: "1.7rem", letterSpacing: "-0.012em" }],
+        "2xl": ["1.5rem", { lineHeight: "1.85rem", letterSpacing: "-0.015em" }],
+        "3xl": ["1.875rem", { lineHeight: "2.15rem", letterSpacing: "-0.02em" }],
+        "4xl": ["2.5rem", { lineHeight: "2.75rem", letterSpacing: "-0.025em" }],
+      },
+      letterSpacing: {
+        institutional: "0.18em",
+      },
       keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
         "fade-in": {
-          from: { opacity: "0", transform: "translateY(4px)" },
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "rise-in": {
+          from: { opacity: "0", transform: "translateY(6px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
-        "pulse-soft": {
+        shimmer: {
+          "0%": { backgroundPosition: "-400px 0" },
+          "100%": { backgroundPosition: "400px 0" },
+        },
+        "caret-blink": {
           "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.6" },
+          "50%": { opacity: "0" },
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
-        "pulse-soft": "pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "fade-in": "fade-in 240ms cubic-bezier(0.2, 0, 0, 1) both",
+        "rise-in": "rise-in 280ms cubic-bezier(0.2, 0, 0, 1) both",
+        "caret-blink": "caret-blink 1.1s step-end infinite",
+      },
+      boxShadow: {
+        card: "0 1px 0 hsl(var(--border) / 0.6)",
+        composer: "0 -1px 0 hsl(var(--border)), 0 -8px 24px hsl(var(--foreground) / 0.04)",
       },
     },
   },

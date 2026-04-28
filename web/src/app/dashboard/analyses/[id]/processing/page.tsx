@@ -2,17 +2,19 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, FileText } from "lucide-react";
+import { FileText, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AssistantMessage, UserMessage } from "@/components/chat-message";
 import { ProgressTimeline } from "@/components/progress-stream";
 import { useAnalysis } from "@/hooks/use-analyses";
 import { useProgressStream } from "@/hooks/use-progress-stream";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function ProcessingPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const id = params.id;
+  const { user } = useAuth();
 
   const { data: analysis } = useAnalysis(id, { refetchInterval: 3000 });
   const { events, status } = useProgressStream(id);
@@ -25,46 +27,56 @@ export default function ProcessingPage() {
   }, [analysis, id, router]);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => router.push("/dashboard")} aria-label="Volver">
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-xl font-bold tracking-tight">Analizando</h1>
-          {analysis?.filename && (
-            <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5" />
-              {analysis.filename}
-            </p>
-          )}
-        </div>
-      </div>
+    <div className="mx-auto w-full max-w-[760px] px-6 py-8">
+      <UserMessage email={user?.email}>
+        <UserPDARequest filename={analysis?.filename} />
+      </UserMessage>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Progreso del analisis</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <AssistantMessage>
+        {analysis?.status === "failed" ? (
+          <FailedState
+            error={analysis.error}
+            onRetry={() => router.push("/dashboard")}
+          />
+        ) : (
           <ProgressTimeline events={events} status={status} />
-        </CardContent>
-      </Card>
+        )}
+      </AssistantMessage>
+    </div>
+  );
+}
 
-      {analysis?.status === "failed" && (
-        <Card className="border-destructive/40 bg-destructive/5">
-          <CardContent className="p-5 space-y-3">
-            <div className="text-sm font-medium text-destructive">El analisis fallo</div>
-            <p className="text-sm">{analysis.error}</p>
-            <Button variant="outline" size="sm" onClick={() => router.push("/dashboard/new")}>
-              Intentar con otro PDF
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+function UserPDARequest({ filename }: { filename?: string }) {
+  if (!filename) return null;
+  return (
+    <div className="inline-flex items-center gap-2">
+      <FileText className="h-4 w-4 text-muted-foreground shrink-0" strokeWidth={1.75} />
+      <span className="text-sm text-foreground truncate max-w-[320px]">{filename}</span>
+    </div>
+  );
+}
 
-      <p className="text-xs text-center text-muted-foreground">
-        Este proceso suele tardar entre 1 y 3 minutos. Puedes cerrar esta pestana, el analisis seguira corriendo.
+function FailedState({
+  error,
+  onRetry,
+}: {
+  error: string | null | undefined;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="space-y-3 max-w-prose">
+      <p className="text-sm text-destructive leading-relaxed">
+        El análisis no pudo completarse.
       </p>
+      {error && (
+        <pre className="text-xs text-foreground/80 bg-paper-warm border border-border rounded-md p-3 overflow-x-auto whitespace-pre-wrap">
+          {error}
+        </pre>
+      )}
+      <Button variant="outline" size="sm" onClick={onRetry} className="gap-1.5 mt-2">
+        <RotateCw className="h-3.5 w-3.5" />
+        Intentar con otro PDF
+      </Button>
     </div>
   );
 }

@@ -2,82 +2,109 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * UnibaBot PDA design tokens
+ * Direccion: institucional editorial. Papel blanco como superficie principal,
+ * tinta navy de Universidad de Ibague, dorado solo como acento puntual.
+ * Todo HSL para compatibilidad con Tailwind. Hex equivalentes en comentarios.
+ */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    /* Superficies */
+    --background: 0 0% 100%;          /* #FFFFFF papel */
+    --paper-warm: 41 24% 96%;         /* #F8F6F1 sidebar, muy sutil */
+    --paper-tint: 41 22% 93%;         /* #F1EDE3 hover suave */
+    --foreground: 222 53% 23%;        /* #1B2C5C tinta navy del logo */
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 53% 23%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 222 53% 23%;
 
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
+    /* Acentos institucionales */
+    --primary: 222 53% 23%;           /* navy = CTA principal */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 41 24% 96%;          /* warm gray para botones secundarios */
+    --secondary-foreground: 222 53% 23%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 41 18% 95%;
+    --muted-foreground: 220 13% 41%;  /* #5A6B7E gris frio neutro */
 
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 41 22% 93%;
+    --accent-foreground: 222 53% 23%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 354 71% 42%;       /* #B81E2A crimson legible */
+    --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 45%;
+    --success: 152 41% 30%;           /* #2D6A4F musgo profundo */
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 39 64% 48%;            /* #C99A2C dorado refinado */
     --warning-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    /* Reglas y campos */
+    --border: 41 17% 88%;             /* #E5E2DA warm rule */
+    --border-strong: 41 14% 80%;
+    --input: 41 17% 88%;
+    --ring: 222 53% 23%;
 
-    --radius: 0.625rem;
+    /* Tinta del sello dorado del logo - solo para detalles puntuales */
+    --gold: 39 64% 48%;               /* #C99A2C */
+    --gold-bright: 41 78% 54%;        /* #E8B82C oro vivo del logo */
 
-    --font-sans: "Inter", system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    /* Geometria */
+    --radius: 4px;                    /* esquinas tight, institucionales */
+
+    /* Una sola familia para todo (Inter). El "font-mono" cae en Inter
+     * con tabular-nums; los pocos lugares que muestran codigo se ven
+     * consistentes con el resto de la UI. */
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Inter", ui-monospace, "SF Mono", monospace;
   }
 
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
+    --background: 220 30% 7%;
+    --paper-warm: 220 22% 11%;
+    --paper-tint: 220 18% 15%;
+    --foreground: 41 22% 95%;
 
-    --card: 222 47% 8%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 28% 9%;
+    --card-foreground: 41 22% 95%;
 
-    --popover: 222 47% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 28% 9%;
+    --popover-foreground: 41 22% 95%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 41 22% 95%;
+    --primary-foreground: 220 30% 7%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 18% 15%;
+    --secondary-foreground: 41 22% 95%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 18% 15%;
+    --muted-foreground: 220 8% 64%;
 
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 220 18% 18%;
+    --accent-foreground: 41 22% 95%;
 
-    --destructive: 0 63% 45%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 354 60% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 45%;
+    --success: 152 35% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 0%;
+    --warning: 41 70% 55%;
+    --warning-foreground: 220 30% 7%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 217 91% 60%;
+    --border: 220 14% 20%;
+    --border-strong: 220 12% 28%;
+    --input: 220 14% 20%;
+    --ring: 41 22% 95%;
+
+    --gold: 41 65% 55%;
+    --gold-bright: 41 78% 60%;
   }
 }
 
@@ -85,19 +112,130 @@
   * {
     @apply border-border;
   }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
   }
   ::selection {
-    @apply bg-primary/20;
+    background: hsl(var(--foreground) / 0.12);
+    color: hsl(var(--foreground));
+  }
+  /* Elimina rings azules default; el ring institucional se aplica selectivo. */
+  *:focus {
+    outline: none;
+  }
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  /* Scroll bar discreta */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border-strong));
+    border-radius: 999px;
+    border: 2px solid hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
   }
 }
 
 @layer utilities {
-  .gradient-mesh {
+  /* Numerales tabulares para columnas alineadas en stats y tablas */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  /* Punto dorado de marca: pequeno marker antes del wordmark */
+  .gold-dot::before {
+    content: "";
+    display: inline-block;
+    width: 0.4em;
+    height: 0.4em;
+    background: hsl(var(--gold-bright));
+    border-radius: 999px;
+    margin-right: 0.55em;
+    vertical-align: 0.2em;
+  }
+  /* Subrayado dorado fino para acentos selectivos (tabs activos, secciones) */
+  .underline-gold {
+    box-shadow: inset 0 -2px 0 hsl(var(--gold-bright));
+  }
+  /* Trama de papel muy sutil para superficies grandes (sidebar) */
+  .grain {
     background-image:
-      radial-gradient(at 0% 0%, hsl(var(--primary) / 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsl(var(--primary) / 0.06) 0px, transparent 50%);
+      radial-gradient(hsl(var(--foreground) / 0.025) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0;
+  }
+  /* Pequena animacion de pulso para indicadores de estado activos */
+  @keyframes blink-soft {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+  }
+  .blink-soft {
+    animation: blink-soft 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  /* Aparicion sobria, sin spring */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .rise {
+    animation: rise 280ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  /* Stagger de palabras */
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  /* Stagger de letras con rebote sutil (back-out easing en el caller) */
+  @keyframes letter-rise {
+    0%   { opacity: 0; transform: translateY(28px); }
+    60%  { opacity: 1; }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  /* Aparición editorial sin rebote: fade + blur + slight rise.
+   * Calmada, lenta, refinada. Para texto descriptivo (variant="smooth"). */
+  @keyframes word-veil {
+    0%   { opacity: 0; transform: translateY(10px); filter: blur(8px); }
+    50%  { opacity: 0.8; filter: blur(2px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  /* Shimmer de texto estilo Claude "thinking…": el gradient se mueve
+   * de izquierda a derecha indefinidamente, dándole vida al texto sin
+   * recurrir a iconos giratorios ni barras de progreso. */
+  @keyframes shimmer-text {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .animate-shimmer-text {
+    animation: shimmer-text 4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  /* Toast: entra deslizando desde la derecha, sale igual. */
+  @keyframes toast-in {
+    0%   { opacity: 0; transform: translateX(110%); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes toast-out {
+    0%   { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(110%); }
+  }
+  .animate-toast-in {
+    animation: toast-in 320ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  .animate-toast-out {
+    animation: toast-out 240ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
 }

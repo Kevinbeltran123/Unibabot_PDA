@@ -2,17 +2,33 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+/*
+ * Badge institucional: tipografia uppercase pequena con tracking amplio.
+ * Sin halos ni glows. Borde 1px y fill traslucido del color de su rol.
+ * Variants: success (musgo), destructive (crimson), warning (gold), default
+ * (navy ink), secondary (gris papel), outline (transparente).
+ */
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  [
+    "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5",
+    "text-[0.625rem] font-medium uppercase tracking-institutional leading-none",
+    "transition-colors",
+  ].join(" "),
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary text-primary-foreground",
-        secondary: "border-transparent bg-secondary text-secondary-foreground",
-        destructive: "border-transparent bg-destructive/15 text-destructive border-destructive/30",
-        success: "border-transparent bg-success/15 text-success border-success/30",
-        warning: "border-transparent bg-warning/15 text-warning border-warning/30",
-        outline: "text-foreground",
+        default:
+          "border-foreground/20 bg-foreground/[0.04] text-foreground",
+        secondary:
+          "border-border-strong bg-paper-warm text-muted-foreground",
+        destructive:
+          "border-destructive/30 bg-destructive/[0.08] text-destructive",
+        success:
+          "border-success/30 bg-success/[0.08] text-success",
+        warning:
+          "border-gold/40 bg-gold/[0.08] text-gold",
+        outline:
+          "border-border-strong bg-transparent text-muted-foreground",
       },
     },
     defaultVariants: {
