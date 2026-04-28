@@ -4,12 +4,16 @@ Uso:
     python -m src.api.jobs.worker
 
 El worker corre en proceso separado de la API. Procesa jobs encolados
-con `enqueue_analysis`. Si el sistema corre en modo sincrono (UNIBABOT_API_SYNC_MODE=1),
-no se necesita worker.
+con `enqueue_analysis`.
+
+En macOS usamos SimpleWorker (no fork) porque librerias Cocoa-bound de
+Docling/torch/numpy crashean con `os.fork()` (objc fork-safety). En Linux
+forkear es lo normal y mas eficiente.
 """
 
 from __future__ import annotations
 
+import platform
 import sys
 from pathlib import Path
 
@@ -19,7 +23,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 
 def main() -> None:
-    from rq import Worker
+    from rq import SimpleWorker, Worker
 
     from src.api.config import get_settings
     from src.api.db import init_db
@@ -27,8 +31,13 @@ def main() -> None:
 
     init_db()
     settings = get_settings()
-    print(f"[worker] cola={settings.rq_queue_name} redis={settings.redis_url}")
-    worker = Worker([get_queue()], connection=get_redis())
+
+    WorkerCls = SimpleWorker if platform.system() == "Darwin" else Worker
+    print(
+        f"[worker] cola={settings.rq_queue_name} redis={settings.redis_url} "
+        f"using={WorkerCls.__name__}"
+    )
+    worker = WorkerCls([get_queue()], connection=get_redis())
     worker.work(with_scheduler=False)
 
 
