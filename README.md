@@ -322,3 +322,9 @@ Ver `Docs/UnibaBot_PDA.tex` y `results/evaluation_report.md` para el detalle de 
 
 Ingenieria de Sistemas, Universidad de Ibague, 2026A
 Asignatura: Agentes Inteligentes
+
+## Licencia y datos institucionales
+
+El codigo de este repositorio se distribuye bajo licencia [MIT](LICENSE). Esto cubre todo el pipeline (`src/`), el frontend (`web/`), tests, y la definicion de los lineamientos institucionales en `data/lineamientos/`.
+
+Los PDFs de PDAs reales bajo `PDAs/` y `data/chroma_db/` son datos academicos de la Universidad de Ibague y NO forman parte del repositorio publico (ver `.gitignore`). Reproducir las metricas requiere acceso autorizado a los PDAs originales del programa academico evaluado.

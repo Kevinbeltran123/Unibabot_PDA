@@ -1,7 +1,6 @@
 MIT License
 
-Copyright (c) 2026 Kevin Beltrán Martínez and Jeryleefth Lasso Motta
-Universidad de Ibagué — Faculty of Engineering, Systems Engineering Program
+Copyright (c) 2026 Kevin Beltrán Martínez and Jeryleefth Lasso Motta (Universidad de Ibagué)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,9 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-Note on the gold dataset and PDAs:
-The Academic Development Plan (PDA) PDFs under PDAs/ are property of the
-Universidad de Ibagué and are gitignored. The gold labels and rule definitions
-under data/lineamientos/ encode institutional guidelines and are licensed
-under the same MIT terms as the rest of this repository.
