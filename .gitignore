@@ -76,6 +76,11 @@ Docs/*
 !Docs/UnibaBot_PDA.pdf
 "PDA - Intelligent Agents 2026A-01.docx.pdf"
 
+# Documentos internos del equipo (planning + R&D dev log).
+# El reporte IEEE en Docs/UnibaBot_PDA.pdf cubre todo lo public-facing.
+ROADMAP.md
+results/accuracy_progression.md
+
 # === Backend FastAPI (m18+) ===
 .env
 .env.local
