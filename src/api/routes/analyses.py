@@ -90,6 +90,51 @@ async def create_analysis(
     pdf_path = settings.uploads_dir / f"{analysis_id}.pdf"
     pdf_path.write_bytes(contents)
 
+    # Validacion sincrona: el agente "lee" el PDF y rechaza si no parece PDA.
+    # Esto corre el parser pesado (Docling) ANTES de encolar para que el
+    # frontend reciba un 422 con mensaje natural y lo renderice como
+    # respuesta del asistente, no como toast.
+    try:
+        import sys
+        from pathlib import Path as _Path
+        sys.path.insert(0, str(_Path(__file__).parent.parent.parent))
+
+        from common.exceptions import PDFParseError as _PDFParseError
+        from pdf_parser import parsear_pda as _parsear_pda
+        from pda_classifier import clasificar_documento as _clasificar
+    except ImportError as exc:  # pragma: no cover - solo en setups rotos
+        pdf_path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "code": "INTERNAL_IMPORT_ERROR",
+                "message": f"Error de configuracion del servidor: {exc}",
+            },
+        )
+
+    try:
+        secciones = _parsear_pda(str(pdf_path))
+    except _PDFParseError as exc:
+        pdf_path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "PDF_PARSE_ERROR",
+                "message": (
+                    "No pude abrir el PDF. ¿Está dañado, vacío, o protegido "
+                    "con contraseña? Intenta re-exportarlo y subirlo de nuevo."
+                ),
+            },
+        ) from exc
+
+    es_pda, codigo_rechazo, mensaje_clasificador = _clasificar(secciones)
+    if not es_pda:
+        pdf_path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=422,
+            detail={"code": codigo_rechazo, "message": mensaje_clasificador},
+        )
+
     row = Analysis(
         id=analysis_id,
         user_id=current.id,

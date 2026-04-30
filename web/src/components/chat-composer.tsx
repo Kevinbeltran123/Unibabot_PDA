@@ -23,10 +23,22 @@ import { cn } from "@/lib/utils";
  * con nombre + opciones aplicadas y se habilita el send.
  *
  * Funcionalmente: al hacer send, llama useCreateAnalysis y navega a la
- * pantalla de processing del id retornado.
+ * pantalla de processing del id retornado. Si el backend rechaza el PDF
+ * con 422 (no es PDA, escaneado, corrupto, etc.) llama a `onRejection`
+ * para que el dashboard renderice la respuesta como AssistantMessage en
+ * lugar de mostrarla como toast efimero.
  */
 
-export function ChatComposer() {
+export interface ChatComposerProps {
+  onRejection?: (params: {
+    filename: string;
+    message: string;
+    code?: string;
+  }) => void;
+  onSubmitStart?: (filename: string) => void;
+}
+
+export function ChatComposer({ onRejection, onSubmitStart }: ChatComposerProps = {}) {
   const router = useRouter();
   const create = useCreateAnalysis();
   const [file, setFile] = React.useState<File | null>(null);
@@ -63,6 +75,9 @@ export function ChatComposer() {
       });
       return;
     }
+    const submittedName = file.name;
+    onSubmitStart?.(submittedName);
+
     const form = new FormData();
     form.append("file", file);
     form.append("modelo", "qwen2.5:14b");
@@ -76,6 +91,17 @@ export function ChatComposer() {
       const r = await create.mutateAsync(form);
       router.push(`/dashboard/analyses/${r.id}/processing`);
     } catch (err) {
+      // Rechazo del clasificador (no es PDA, escaneado, corrupto): renderizar
+      // como respuesta del asistente en el chat. Otros errores siguen como toast.
+      if (err instanceof ApiError && err.status === 422 && onRejection) {
+        onRejection({
+          filename: submittedName,
+          message: err.message,
+          code: err.code,
+        });
+        setFile(null);
+        return;
+      }
       const msg = err instanceof ApiError ? err.message : "Error inesperado";
       toast({
         title: "No se pudo iniciar el análisis",

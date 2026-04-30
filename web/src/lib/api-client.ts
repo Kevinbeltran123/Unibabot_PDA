@@ -17,7 +17,11 @@ export function clearToken(): void {
 }
 
 class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string,
+    public code?: string,
+  ) {
     super(message);
   }
 }
@@ -40,14 +44,21 @@ async function request<T>(
   }
   const res = await fetch(`${API}${path}`, { ...rest, headers: finalHeaders });
   if (!res.ok) {
-    let detail = res.statusText;
+    let detail: string = res.statusText;
+    let code: string | undefined;
     try {
       const body = await res.json();
-      detail = body?.detail || detail;
+      const raw = body?.detail;
+      if (raw && typeof raw === "object" && "message" in raw) {
+        detail = String(raw.message);
+        code = typeof raw.code === "string" ? raw.code : undefined;
+      } else if (typeof raw === "string") {
+        detail = raw;
+      }
     } catch {
       /* ignore */
     }
-    throw new ApiError(res.status, detail);
+    throw new ApiError(res.status, detail, code);
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;

@@ -75,7 +75,17 @@ def client(fake_report, tmp_path, monkeypatch):
 
     db_module.Base.metadata.create_all(bind=engine)
 
-    with patch("agent.analizar_pda", return_value=fake_report):
+    fake_secciones = {
+        "informacion general": "programa nombre tipo modalidad creditos docente " * 20,
+        "estrategia pedagogica": "ABP magistral metodologia estrategia " * 20,
+        "RAE": "resultado de aprendizaje aprendiz competencia " * 20,
+    }
+    with patch("agent.analizar_pda", return_value=fake_report), patch(
+        "pdf_parser.parsear_pda", return_value=fake_secciones
+    ), patch(
+        "pda_classifier.clasificar_documento",
+        return_value=(True, None, "ok"),
+    ):
         from src.api.main import app
 
         # Override get_db dependency para que use el engine de tests

@@ -55,3 +55,23 @@ class PDFParseError(UnibabotError):
     Casos: PDF corrupto, demasiado grande para la memoria disponible,
     formato no soportado, OCR fallido cuando esta habilitado.
     """
+
+
+class InvalidPDAError(UnibabotError):
+    """El documento subido no es un PDA institucional reconocible.
+
+    El clasificador rule-based determino que el contenido no tiene
+    suficiente estructura canonica para ser un Plan de Desarrollo
+    Academico. Pensado para rechazar temprano (antes del LLM caro)
+    syllabi de otras instituciones, papers, tesis, escaneados sin OCR.
+
+    Atributos:
+        code: identificador maquina-legible del caso (NOT_A_PDA,
+            EMPTY_OR_SCANNED, INSUFFICIENT_STRUCTURE, OLD_TEMPLATE).
+        message: texto en espanol listo para mostrar al usuario en chat.
+    """
+
+    def __init__(self, code: str, message: str) -> None:
+        super().__init__(message)
+        self.code = code
+        self.message = message
