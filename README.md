@@ -28,33 +28,69 @@ Cada semestre, las oficinas de los programas academicos de la Universidad de Iba
 
 ## Arquitectura
 
+El sistema tiene **dos capas independientes**: el motor de cumplimiento (la inteligencia) y el stack de produccion (la operacion).
+
+### Capa 1 — Motor de cumplimiento (pipeline AI)
+
 ```
 PDF del PDA
     |
     v
-[1. Extraccion + segmentacion]   src/pdf_parser.py
-    |                            Docling + segmentacion por secciones
+[1. Extraccion + segmentacion]    src/pdf_parser.py
+    |                             Docling + segmentacion por secciones
     v
-[2. Rule-based estructural]      src/rules/estructural_checker.py
-    |                            11 checkers deterministicos (EST-001..011)
-    |                            100% precision en reglas estructurales
+[2. Rule-based estructural]       src/rules/estructural_checker.py
+    |                             11 checkers deterministicos (EST-001..011)
+    |                             100% precision en reglas estructurales
     v
-[3. Despacho de reglas]          src/rag/rule_dispatcher.py
-    |                            Mapea 168 reglas (reglas.json) a secciones del PDA
-    |                            Match por nombre de seccion + fallback por keywords
+[3. Clasificador de tipo PDA]     src/pda_classifier.py
+    |                             Rechaza temprano docs que no son PDA
+    |                             (papers, syllabi, escaneados sin OCR)
     v
-[4. Extraccion de declaraciones] src/rules/declaracion_extractor.py
-    |                            1 llamada LLM por PDA (Qwen 2.5 14B)
-    |                            Extrae codigos canonicos (C1, 1b, SP5, D4, ABET X.Y)
-    |                            src/prompts/extraccion_prompt.txt
+[4. Despacho de reglas]           src/rag/rule_dispatcher.py
+    |                             Mapea 168 reglas (reglas.json) a secciones
+    |                             Match por nombre de seccion + keyword fallback
     v
-[5. Matcher deterministico]      src/rules/declaracion_checker.py
-    |                            Regex por tipo + set intersection
-    |                            Compliance 100% reproducible y auditable
+[5. Extraccion de declaraciones]  src/rules/declaracion_extractor.py
+    |                             1 llamada LLM por PDA (Qwen 2.5 14B)
+    |                             Extrae codigos canonicos (C1, 1b, SP5, D4, ABET X.Y)
+    |                             src/prompts/extraccion_prompt.txt
     v
-[6. Reporte estructurado]        results/reports_<tag>.json
-                                 regla_id / estado / evidencia / correccion
+[6. Matcher deterministico]       src/rules/declaracion_checker.py
+    |                             Regex por tipo + set intersection
+    |                             Compliance 100% reproducible y auditable
+    v
+[7. Enrichment LLM (opt-in)]      src/enrichment/correction_writer.py
+    |                             src/enrichment/summary_writer.py
+    |                             Cache SHA-256 idempotente
+    v
+[8. Reporte estructurado]         results/reports_<tag>.json
+                                  regla_id / estado / evidencia / correccion
 ```
+
+### Capa 2 — Stack de produccion (web + cola + worker)
+
+```
+Navegador (Next.js 14)                                      web/
+    |        chat UI, dark mode, SSE de progreso
+    |        upload con validacion sincrona y rechazo conversacional
+    v
+HTTP / SSE
+    |
+    v
+FastAPI :8000     auth JWT, endpoints REST, SSE de progreso        src/api/
+    |             validacion sincrona del PDA antes de encolar
+    |             encola job en RQ
+    v
+Redis :6379       broker de RQ + canal pub/sub para progreso en vivo
+    |
+    v
+RQ Worker         consume cola, corre el motor de cumplimiento     src/api/jobs/
+                  publica eventos de progreso por canal pub/sub    SimpleWorker en macOS y Windows
+                  guarda reporte en data/reports/                  Worker estandar (fork) en Linux
+```
+
+Cada PDA subido por la web pasa por el motor de cumplimiento exactamente igual que cuando se invoca por CLI: el stack de produccion solo cambia COMO se invoca y COMO se entregan los resultados, no QUE evalua. Eso preserva la auditabilidad: el reporte que ve la oficina del programa academico es identico al reporte que produce `python src/agent.py` localmente.
 
 **Evolucion de resultados — hitos principales:**
 
@@ -75,66 +111,87 @@ PDF del PDA
 
 *m8b: accuracy 1.000 sobre 45/48 entradas matcheadas, 3 excluidas por retrieval semantico. El salto de m8b a m11 no es una regresion: m11 introdujo evaluacion 100% deterministica revelando incumplimientos que el retrieval semantico omitia por no recuperarlos en el top-k.*
 
-Ver [results/evaluation_report.md](results/evaluation_report.md) y [results/accuracy_progression.md](results/accuracy_progression.md) para el detalle completo por iteracion.
+Ver [results/accuracy_progression.md](results/accuracy_progression.md) y [results/rag_vs_rules_benchmark.md](results/rag_vs_rules_benchmark.md) para el detalle por iteracion y la comparacion empirica entre las dos arquitecturas exploradas.
 
 ## Estructura del proyecto
 
 ```
 Unibabot_PDA/
-  src/
-    pdf_parser.py                # Extraccion y segmentacion de PDAs
-    agent.py                     # Pipeline completo del agente
-    evaluate.py                  # Evaluacion contra gold dataset (train/test)
-    generar_reglas.py            # Genera reglas desde JSON_archives/
-    schemas.py                   # Modelos Pydantic para validacion estricta
+  src/                                # Motor de cumplimiento (capa 1)
+    agent.py                          # Pipeline completo invocado desde CLI / API / Streamlit
+    pdf_parser.py                     # Extraccion + segmentacion con Docling
+    pda_classifier.py                 # Clasificador rule-based "esto es un PDA?"
+    evaluate.py                       # Evaluacion contra gold dataset (train/test)
+    generar_reglas.py                 # Genera reglas desde JSON_archives/
+    schemas.py                        # Modelos Pydantic para validacion estricta
     common/
-      text.py                    # Normalizacion de texto (normalizar())
-      logging_config.py          # Logging estructurado con structlog + @timed
-      exceptions.py              # Excepciones tipadas (UnibabotError, LLMError...)
-      ollama_client.py           # Wrapper ollama con timeout configurable
+      text.py                         # Normalizacion de texto (normalizar())
+      logging_config.py               # structlog + decorador @timed
+      exceptions.py                   # Excepciones tipadas (UnibabotError, LLMError, InvalidPDAError)
+      ollama_client.py                # Wrapper ollama con timeout configurable
     prompts/
-      extraccion_prompt.txt          # Prompt de extraccion de codigos declarados (m13)
-      compliance_prompt.txt          # Prompt de evaluacion LLM (fallback legacy)
-      retry_prompt.txt               # Prompt de retry para JSON invalido
-      correccion_prescriptiva.txt    # Prompt para correccion enriquecida (m17)
-      resumenes.txt                  # Prompt para resumenes oficina + docente (m17)
+      extraccion_prompt.txt           # Prompt de extraccion de codigos declarados (m13)
+      compliance_prompt.txt           # Prompt de evaluacion LLM (fallback legacy)
+      retry_prompt.txt                # Prompt de retry para JSON invalido
+      correccion_prescriptiva.txt     # Prompt para correccion enriquecida (m17)
+      resumenes.txt                   # Prompt para resumenes oficina + docente (m17)
     rules/
-      estructural_checker.py     # 11 checkers rule-based (EST-001..011)
-      declaracion_extractor.py   # Extractor LLM de codigos canonicos (m13)
-      declaracion_checker.py     # Matcher deterministico (m13)
-    enrichment/                  # Enrichment LLM opt-in (m17)
-      cache.py                   # Cache en disco SHA-256 (idempotencia bit-a-bit)
-      correction_writer.py       # Texto prescriptivo por hallazgo NO CUMPLE
-      summary_writer.py          # Resumenes ejecutivo (oficina) + didactico (docente)
+      estructural_checker.py          # 11 checkers rule-based (EST-001..011)
+      declaracion_extractor.py        # Extractor LLM de codigos canonicos (m13)
+      declaracion_checker.py          # Matcher deterministico (m13)
+    enrichment/                       # Enrichment LLM opt-in (m17)
+      cache.py                        # Cache en disco SHA-256 (idempotencia bit-a-bit)
+      correction_writer.py            # Texto prescriptivo por hallazgo NO CUMPLE
+      summary_writer.py               # Resumenes ejecutivo (oficina) + didactico (docente)
     rag/
-      rule_dispatcher.py         # PRODUCCION: despacho determinista por seccion (m11+)
-      seccion_mapping.py         # PRODUCCION: keyword_parser -> [seccion_pda]
-      ingest.py                  # ALTERNATIVO: ingesta semantica en ChromaDB (m0-m10)
-      retriever.py               # ALTERNATIVO: busqueda semantica top-k (m0-m10)
-      embeddings.py              # ALTERNATIVO: SBERT custom embedding function
-      reranker.py                # ALTERNATIVO: cross-encoder reranker (m9)
+      rule_dispatcher.py              # PRODUCCION: despacho determinista por seccion (m11+)
+      seccion_mapping.py              # PRODUCCION: keyword_parser -> [seccion_pda]
+      ingest.py / retriever.py /
+      embeddings.py / reranker.py     # ALTERNATIVO: via RAG semantica (m0-m10), referencia comparativa
+    api/                              # Backend FastAPI (m18)
+      main.py                         # App factory + middlewares (CORS, JWT)
+      auth.py                         # Login, registro, JWT
+      config.py                       # Settings via pydantic-settings
+      db.py                           # SQLAlchemy + SQLite, sesiones por request
+      models.py / schemas.py          # ORM + DTOs
+      routes/auth.py                  # /api/auth/{login,register,me}
+      routes/analyses.py              # POST upload + validacion sincrona, GET list/detail, SSE de progreso
+      jobs/queue.py                   # Encolar al RQ
+      jobs/tasks.py                   # Task que invoca agent.analizar_pda con callback de progreso
+      jobs/progress.py                # SSE generator que lee del canal pub/sub Redis
+      jobs/worker.py                  # Entrypoint del worker (SimpleWorker en macOS/Windows)
+  web/                                # Frontend Next.js 14 (m18)
+    src/app/                          # App Router: /login, /register, /dashboard
+    src/components/                   # chat-composer, chat-message, chat-rejection, ui/* (shadcn-style)
+    src/hooks/                        # use-auth, use-analyses, use-progress-stream, use-toast
+    src/lib/                          # api-client (fetch + JWT), types, utils
+    tests/                            # Playwright E2E
+    Dockerfile                        # Build production con node:20-alpine
+    scripts/icloud-fix.js             # Postinstall portable (Node, sin bash)
+  tests/                              # Suite Python
+    test_pda_classifier.py            # 7 casos sinteticos del clasificador
+    api/test_auth.py / test_analyses.py # 10 tests del backend (incluye casos 422 de rejection)
+    api/conftest.py                   # Fixtures (DB en memoria, mocks, SYNC_MODE)
   data/
-    lineamientos/
-      reglas.json                # 179 reglas codificadas (11 EST + 168 COMP)
-    gold_labels.json             # Gold dataset train (51 entradas, 3 PDAs)
-    gold_labels_test.json        # Gold dataset test hold-out (55 entradas, 3 PDAs)
+    lineamientos/reglas.json          # 179 reglas codificadas (11 EST + 168 COMP)
+    gold_labels.json                  # Gold train (51 entradas, 3 PDAs)
+    gold_labels_test.json             # Gold test hold-out (55 entradas, 3 PDAs)
+    unibabot.db                       # SQLite del backend (gitignored)
   results/
-    evaluation_report.md         # Reporte completo con metricas por iteracion (m1-m16)
-    accuracy_progression.md      # Tabla de progresion de accuracy (m1-m16)
-    metrics_<tag>.json           # Metricas por snapshot (gitignored)
-    reports_<tag>.json           # Reportes crudos del agente (gitignored)
-  cache/                         # Cache de enrichment LLM (gitignored, m17)
-    enrichment/                  # Salidas LLM hasheadas SHA-256 por inputs
-  PDAs/                          # PDAs reales en PDF (6 documentos, gitignored)
-  JSON_archives/                 # Datos institucionales (ABET, competencias, cursos)
-  Docs/                          # Documentacion tecnica y academica
-    ARCHITECTURE.md              # Arquitectura tecnica del sistema (m13)
-    EXPLICACION_TECNICA.md       # Documentacion exhaustiva para presentacion
-  streamlit_app.py               # Interfaz web (Streamlit)
-  webapp/                        # Componentes adicionales de la UI web
-  ROADMAP.md                     # Plan de implementacion historico
-  CLAUDE.md                      # Instrucciones del proyecto
-  requirements.txt               # Dependencias Python
+    accuracy_progression.md           # Tabla de progresion de accuracy (m1-m17)
+    rag_vs_rules_benchmark.md         # Head-to-head rule-driven vs RAG semantico
+    metrics_<tag>.json                # Metricas por snapshot (gitignored)
+    reports_<tag>.json                # Reportes crudos del agente (gitignored)
+  cache/enrichment/                   # Cache LLM hasheado SHA-256 (gitignored, m17)
+  PDAs/                               # PDAs reales en PDF (gitignored, datos institucionales)
+  JSON_archives/                      # Datos institucionales (ABET, competencias, cursos)
+  Docs/UnibaBot_PDA.pdf               # Reporte tecnico IEEE (drafts y .tex gitignored)
+  docker-compose.yml                  # Orquesta redis + api + worker + web
+  api.Dockerfile / worker.Dockerfile  # Imagenes Python 3.12 con FastAPI / RQ
+  streamlit_app.py + webapp/          # Demo legacy con Streamlit (sigue funcional)
+  requirements.txt                    # Dependencias core (pipeline + Streamlit)
+  requirements-api.txt                # Adicionales para FastAPI + RQ
+  LICENSE                             # MIT
 ```
 
 ## Requisitos
@@ -170,7 +227,16 @@ python src/generar_reglas.py
 
 ### Interfaz web "produccion" (FastAPI + Next.js, m18)
 
-Stack alternativo orientado a entrega final: autenticacion por usuario, cola asincrona de jobs, frontend con dark mode y descarga de reportes. Streamlit sigue funcionando para presentaciones de avance; este stack es opt-in.
+Stack orientado a entrega final y operacion multi-usuario. Streamlit sigue funcionando como demo de avance; este stack es la ruta canonica para deployment.
+
+**Caracteristicas principales:**
+
+- **Auth por usuario** con JWT (registro, login, validacion en cada request).
+- **Cola asincrona de jobs** (RQ + Redis): el upload responde en ~5-10s con un `analysis_id`; el analisis pesado (~5 min) corre en el worker sin bloquear la API.
+- **SSE de progreso en vivo**: el frontend se suscribe a `/api/analyses/{id}/events` y recibe eventos por canal pub/sub Redis (`extractor_start`, `extractor_done`, `enrichment_start`, etc.). El usuario ve el progreso seccion por seccion sin polling.
+- **Validacion sincrona del PDA antes de encolar**: si el documento no parece un PDA (paper, syllabus, escaneado sin OCR, corrupto), el endpoint responde HTTP 422 con un codigo y mensaje natural. El frontend renderiza la respuesta como un mensaje del asistente en el chat ("Este documento parece academico pero no es un PDA. Solo reconoci 3/11 secciones canonicas..."), no como toast efimero.
+- **UI estilo conversacion**: dashboard en Next.js 14 con dark mode, mensajes de usuario y asistente, descarga del reporte JSON, listado de analisis pasados.
+- **Cobertura por tests:** suite pytest del backend (10/10 verde) + tests Playwright E2E del frontend.
 
 **Recomendado en cualquier sistema operativo:** levantar todo con Docker Compose. Un solo comando, cero dependencias en el host (excepto Docker y Ollama):
 
@@ -179,9 +245,9 @@ Stack alternativo orientado a entrega final: autenticacion por usuario, cola asi
 docker compose up --build
 ```
 
-Esto arranca redis + api + worker + web. Frontend en `http://localhost:3000`, API en `http://localhost:8000`. El `worker` corre en un contenedor Linux (fork natural), asi que **es la unica via soportada en Windows** dado que RQ no soporta `os.fork()` nativo en ese sistema.
+Esto arranca redis + api + worker + web. Frontend en `http://localhost:3000`, API en `http://localhost:8000`. El `worker` corre en un contenedor Linux (fork natural), asi que **es la unica via soportada en Windows** dado que RQ no soporta `os.fork()` nativo.
 
-**Dev local en macOS / Linux** (mas rapido para iterar pero requiere 4 terminales):
+**Dev local en macOS / Linux** (mas rapido para iterar, requiere 4 terminales):
 
 ```bash
 # 1. Backend
@@ -198,11 +264,9 @@ npm install
 npm run dev       # Next.js en http://localhost:3000
 ```
 
-En macOS el worker se autoselecciona como `SimpleWorker` (sin fork) para evitar crashes de Docling/torch con objc fork-safety. En Linux usa el `Worker` estandar con fork. En Windows nativo solo SimpleWorker funciona, pero la ruta soportada es Docker Compose.
+En macOS el worker se autoselecciona como `SimpleWorker` (sin fork) para evitar crashes de Docling/torch con objc fork-safety. En Linux usa el `Worker` estandar con fork. En Windows nativo solo `SimpleWorker` funciona, pero la ruta soportada es Docker Compose.
 
 **Notas sobre `npm install`:** el postinstall hook (`web/scripts/icloud-fix.js`) corre en Node y es noop en cualquier sistema que no este bajo iCloud Drive de macOS. No requiere bash, asi que funciona en Windows nativo, Linux nativo, e imagenes Docker Alpine sin modificacion.
-
-Detalles completos en [Docs/PRODUCCION.md](Docs/PRODUCCION.md): endpoints REST, variables de entorno, flujo de un analisis con SSE, y comparacion vs Streamlit.
 
 ### Interfaz web (Streamlit, demo de avance)
 
@@ -292,9 +356,9 @@ El proyecto exploro dos arquitecturas antes de quedarse con la actual. Ambos sig
 - **Rule-driven (PRODUCCION, m11+):** `rag/rule_dispatcher.py` + `rag/seccion_mapping.py`. Despacha cada regla a la seccion del PDA donde debe declararse via match por nombre + keyword fallback. Sin embeddings, sin base vectorial, sin dependencias ML pesadas. **Mas escalable**: 168 reglas hoy, miles manana, mismo costo en tiempo de inferencia (O(n) lookup en memoria).
 - **RAG semantico (ALTERNATIVO, m0-m10):** `rag/ingest.py` + `rag/retriever.py` + `rag/embeddings.py` + `rag/reranker.py`. ChromaDB + SBERT multilingue + cross-encoder reranker recuperaban reglas top-k por similitud. Funcional pero mas costoso (ingesta inicial, persistencia de la base vectorial, dependencias) y con problemas de cobertura: m11 demostro que pasar a despacho explicito subio la cobertura del gold de 38/55 a 55/55.
 
-Tambien se exploro **fine-tuning con QLoRA (m7)**: Llama 3.2 3B fine-tuneado con 42 ejemplos en Colab T4. El modelo entro en loops de generacion y fue descartado. La mejora vino despues por ingenieria del pipeline (m8-m13), no por especializacion del modelo. Los scripts y datasets de fine-tuning si fueron eliminados; solo queda registro en el reporte IEEE y en `Docs/secciones/10_fine_tuning.md`.
+Tambien se exploro **fine-tuning con QLoRA (m7)**: Llama 3.2 3B fine-tuneado con 42 ejemplos en Colab T4. El modelo entro en loops de generacion y fue descartado. La mejora vino despues por ingenieria del pipeline (m8-m13), no por especializacion del modelo. Los scripts y datasets de fine-tuning fueron eliminados del repo; el registro completo del experimento queda en el reporte IEEE.
 
-Ver `Docs/UnibaBot_PDA.tex` y `results/evaluation_report.md` para el detalle de cada iteracion.
+Ver [Docs/UnibaBot_PDA.pdf](Docs/UnibaBot_PDA.pdf) y [results/accuracy_progression.md](results/accuracy_progression.md) para el detalle de cada iteracion.
 
 ## Decisiones tecnicas clave
 
@@ -306,7 +370,37 @@ Ver `Docs/UnibaBot_PDA.tex` y `results/evaluation_report.md` para el detalle de 
 
 4. **Despacho explicito sin retrieval semantico:** `rule_dispatcher.py` mapea cada regla al nombre de seccion del PDA donde debe declararse, con keyword-fallback cuando el nombre no matchea. No hay base vectorial ni embeddings en produccion: el matching es por strings normalizados, 100% reproducible, sin dependencias ML pesadas, y escalable a miles de reglas sin re-indexacion. La via RAG semantica (`ingest.py`/`retriever.py`/`embeddings.py`/`reranker.py`) sigue en `src/rag/` como referencia comparativa.
 
-5. **Gold dataset como evidencia de generalizacion:** El test hold-out con 3 PDAs nunca vistos durante el desarrollo (accuracy 0.982) demuestra que el sistema no memoriza patrones de los PDAs de entrenamiento.
+5. **Gold dataset como evidencia de generalizacion:** El test hold-out con 3 PDAs nunca vistos durante el desarrollo (accuracy 1.000) demuestra que el sistema no memoriza patrones de los PDAs de entrenamiento.
+
+## Escalabilidad y operacion
+
+El stack de produccion (capa 2) esta disenado para escalar desde un solo usuario en un Mac M3 hasta una oficina academica con varios programas usando el sistema simultaneamente.
+
+**Cola asincrona desacopla upload de inferencia.** El endpoint `POST /api/analyses` valida el documento (~5-10s con Docling) y encola un job en RQ; el HTTP responde 202 con un `analysis_id` antes de ejecutar la fase pesada. El worker consume la cola al ritmo del LLM (~5 min por PDA). Si llegan 20 PDAs en 5 minutos, no se pierde ninguno: la cola los serializa y el frontend muestra estado `pending` hasta que termina cada uno.
+
+**API stateless, escala horizontal.** FastAPI no guarda estado por request (el JWT lleva el `user_id`, la sesion vive solo en SQLite). Detras de un load balancer se puede correr N replicas de la API sin coordinacion. SQLite se cambia por Postgres con un solo cambio de variable de entorno (`DATABASE_URL`).
+
+**Worker stateless, escala N replicas.** Cada worker pulla del mismo Redis. Anadir un segundo worker dobla el throughput hasta saturar Ollama (que es el cuello de botella real, no la app). Si Ollama se mueve a un servidor con GPU dedicada (`OLLAMA_HOST=http://gpu-server:11434`), los workers en Linux/Docker pueden correr en CPU normal sin afectar la latencia.
+
+**Cache SHA-256 idempotente.** El enrichment LLM (m17) cachea cada salida hasheada por modelo + prompt + inputs. Re-correr el mismo PDA con `--enriquecer --resumen` la segunda vez no invoca al LLM: lectura directa de `cache/enrichment/<sha>.json`. La cache se monta como volumen Docker, asi que sobrevive reinicios de containers.
+
+**Validacion temprana evita procesar basura.** El clasificador rule-based (`pda_classifier.py`) corre sincrono en el upload y rechaza documentos que no son PDAs (papers, syllabi, escaneados sin OCR) ANTES de encolar. El usuario no espera 5 minutos para ver "no es un PDA"; recibe el rechazo en segundos como respuesta del asistente en el chat. Esto protege la cola de jobs imposibles y reduce costo de Ollama para uploads erroneos.
+
+**Observabilidad operacional.**
+
+- `structlog` con output JSON activable por env (`UNIBABOT_LOG_JSON=1`). Listo para Splunk / Datadog / Grafana Loki.
+- Decorador `@timed("event")` en operaciones criticas (parsing, extraccion LLM, validacion).
+- SSE per-analysis stream: cada job publica eventos en el canal `progress:{analysis_id}` y la API los reenvia al frontend. Util para diagnostico ("se quedo pegado en `extractor_start`").
+- Excepciones tipadas (`UnibabotError` -> `LLMError` -> `LLMUnavailableError` / `LLMTimeoutError` / `LLMResponseError`, `PDFParseError`, `InvalidPDAError`). Distingue fatales de recuperables.
+
+**Cross-platform comprobado.**
+
+- macOS: dev local con 4 terminales o docker-compose. `SimpleWorker` evita crashes de fork-safety con Cocoa-bound libs.
+- Linux: dev local con `Worker` estandar (fork natural) o docker-compose. Recomendado para deploy real.
+- Windows: docker-compose es la unica via soportada (RQ no soporta `os.fork()` nativo en Windows; el worker corre en contenedor Linux).
+- iCloud Drive en macOS: el postinstall de `web/` es un script Node que detecta iCloud y crea symlinks a `.nosync/` para evitar evictions. En cualquier otro sistema hace noop.
+
+**Surface de dependencias minima.** El motor de cumplimiento usa Docling, Qwen via Ollama, y librerias estandar de Python. El stack de produccion suma FastAPI, RQ, Redis, Next.js. La via RAG semantica (ChromaDB + SBERT + cross-encoder) sigue como ruta alternativa pero NO esta en la dependencia critica del path de produccion: removerla del entorno no rompe nada esencial.
 
 ## Limitaciones identificadas
 

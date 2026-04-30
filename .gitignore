@@ -70,7 +70,10 @@ checkpoints/
 
 # === Proyecto ===
 CLAUDE.md
-Docs/
+# Docs/ contiene drafts, notas internas y presentaciones; solo trackeamos
+# el reporte tecnico IEEE final (referenciado desde el README).
+Docs/*
+!Docs/UnibaBot_PDA.pdf
 "PDA - Intelligent Agents 2026A-01.docx.pdf"
 
 # === Backend FastAPI (m18+) ===
