@@ -1,6 +1,17 @@
 # UnibaBot PDA
 
-Agente inteligente para la verificacion automatizada de Planes de Desarrollo Academico (PDA) de la Universidad de Ibague. El sistema recibe un PDA en formato PDF, lo evalua contra 179 lineamientos institucionales codificados, y genera un reporte estructurado de cumplimiento.
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
+[![Test accuracy](https://img.shields.io/badge/test%20accuracy-1.000-success.svg)](#evaluacion)
+[![LLM](https://img.shields.io/badge/LLM-Qwen%202.5%2014B-7c3aed.svg)](https://huggingface.co/Qwen/Qwen2.5-14B-Instruct)
+[![Backend](https://img.shields.io/badge/backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+[![Frontend](https://img.shields.io/badge/frontend-Next.js%2014-black.svg)](https://nextjs.org/)
+
+Agente inteligente para la verificacion automatizada de Planes de Desarrollo Academico (PDA) de la Universidad de Ibague. El sistema recibe un PDA en formato PDF, lo evalua contra 179 lineamientos institucionales codificados, y genera un reporte estructurado de cumplimiento con evidencia citada y correcciones sugeridas.
+
+> **Asignatura:** Agentes Inteligentes — Ingenieria de Software, Universidad de Ibague (2025-2026).
+> **Autores:** Kevin Beltran Martinez (2220221003), Jeryleefth Lasso Motta (2220231074).
+> **Reporte tecnico:** [Docs/UnibaBot_PDA.pdf](Docs/UnibaBot_PDA.pdf) (formato IEEE).
 
 **Resultados sobre gold dataset (106 entradas, 6 PDAs reales) — produccion m17:**
 
