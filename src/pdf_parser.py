@@ -53,25 +53,16 @@ def normalizar(texto: str) -> str:
 
 
 def _tabla_a_texto(table_item: TableItem, doc: DoclingDocument) -> str:
-    """Convierte una tabla de Docling a texto plano insertable en el contenido.
+    """Tabla Docling -> markdown una-linea-por-fila.
 
-    TODO(user): revisar y ajustar este helper. Implementacion actual es
-    placeholder funcional. Considerar:
-
-    - EST-007 busca regex de porcentajes (\\d+\\s*%) y fechas (semana N,
-      DD/MM/YYYY, meses en espanol) sobre el texto de la seccion. El formato
-      debe preservar esos patrones en una sola linea recuperable por regex.
-    - El LLM (qwen2.5:14b) ve este texto cuando la seccion se le envia para
-      extraccion de declaraciones; formato legible mejora recall.
-    - Celdas multi-linea: to_markdown() puede colapsar newlines con <br>.
-    - Filas/columnas vacias: artefacto de fusion de celdas; pueden romper
-      el alineamiento de pipes.
-    - index=False evita columna de indice 0/1/2... inutil.
-
-    El default abajo es "markdown con pipes". Sustituir si el gate de eval
-    (accuracy >= 0.982) falla y el problema rastrea hasta aqui.
+    Filas/columnas vacias eliminadas (artefactos de fusion de celdas) y
+    newlines internos en celdas reemplazados por ' / ' para preservar
+    porcentajes y fechas en una sola linea recuperable por la regex de
+    EST-007.
     """
     df = table_item.export_to_dataframe(doc=doc)
+    df = df.dropna(how="all").dropna(how="all", axis=1)
+    df = df.map(lambda v: " / ".join(str(v).split("\n")) if isinstance(v, str) else v)
     return df.to_markdown(index=False)
 
 

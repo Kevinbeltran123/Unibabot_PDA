@@ -57,6 +57,7 @@ KEYWORDS_SECCIONES_RELEVANTES = [
     "purpose", "proposito",
     "description", "descripcion",
     "context", "contexto",
+    "abet",  # captura "ABET:" como heading top-level cuando aparece sin padre
 ]
 
 # Fallback: si una seccion contiene codigos canonicos literales, incluir
