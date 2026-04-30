@@ -6,9 +6,15 @@ Uso:
 El worker corre en proceso separado de la API. Procesa jobs encolados
 con `enqueue_analysis`.
 
-En macOS usamos SimpleWorker (no fork) porque librerias Cocoa-bound de
-Docling/torch/numpy crashean con `os.fork()` (objc fork-safety). En Linux
-forkear es lo normal y mas eficiente.
+Seleccion de WorkerCls por plataforma:
+
+- macOS (Darwin): SimpleWorker. Las librerias Cocoa-bound de Docling /
+  torch / numpy crashean con `os.fork()` (objc fork-safety).
+- Windows: SimpleWorker. Windows no soporta `os.fork()` en absoluto.
+  Recomendado: en Windows levantar el stack con `docker-compose up` para
+  que el worker corra en un contenedor Linux (fork natural) sin las
+  limitaciones del sistema host.
+- Linux: Worker estandar. Forkear es lo normal y mas eficiente.
 """
 
 from __future__ import annotations
@@ -32,10 +38,11 @@ def main() -> None:
     init_db()
     settings = get_settings()
 
-    WorkerCls = SimpleWorker if platform.system() == "Darwin" else Worker
+    sistema = platform.system()
+    WorkerCls = SimpleWorker if sistema in ("Darwin", "Windows") else Worker
     print(
         f"[worker] cola={settings.rq_queue_name} redis={settings.redis_url} "
-        f"using={WorkerCls.__name__}"
+        f"sistema={sistema} using={WorkerCls.__name__}"
     )
     worker = WorkerCls([get_queue()], connection=get_redis())
     worker.work(with_scheduler=False)

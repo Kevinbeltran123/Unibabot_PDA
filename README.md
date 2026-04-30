@@ -161,6 +161,17 @@ python src/generar_reglas.py
 
 Stack alternativo orientado a entrega final: autenticacion por usuario, cola asincrona de jobs, frontend con dark mode y descarga de reportes. Streamlit sigue funcionando para presentaciones de avance; este stack es opt-in.
 
+**Recomendado en cualquier sistema operativo:** levantar todo con Docker Compose. Un solo comando, cero dependencias en el host (excepto Docker y Ollama):
+
+```bash
+# Asegurate de que ollama esta corriendo en el host (ollama serve)
+docker compose up --build
+```
+
+Esto arranca redis + api + worker + web. Frontend en `http://localhost:3000`, API en `http://localhost:8000`. El `worker` corre en un contenedor Linux (fork natural), asi que **es la unica via soportada en Windows** dado que RQ no soporta `os.fork()` nativo en ese sistema.
+
+**Dev local en macOS / Linux** (mas rapido para iterar pero requiere 4 terminales):
+
 ```bash
 # 1. Backend
 pip install -r requirements-api.txt
@@ -176,13 +187,11 @@ npm install
 npm run dev       # Next.js en http://localhost:3000
 ```
 
-O con Docker Compose (un solo comando):
+En macOS el worker se autoselecciona como `SimpleWorker` (sin fork) para evitar crashes de Docling/torch con objc fork-safety. En Linux usa el `Worker` estandar con fork. En Windows nativo solo SimpleWorker funciona, pero la ruta soportada es Docker Compose.
 
-```bash
-docker compose up --build
-```
+**Notas sobre `npm install`:** el postinstall hook (`web/scripts/icloud-fix.js`) corre en Node y es noop en cualquier sistema que no este bajo iCloud Drive de macOS. No requiere bash, asi que funciona en Windows nativo, Linux nativo, e imagenes Docker Alpine sin modificacion.
 
-Detalles completos en [docs/PRODUCCION.md](docs/PRODUCCION.md): endpoints REST, variables de entorno, flujo de un analisis con SSE, y comparacion vs Streamlit.
+Detalles completos en [Docs/PRODUCCION.md](Docs/PRODUCCION.md): endpoints REST, variables de entorno, flujo de un analisis con SSE, y comparacion vs Streamlit.
 
 ### Interfaz web (Streamlit, demo de avance)
 
