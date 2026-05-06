@@ -73,3 +73,71 @@ class AnalysisCreated(BaseModel):
 
     id: str
     status: AnalysisStatus
+
+
+# --- Share tokens ---
+
+
+class ShareCreate(BaseModel):
+    """Body de POST /api/analyses/{id}/share."""
+
+    expires_in_days: int | None = Field(default=30, ge=1, le=365)
+
+
+class ShareSummary(BaseModel):
+    """Vista de listado de shares de un analisis. NO incluye token plano."""
+
+    id: str
+    audience: str
+    created_at: datetime
+    expires_at: datetime | None
+    revoked_at: datetime | None
+    last_accessed_at: datetime | None
+    access_count: int
+
+
+class ShareCreated(ShareSummary):
+    """Respuesta de POST /api/analyses/{id}/share. Incluye `token` y `url`
+    pero solo en esta respuesta; despues solo se ve el hash."""
+
+    token: str
+    url: str
+
+
+class SharedHallazgo(BaseModel):
+    """Hallazgo recortado para vista docente: solo NO CUMPLE con correccion."""
+
+    regla_id: str
+    regla: str
+    evidencia: str
+    correccion: str | None = None
+    correccion_enriquecida: str | None = None
+
+
+class SharedSeccion(BaseModel):
+    seccion: str
+    hallazgos: list[SharedHallazgo]
+
+
+class ShareReport(BaseModel):
+    """Reporte filtrado para la vista publica del docente.
+
+    No incluye: resumen para oficina, hallazgos CUMPLE, secciones internas
+    sin NO CUMPLE.
+    """
+
+    archivo: str
+    codigo_curso: str | None
+    total_no_cumple: int
+    resumen_docente: str | None = None
+    secciones: list[SharedSeccion]
+
+
+class SharePublic(BaseModel):
+    """Respuesta del endpoint publico GET /api/share/{token}."""
+
+    audience: str
+    shared_by: str  # email de la oficina, atribucion #4
+    analysis_completed_at: datetime | None
+    expires_at: datetime | None
+    report: ShareReport

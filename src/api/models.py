@@ -6,7 +6,7 @@ metadata indexable y status del job.
 
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -62,3 +62,40 @@ class Analysis(Base):
     duration_s: Mapped[float | None] = mapped_column(Float, default=None)
 
     user: Mapped["User"] = relationship(back_populates="analyses")
+    share_tokens: Mapped[list["ShareToken"]] = relationship(
+        back_populates="analysis",
+        cascade="all, delete-orphan",
+    )
+
+
+class ShareToken(Base):
+    """Link publico read-only para que un docente vea un reporte sin loguearse.
+
+    Solo se almacena el hash SHA-256 del token; el plano se entrega una sola
+    vez al crear. Revocar = setear `revoked_at`. Expiracion via `expires_at`
+    (null = no expira).
+    """
+
+    __tablename__ = "share_tokens"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
+    analysis_id: Mapped[str] = mapped_column(
+        ForeignKey("analyses.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    created_by_user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+    audience: Mapped[str] = mapped_column(String(20), default="docente", nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, nullable=False
+    )
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+
+    last_accessed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    access_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    analysis: Mapped["Analysis"] = relationship(back_populates="share_tokens")
