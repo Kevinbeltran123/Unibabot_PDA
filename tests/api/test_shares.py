@@ -197,3 +197,129 @@ def test_share_no_expiration(client, auth_headers, sample_pdf):
     )
     assert r.status_code == 201
     assert r.json()["expires_at"] is None
+
+
+# --- Endpoint publico ---
+
+
+def _create_with_share(client, auth_headers, sample_pdf, expires_in_days=30):
+    aid = _create_analysis(client, auth_headers, sample_pdf)
+    created = client.post(
+        f"/api/analyses/{aid}/share",
+        headers=auth_headers,
+        json={"expires_in_days": expires_in_days},
+    ).json()
+    return aid, created
+
+
+def test_public_view_works_without_auth(client, auth_headers, sample_pdf):
+    _, created = _create_with_share(client, auth_headers, sample_pdf)
+    token = created["token"]
+
+    # Sin Authorization header
+    r = client.get(f"/api/share/{token}")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["audience"] == "docente"
+    assert body["shared_by"] == "u@test.com"
+    assert "report" in body
+    assert "archivo" in body["report"]
+
+
+def test_public_view_404_for_unknown_token(client):
+    r = client.get("/api/share/totally-fake-token-xyz")
+    assert r.status_code == 404
+
+
+def test_public_view_410_for_revoked(client, auth_headers, sample_pdf):
+    _, created = _create_with_share(client, auth_headers, sample_pdf)
+    client.delete(f"/api/shares/{created['id']}", headers=auth_headers)
+
+    r = client.get(f"/api/share/{created['token']}")
+    assert r.status_code == 410
+
+
+def test_public_view_410_for_expired(client, auth_headers, sample_pdf):
+    from datetime import datetime, timedelta, timezone
+
+    from src.api.db import SessionLocal
+    from src.api.models import ShareToken
+
+    _, created = _create_with_share(client, auth_headers, sample_pdf)
+    db = SessionLocal()
+    try:
+        row = db.get(ShareToken, created["id"])
+        row.expires_at = datetime.now(timezone.utc) - timedelta(days=1)
+        db.commit()
+    finally:
+        db.close()
+
+    r = client.get(f"/api/share/{created['token']}")
+    assert r.status_code == 410
+
+
+def test_public_view_410_when_analysis_deleted(client, auth_headers, sample_pdf):
+    aid, created = _create_with_share(client, auth_headers, sample_pdf)
+    client.delete(f"/api/analyses/{aid}", headers=auth_headers)
+
+    # Cascade borra el share, asi que es 404 (no 410)
+    r = client.get(f"/api/share/{created['token']}")
+    assert r.status_code == 404
+
+
+def test_public_view_filters_cumple(client, auth_headers, sample_pdf, monkeypatch):
+    """Verifica que el reporte devuelto via /api/share/{token} no contiene CUMPLE."""
+    # Mockear el reporte para tener mezcla de hallazgos
+    fake_report = {
+        "archivo": "test.pdf",
+        "modelo": "qwen2.5:14b",
+        "codigo_curso": "22A14",
+        "dispatcher": "rule",
+        "total_secciones": 1,
+        "resultados": [
+            {
+                "seccion": "x",
+                "hallazgos": [
+                    {
+                        "regla_id": "R1",
+                        "regla": "ok rule",
+                        "estado": "CUMPLE",
+                        "evidencia": "ev",
+                        "correccion": None,
+                    },
+                    {
+                        "regla_id": "R2",
+                        "regla": "fail rule",
+                        "estado": "NO CUMPLE",
+                        "evidencia": "ev2",
+                        "correccion": "fix it",
+                    },
+                ],
+            }
+        ],
+        "resumenes": {"oficina": "OFICINA SECRETO", "docente": "PARA DOCENTE"},
+    }
+    from unittest.mock import patch
+
+    with patch("agent.analizar_pda", return_value=fake_report):
+        _, created = _create_with_share(client, auth_headers, sample_pdf)
+    r = client.get(f"/api/share/{created['token']}")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert "OFICINA SECRETO" not in str(body)
+    assert body["report"]["resumen_docente"] == "PARA DOCENTE"
+    assert body["report"]["total_no_cumple"] == 1
+    reglas = [h["regla_id"] for s in body["report"]["secciones"] for h in s["hallazgos"]]
+    assert reglas == ["R2"]
+
+
+def test_public_view_increments_access_count(client, auth_headers, sample_pdf):
+    aid, created = _create_with_share(client, auth_headers, sample_pdf)
+    token = created["token"]
+
+    client.get(f"/api/share/{token}")
+    client.get(f"/api/share/{token}")
+
+    items = client.get(f"/api/analyses/{aid}/shares", headers=auth_headers).json()
+    assert items[0]["access_count"] == 2
+    assert items[0]["last_accessed_at"] is not None

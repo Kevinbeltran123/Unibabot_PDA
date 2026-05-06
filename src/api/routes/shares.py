@@ -11,18 +11,22 @@ Publico (sin auth) lo agrega step 3:
 
 from __future__ import annotations
 
+import json
 import uuid
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from ..auth import get_current_user
 from ..config import get_settings
 from ..db import get_db
 from ..models import Analysis, ShareToken, User
-from ..schemas import ShareCreate, ShareCreated, ShareSummary
-from ..share_tokens import generate_token
+from ..rate_limit import check_rate_limit
+from ..schemas import ShareCreate, ShareCreated, SharePublic, ShareReport, ShareSummary
+from ..share_filter import filtrar_para_docente
+from ..share_tokens import generate_token, lookup_active
 
 router = APIRouter(tags=["shares"])
 
@@ -137,3 +141,84 @@ def revoke_share(
     row.revoked_at = datetime.now(timezone.utc)
     db.commit()
     return None
+
+
+# --- Endpoint publico (sin auth) ---
+
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+@router.get("/api/share/{token}", response_model=SharePublic)
+def view_shared(
+    token: str,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> SharePublic:
+    """Vista publica read-only para el docente. Sin auth.
+
+    Rate limited por IP (configurable). Devuelve 410 si el token esta
+    expirado o revocado. 404 si no existe.
+    """
+    ip = _client_ip(request)
+    try:
+        from ..jobs.queue import get_redis
+
+        redis_client = get_redis()
+        allowed = check_rate_limit(
+            redis_client,
+            key=f"share:{ip}",
+            max_requests=settings.share_rate_limit_per_minute,
+            window_seconds=60,
+        )
+        if not allowed:
+            raise HTTPException(status_code=429, detail="Demasiados intentos")
+    except HTTPException:
+        raise
+    except Exception:  # noqa: BLE001
+        # Sin redis: fail-open (rate_limit ya logea).
+        pass
+
+    row = lookup_active(db, token)
+    if row is None:
+        # Distinguir 410 de 404 sin filtrar info: si el hash existe pero
+        # esta revocado/expirado damos 410, en otro caso 404.
+        import hashlib
+
+        h = hashlib.sha256(token.encode("utf-8")).hexdigest()
+        existing = db.query(ShareToken).filter(ShareToken.token_hash == h).first()
+        if existing is None:
+            raise HTTPException(status_code=404, detail="Link no encontrado")
+        raise HTTPException(status_code=410, detail="Link expirado o revocado")
+
+    db.commit()  # persiste last_accessed_at + access_count
+
+    analysis = db.get(Analysis, row.analysis_id)
+    if analysis is None or analysis.status != "done" or not analysis.report_path:
+        raise HTTPException(status_code=410, detail="Reporte ya no disponible")
+
+    report_path = Path(analysis.report_path)
+    if not report_path.exists():
+        raise HTTPException(status_code=410, detail="Reporte ya no disponible")
+
+    try:
+        reporte = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=500, detail="Reporte corrupto") from exc
+
+    filtrado = filtrar_para_docente(reporte)
+
+    owner = db.get(User, row.created_by_user_id)
+    shared_by = owner.email if owner else "(usuario desconocido)"
+
+    return SharePublic(
+        audience=row.audience,
+        shared_by=shared_by,
+        analysis_completed_at=analysis.completed_at,
+        expires_at=row.expires_at,
+        report=ShareReport(**filtrado),
+    )
