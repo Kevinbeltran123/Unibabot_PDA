@@ -32,6 +32,9 @@ tmp/
 # Se regenera al primer uso. Mantiene reproducibilidad bit-a-bit por PDA.
 cache/
 
+# Redis snapshot dump (se genera si redis-server corre como daemon local)
+*.rdb
+
 # === Python ===
 __pycache__/
 *.py[cod]
