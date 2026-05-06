@@ -91,8 +91,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Main */}
-        <div className="flex flex-col min-w-0 relative">
-          <main className="flex-1 overflow-y-auto">{children}</main>
+        <div className="flex flex-col min-w-0 min-h-0 relative">
+          <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
         </div>
       </div>
 
@@ -133,7 +133,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <BrandMark variant="text" className="text-base" />
           <span className="w-8" />
         </div>
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
       </div>
 
       {/* Mobile drawer */}
