@@ -211,6 +211,9 @@ def view_shared(
         raise HTTPException(status_code=500, detail="Reporte corrupto") from exc
 
     filtrado = filtrar_para_docente(reporte)
+    # No filtrar el path crudo del upload temporal: el docente ve el nombre
+    # original del PDA tal como lo subio la oficina.
+    filtrado["archivo"] = analysis.filename
 
     owner = db.get(User, row.created_by_user_id)
     shared_by = owner.email if owner else "(usuario desconocido)"

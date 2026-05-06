@@ -313,6 +313,18 @@ def test_public_view_filters_cumple(client, auth_headers, sample_pdf, monkeypatc
     assert reglas == ["R2"]
 
 
+def test_public_view_uses_original_filename_not_upload_path(
+    client, auth_headers, sample_pdf
+):
+    """No leak del path del upload temporal: el docente ve el filename original."""
+    aid, created = _create_with_share(client, auth_headers, sample_pdf)
+    r = client.get(f"/api/share/{created['token']}")
+    assert r.status_code == 200
+    archivo = r.json()["report"]["archivo"]
+    assert "/" not in archivo  # no path components
+    assert archivo.endswith(".pdf")
+
+
 def test_public_view_increments_access_count(client, auth_headers, sample_pdf):
     aid, created = _create_with_share(client, auth_headers, sample_pdf)
     token = created["token"]

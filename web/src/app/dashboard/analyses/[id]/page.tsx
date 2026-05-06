@@ -8,6 +8,7 @@ import {
   Download,
   FileText,
   Loader2,
+  Share2,
   Trash2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AssistantMessage, UserMessage } from "@/components/chat-message";
 import { FindingRow } from "@/components/finding-row";
 import { FindingsTable } from "@/components/findings-table";
+import { ShareDialog } from "@/components/share-dialog";
 import { useAnalysis, useDeleteAnalysis } from "@/hooks/use-analyses";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
@@ -39,6 +41,7 @@ export default function AnalysisDetailPage() {
   const { data, isLoading } = useAnalysis(id, { refetchInterval: false });
   const del = useDeleteAnalysis();
   const confirm = useConfirm();
+  const [shareOpen, setShareOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (!data) return;
@@ -104,6 +107,13 @@ export default function AnalysisDetailPage() {
         completedAt={data.completed_at}
         duration={data.duration_s}
         onDelete={onDelete}
+        onShare={() => setShareOpen(true)}
+      />
+
+      <ShareDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        analysisId={id}
       />
 
       <UserMessage email={user?.email}>
@@ -206,11 +216,13 @@ function ConversationHeader({
   completedAt,
   duration,
   onDelete,
+  onShare,
 }: {
   filename: string;
   completedAt: string | null;
   duration: number | null;
   onDelete: () => void;
+  onShare: () => void;
 }) {
   return (
     <div className="pb-3 flex items-start justify-between gap-3">
@@ -226,15 +238,26 @@ function ConversationHeader({
           {duration != null && <span className="ml-2">&middot; {formatDuration(duration)}</span>}
         </div>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        aria-label="Borrar análisis"
-        onClick={onDelete}
-        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </Button>
+      <div className="flex items-center gap-1 shrink-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onShare}
+          className="gap-1.5 text-muted-foreground hover:text-foreground"
+        >
+          <Share2 className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Compartir con docente</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Borrar análisis"
+          onClick={onDelete}
+          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
     </div>
   );
 }
