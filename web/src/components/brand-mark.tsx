@@ -22,13 +22,9 @@ export function BrandMark({ variant = "default", className }: Props) {
     return (
       <span
         aria-hidden
-        className={cn(
-          "inline-flex h-8 w-8 items-center justify-center rounded-md",
-          "bg-foreground p-1.5",
-          className,
-        )}
+        className={cn("inline-flex h-8 w-8 items-center justify-center", className)}
       >
-        <Logo className="h-full w-full text-background" />
+        <Logo className="h-full w-full" />
       </span>
     );
   }
