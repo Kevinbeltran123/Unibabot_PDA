@@ -1,4 +1,11 @@
-import type { AnalysisDetail, AnalysisSummary, TokenResponse } from "./types";
+import type {
+  AnalysisDetail,
+  AnalysisSummary,
+  ShareCreated,
+  SharePublic,
+  ShareSummary,
+  TokenResponse,
+} from "./types";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const TOKEN_KEY = "unibabot_token";
@@ -99,6 +106,21 @@ export const api = {
   downloadUrl: (id: string) => `${API}/api/analyses/${id}/download`,
 
   eventsUrl: (id: string) => `${API}/api/analyses/${id}/events`,
+
+  createShare: (analysisId: string, expiresInDays: number | null) =>
+    request<ShareCreated>(`/api/analyses/${analysisId}/share`, {
+      method: "POST",
+      body: JSON.stringify({ expires_in_days: expiresInDays }),
+    }),
+
+  listShares: (analysisId: string) =>
+    request<ShareSummary[]>(`/api/analyses/${analysisId}/shares`),
+
+  revokeShare: (shareId: string) =>
+    request<void>(`/api/shares/${shareId}`, { method: "DELETE" }),
+
+  getShared: (token: string) =>
+    request<SharePublic>(`/api/share/${encodeURIComponent(token)}`, { auth: false }),
 };
 
 export { ApiError };
