@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-  BookOpen,
   Briefcase,
   Download,
   FileText,
@@ -146,20 +145,15 @@ export default function AnalysisDetailPage() {
             <Stat label="Secciones" value={report.total_secciones} />
           </div>
 
-          {/* Resumenes opcionales */}
-          {report.resumenes && (
-            <div className="grid gap-3 md:grid-cols-2">
-              <SummaryPanel
-                icon={<Briefcase className="h-3.5 w-3.5" />}
-                label="Para la oficina"
-                body={report.resumenes.oficina}
-              />
-              <SummaryPanel
-                icon={<BookOpen className="h-3.5 w-3.5" />}
-                label="Para el docente"
-                body={report.resumenes.docente}
-              />
-            </div>
+          {/* Resumen ejecutivo para la oficina. El resumen del docente
+              ya no se renderiza aqui: se entrega via share-link publico
+              para que el docente lo vea sin acceder al dashboard. */}
+          {report.resumenes?.oficina && (
+            <SummaryPanel
+              icon={<Briefcase className="h-3.5 w-3.5" />}
+              label="Para la oficina"
+              body={report.resumenes.oficina}
+            />
           )}
 
           {/* Tabs con desglose */}
