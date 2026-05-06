@@ -22,7 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 
 from .config import get_settings  # noqa: E402
 from .db import init_db  # noqa: E402
-from .routes import analyses, auth  # noqa: E402
+from .routes import analyses, auth, shares  # noqa: E402
 
 settings = get_settings()
 
@@ -50,6 +50,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(analyses.router)
+app.include_router(shares.router)
 
 
 @app.get("/api/health", tags=["meta"])

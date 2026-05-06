@@ -41,6 +41,10 @@ class Settings(BaseSettings):
 
     sync_mode: bool = False
 
+    public_base_url: str = "http://localhost:3000"
+    share_default_ttl_days: int = 30
+    share_rate_limit_per_minute: int = 30
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
