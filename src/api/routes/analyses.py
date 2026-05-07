@@ -28,6 +28,14 @@ from ..db import get_db
 from ..models import Analysis, User
 from ..schemas import AnalysisCreated, AnalysisDetail, AnalysisStatus, AnalysisSummary
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_sys.path.insert(0, str(_Path(__file__).parent.parent.parent))
+from common.logging_config import get_logger as _get_logger  # noqa: E402
+
+_log = _get_logger("api.analyses")
+
 router = APIRouter(prefix="/api/analyses", tags=["analyses"])
 
 settings = get_settings()
@@ -115,6 +123,16 @@ async def create_analysis(
     try:
         secciones = _parsear_pda(str(pdf_path))
     except _PDFParseError as exc:
+        # Log el error real de Docling antes de envolver en mensaje generico
+        # asi el operador puede diagnosticar fallas plataforma-especificas
+        # (Windows + OneDrive placeholder, fuentes con encoding raro, etc.).
+        _log.warning(
+            "pdf_parse_error",
+            filename=file.filename,
+            file_size=len(contents),
+            docling_error=str(exc.__cause__ or exc),
+            pdf_sha256_prefix=sha[:12],
+        )
         pdf_path.unlink(missing_ok=True)
         raise HTTPException(
             status_code=422,
@@ -129,6 +147,14 @@ async def create_analysis(
 
     es_pda, codigo_rechazo, mensaje_clasificador = _clasificar(secciones)
     if not es_pda:
+        _log.info(
+            "pda_classifier_rejected",
+            filename=file.filename,
+            file_size=len(contents),
+            code=codigo_rechazo,
+            n_secciones=len(secciones),
+            total_chars=sum(len(c) for c in secciones.values()),
+        )
         pdf_path.unlink(missing_ok=True)
         raise HTTPException(
             status_code=422,

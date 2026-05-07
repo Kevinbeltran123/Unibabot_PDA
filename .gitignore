@@ -47,6 +47,8 @@ build/
 .eggs/
 *.whl
 .venv/
+.venv
+.venv.nosync/
 venv/
 env/
 
