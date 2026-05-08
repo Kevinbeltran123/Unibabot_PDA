@@ -437,8 +437,7 @@ def extraer_declaraciones(
         )
     except LLMUnavailableError:
         # ollama caido o modelo no instalado: fatal, propagar para que
-        # evaluate.py / streamlit / agent.py CLI puedan abortar con mensaje
-        # accionable al usuario.
+        # el caller pueda abortar con mensaje accionable al usuario.
         logger.error("ollama_unavailable_fatal", model=modelo)
         raise
     except LLMError as e:

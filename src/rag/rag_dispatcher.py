@@ -11,8 +11,8 @@ deterministico que viene despues es identico para ambos pipelines.
 
 Limitacion conocida: el retriever solo devuelve top_k por seccion. Las reglas
 que no caen en el top_k de ninguna seccion del PDA NUNCA se evaluan, por lo
-que aparecen como `not_found` en evaluate.py. Esa es exactamente la metrica
-de cobertura que queremos medir.
+que aparecen como `not_found`. Esa es exactamente la metrica de cobertura
+que queremos medir.
 """
 
 from __future__ import annotations

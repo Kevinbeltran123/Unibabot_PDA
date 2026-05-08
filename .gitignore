@@ -48,7 +48,6 @@ build/
 *.whl
 .venv/
 .venv
-.venv.nosync/
 venv/
 env/
 

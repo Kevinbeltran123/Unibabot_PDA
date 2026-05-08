@@ -14,8 +14,8 @@ from __future__ import annotations
 class UnibabotError(Exception):
     """Base para todos los errores del pipeline unibabot.
 
-    Callers externos (ej. evaluate.py) pueden capturar esta clase para
-    distinguir errores del pipeline de errores genericos de Python.
+    Callers externos pueden capturar esta clase para distinguir errores
+    del pipeline de errores genericos de Python.
     """
 
 

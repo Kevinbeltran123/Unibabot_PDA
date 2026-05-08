@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 # Smoke test E2E del backend.
 # Asume:
-#   - uvicorn corriendo en :8000 (make dev-api)
-#   - Si SYNC_MODE=0: redis (make dev-redis) + worker (make dev-worker)
+#   - El stack Docker esta arriba (docker compose up -d). Esto levanta api en :8000,
+#     worker, redis y web. Tambien funciona contra otra API si se exporta API=...
 #   - Existe al menos un PDF en PDAs/
+#   - Ollama corre en el host con qwen2.5:14b para que el worker pueda procesar.
 #
 # Verifica: register -> login -> upload -> poll status -> download.
 
 set -euo pipefail
 
 API="${API:-http://localhost:8000}"
-EMAIL="smoke-$(date +%s)@test.local"
+EMAIL="smoke-$(date +%s)@example.com"
 PASSWORD="smoketest1234"
 PDF=$(ls PDAs/*.pdf 2>/dev/null | head -n1 || true)
 
