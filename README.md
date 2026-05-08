@@ -80,7 +80,10 @@ Open `http://localhost:3000`, register a user, and upload a PDA PDF.
 **Option B — Native Windows (PowerShell as Administrator):**
 
 ```powershell
-# 1. Start Redis (keep this terminal open, or run as a service)
+# 0. Start Ollama (skip if already running in the system tray)
+ollama serve
+
+# 1. Start Redis (keep this terminal open, or install as a service)
 redis-server
 
 # 2. First-time setup (venv goes to %USERPROFILE%\.venvs\unibabot, outside OneDrive)
@@ -90,12 +93,14 @@ redis-server
 .\scripts\dev.ps1
 ```
 
+> After installing dependencies with `winget`, open a new terminal so the updated PATH takes effect.
+
 ### Verify the installation
 
 With the stack running, execute the end-to-end smoke test (requires at least one PDF in `PDAs/`):
 
 ```bash
-bash scripts/smoke_api.sh
+bash scripts/smoke_api.sh        # macOS, Linux, WSL2, or Git Bash on Windows
 ```
 
 The script registers a user, uploads a PDA, polls until the analysis completes, and downloads the report. A final `[smoke] OK` confirms everything is working.
@@ -103,6 +108,11 @@ The script registers a user, uploads a PDA, polls until the analysis completes, 
 **Run the unit/integration test suite** (stack must be running):
 
 ```bash
+# macOS / Linux / WSL2
+pytest tests/api/ -v
+
+# Windows native (activate the venv first)
+.\.venvs\unibabot\Scripts\Activate.ps1
 pytest tests/api/ -v
 ```
 
