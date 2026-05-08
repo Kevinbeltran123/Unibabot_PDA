@@ -100,8 +100,8 @@ def parsear_pda(pdf_path: str) -> dict[str, str]:
     except Exception as e:
         # Docling puede fallar por PDF corrupto, demasiado grande (OOM),
         # formato no soportado. Envolvemos en PDFParseError para que el
-        # caller (evaluate.py / streamlit) pueda manejar el fallo con
-        # contexto sin depender del tipo interno de Docling.
+        # caller pueda manejar el fallo con contexto sin depender
+        # del tipo interno de Docling.
         raise PDFParseError(
             f"Docling no pudo parsear '{pdf_path}': {e}"
         ) from e

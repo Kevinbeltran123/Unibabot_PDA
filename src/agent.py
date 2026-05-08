@@ -14,12 +14,11 @@ from pydantic import ValidationError
 # Asegurar que src/ este en el path para imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from common.logging_config import get_logger, setup_logging
+from common.logging_config import get_logger
 from common.ollama_client import chat as llm_chat
 from enrichment.correction_writer import enriquecer_correccion
 from enrichment.summary_writer import generar_resumenes
 from pdf_parser import parsear_pda
-from rag.rag_dispatcher import recuperar_reglas_aplicables
 from rag.rule_dispatcher import (
     SECCION_AUSENTE,
     agrupar_reglas_por_seccion,
@@ -287,12 +286,9 @@ def analizar_pda(
     Usa rule-based determinista para las 11 reglas estructurales y LLM
     para las demas reglas (competencias, ABET, dimensiones, etc).
 
-    Si `on_progress` es None, se usa `_default_progress` que replica el
-    stdout previo al refactor. La UI de Streamlit pasa un callback custom
-    que traduce los eventos a updates visuales (st.status, progress bar).
+    Si `on_progress` es None, se usa `_default_progress` que imprime a stdout.
 
-    Args adicionales (m17 enrichment, ambos default False para preservar
-    comportamiento de evaluate.py y batch runs):
+    Args adicionales (m17 enrichment, ambos default False):
         enriquecer_correcciones: Si True, anade `correccion_enriquecida`
             (texto prescriptivo via LLM) a cada hallazgo NO CUMPLE. La
             correccion templada original (`correccion`) se preserva.
@@ -329,6 +325,7 @@ def analizar_pda(
         # Seleccion del conjunto de reglas a evaluar: rule-driven (default,
         # cobertura 100%) vs RAG semantico (camino alternativo, top-k por seccion).
         if dispatcher == "rag":
+            from rag.rag_dispatcher import recuperar_reglas_aplicables  # lazy: requires chromadb
             reglas_app = recuperar_reglas_aplicables(secciones, codigo_curso, top_k=top_k)
         else:
             reglas_app = reglas_aplicables(codigo_curso)
@@ -411,8 +408,7 @@ def analizar_pda(
             "no_cumple": no_cumple,
         })
 
-    # m17: enrichment LLM aditivo. Defaults False para no afectar
-    # evaluate.py ni batch runs. Cualquier fallo aqui deja el reporte
+    # m17: enrichment LLM aditivo. Defaults False. Cualquier fallo aqui deja el reporte
     # original intacto: los nuevos campos simplemente no se anaden.
     if enriquecer_correcciones:
         no_cumple_total = [
@@ -439,67 +435,3 @@ def analizar_pda(
 
     emit("done", {"total_secciones": total})
     return reporte
-
-
-# --- CLI ---
-if __name__ == "__main__":
-    import sys
-
-    setup_logging()
-
-    if len(sys.argv) < 2:
-        print("Uso: python agent.py <ruta_al_pdf> [codigo_curso] [modelo] [--enriquecer] [--resumen] [--rag]")
-        print("  modelo: alias 'qwen' (default qwen2.5:14b) o nombre crudo de otro modelo ollama")
-        print("  --enriquecer: anade correccion_enriquecida via LLM a cada NO CUMPLE")
-        print("  --resumen: anade resumenes ejecutivo y didactico al reporte")
-        print("  --rag: usa retrieval semantico (camino alternativo) en lugar de rule-driven")
-        print("Ejemplo: python agent.py 'PDAs/tu_pda.pdf' 22A14 qwen --enriquecer --resumen")
-        sys.exit(1)
-
-    # Separar flags de args posicionales para no romper la API existente.
-    flags = {arg for arg in sys.argv[1:] if arg.startswith("--")}
-    posicionales = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
-
-    enriquecer_flag = "--enriquecer" in flags
-    resumen_flag = "--resumen" in flags
-    dispatcher_choice = "rag" if "--rag" in flags else "rule"
-
-    pdf_path = posicionales[0]
-    codigo = posicionales[1] if len(posicionales) > 1 else None
-
-    # Aliases + fallback a nombre crudo (permite probar modelos ad-hoc)
-    aliases = {
-        "qwen": MODELO_QWEN,
-        "14b": MODELO_QWEN,
-        "default": MODELO_QWEN,
-    }
-    if len(posicionales) > 2:
-        modelo = aliases.get(posicionales[2], posicionales[2])
-    else:
-        modelo = MODELO_DEFAULT
-
-    reporte = analizar_pda(
-        pdf_path,
-        codigo,
-        modelo=modelo,
-        enriquecer_correcciones=enriquecer_flag,
-        generar_resumen=resumen_flag,
-        dispatcher=dispatcher_choice,
-    )
-
-    # Guardar reporte con sufijo del modelo + dispatcher
-    sufijo_modelo = modelo.replace(":", "-").replace("/", "_")
-    sufijo = f"{sufijo_modelo}_{dispatcher_choice}"
-    output_path = ROOT / "results" / f"reporte_{sufijo}.json"
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(reporte, f, ensure_ascii=False, indent=2)
-
-    print(f"\nReporte guardado en: {output_path}")
-
-    # Resumen
-    for resultado in reporte.get("resultados", []):
-        seccion = resultado.get("seccion", "?")
-        hallazgos = resultado.get("hallazgos", [])
-        cumple = sum(1 for h in hallazgos if h.get("estado") == "CUMPLE")
-        no_cumple = sum(1 for h in hallazgos if h.get("estado") == "NO CUMPLE")
-        print(f"  {seccion}: {cumple} cumple, {no_cumple} no cumple")

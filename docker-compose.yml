@@ -41,6 +41,7 @@ services:
     environment:
       DATABASE_URL: sqlite:////app/data/unibabot.db
       REDIS_URL: redis://redis:6379/0
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
     volumes:
       - ./data:/app/data
       - ./tmp:/app/tmp
@@ -52,8 +53,6 @@ services:
         condition: service_started
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    environment:
-      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
     restart: unless-stopped
 
   web:

@@ -11,9 +11,6 @@ Seleccion de WorkerCls por plataforma:
 - macOS (Darwin): SimpleWorker. Las librerias Cocoa-bound de Docling /
   torch / numpy crashean con `os.fork()` (objc fork-safety).
 - Windows: SimpleWorker. Windows no soporta `os.fork()` en absoluto.
-  Recomendado: en Windows levantar el stack con `docker-compose up` para
-  que el worker corra en un contenedor Linux (fork natural) sin las
-  limitaciones del sistema host.
 - Linux: Worker estandar. Forkear es lo normal y mas eficiente.
 """
 

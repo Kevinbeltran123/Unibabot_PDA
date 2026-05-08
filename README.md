@@ -36,64 +36,106 @@ For the full architecture diagram, design decisions, and the comparison with the
 
 ## Quickstart
 
-The recommended path on any operating system (including Windows) is Docker Compose:
+The stack has four processes: Redis, FastAPI API, RQ worker, and the Next.js frontend. Run them directly — no Docker required.
+
+**Prerequisite — Ollama.** Install from [ollama.com](https://ollama.com), then:
 
 ```bash
-# Make sure ollama is running on the host (ollama serve) with qwen2.5:14b pulled
-docker compose up --build
-```
-
-This starts redis, the FastAPI API, the RQ worker, and the Next.js frontend. Open `http://localhost:3000` and register a user.
-
-For local development on macOS or Linux:
-
-```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt -r requirements-api.txt
 ollama pull qwen2.5:14b
-
-# Terminal 1: Redis
-docker run --rm -d --name unibabot-redis -p 6379:6379 redis:7-alpine
-# Terminal 2: FastAPI
-make dev-api
-# Terminal 3: RQ worker
-make dev-worker
-# Terminal 4: Next.js
-cd web && npm install && npm run dev
 ```
 
-The CLI is the simplest entry point for evaluation:
+### macOS
 
 ```bash
-# Analyze a single PDA
-python src/agent.py "PDAs/<pda_file>.pdf" 22A14
+brew install redis node python@3.12
+brew services start redis
 
-# Evaluate against the gold dataset
-python src/evaluate.py --tag my_run
-python src/evaluate.py --tag my_run_test --gold-path data/gold_labels_test.json
+python3 -m venv ~/.venvs/unibabot          # venv outside iCloud to avoid file eviction
+~/.venvs/unibabot/bin/pip install -r requirements-api.txt
+cd web && npm install && cd ..
 ```
 
-A Streamlit demo is also available (`streamlit run streamlit_app.py`) for quick interactive exploration.
+Open four terminals (or use `scripts/dev.sh`):
+
+```bash
+~/.venvs/unibabot/bin/uvicorn src.api.main:app --reload --port 8000
+~/.venvs/unibabot/bin/python -m src.api.jobs.worker
+cd web && npm run dev
+```
+
+Open `http://localhost:3000` and register a user.
+
+### Linux (Ubuntu/Debian)
+
+```bash
+sudo apt install redis-server python3-venv python3-pip nodejs npm
+sudo systemctl start redis
+
+python3 -m venv ~/.venvs/unibabot
+~/.venvs/unibabot/bin/pip install -r requirements-api.txt
+cd web && npm install && cd ..
+
+# Then same four terminals as macOS
+```
+
+### Windows
+
+**Option A — WSL2 (recommended):** install Ubuntu on WSL2, follow the Linux instructions. Ollama for Windows runs on the host and is reachable from WSL2 at `localhost:11434`.
+
+**Option B — Native Windows:**
+
+```powershell
+winget install Ollama.Ollama Redis.Redis nodejs-lts Python.Python.3.12
+
+# venv outside OneDrive to avoid sync issues (same reason as iCloud on macOS)
+python -m venv "$env:USERPROFILE\.venvs\unibabot"
+& "$env:USERPROFILE\.venvs\unibabot\Scripts\pip" install -r requirements-api.txt
+cd web; npm install; cd ..
+
+# Four terminals
+& "$env:USERPROFILE\.venvs\unibabot\Scripts\uvicorn" src.api.main:app --reload --port 8000
+& "$env:USERPROFILE\.venvs\unibabot\Scripts\python" -m src.api.jobs.worker
+cd web; npm run dev
+```
+
+**Run the backend smoke test:**
+
+```bash
+bash scripts/smoke_api.sh
+```
+
+**Run the test suite:**
+
+```bash
+pytest tests/api/ -v
+```
+
+### Docker (alternative)
+
+A `docker-compose.yml` is included for environments where installing dependencies locally is not practical. See comments in the file for usage. Note: the images are large (~3 GB) due to Docling's ML dependencies.
 
 ## Project layout
 
 ```
 src/                  # Compliance engine (Layer 1)
-  agent.py            # End-to-end pipeline (CLI / API / Streamlit entrypoint)
+  agent.py            # analizar_pda() — called by the RQ worker
   pdf_parser.py       # Docling-based extraction and section segmentation
   pda_classifier.py   # Rule-based "is this a PDA?" classifier
-  evaluate.py         # Evaluation harness for the gold dataset
   common/             # Logging, typed exceptions, ollama wrapper, text utils
   rules/              # Structural checks, declaration extractor, deterministic matcher
   enrichment/         # Optional LLM enrichment with SHA-256 cache
-  rag/                # Rule dispatcher (production) + RAG path (alternative reference)
+  rag/                # rule_dispatcher.py (production) + semantic RAG (reference only, not used)
   api/                # FastAPI backend, RQ jobs, SSE progress (Layer 2)
 web/                  # Next.js 14 frontend (Layer 2)
 tests/                # Pytest suite (classifier, API, auth)
 data/                 # Rules, gold labels, SQLite (PDAs and ChromaDB are gitignored)
 results/              # Tagged metrics + progression notes
 Docs/                 # IEEE technical report (drafts and slides are gitignored)
-docker-compose.yml    # Orchestrates redis + api + worker + web
+scripts/              # dev.sh (Unix), dev.ps1 (Windows), smoke_api.sh (E2E test)
+requirements.txt      # Production deps: docling, ollama, structlog
+requirements-api.txt  # requirements.txt + FastAPI, uvicorn, RQ, Redis, etc.
+requirements-rag.txt  # RAG-only deps: chromadb, sentence-transformers, torch
+docker-compose.yml    # Alternative: runs the full stack in containers
 ```
 
 ## Key technical decisions

@@ -119,20 +119,15 @@ Let N be the number of rules and S the number of PDA sections.
 
 ## Reproducibility
 
+> **Note:** `src/evaluate.py` was removed in the May 2026 cleanup (the production interface is the web stack). The benchmark results above are final and archived in `results/`. Re-running these benchmarks would require restoring `evaluate.py` from git history and installing `requirements-rag.txt` for the RAG path.
+
 ```bash
 # Re-ingest rules into ChromaDB (required for the RAG path)
 python src/rag/ingest.py
 
-# Train benchmark
+# Run with requirements-rag.txt installed and evaluate.py restored from git history
 python src/evaluate.py --tag bench_rule_train --dispatcher rule --gold-path data/gold_labels.json
 python src/evaluate.py --tag bench_rag_train --dispatcher rag --gold-path data/gold_labels.json
-
-# Test benchmark
-python src/evaluate.py --tag bench_rule_test --dispatcher rule --gold-path data/gold_labels_test.json
-python src/evaluate.py --tag bench_rag_test --dispatcher rag --gold-path data/gold_labels_test.json
-
-# Compare two saved runs
-python src/evaluate.py --compare bench_rule_train bench_rag_train
 ```
 
 Metrics are persisted in `results/metrics_<tag>.json`. Raw reports in `results/reports_<tag>.json`.

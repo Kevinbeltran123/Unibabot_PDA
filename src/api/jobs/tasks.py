@@ -1,7 +1,7 @@
 """Tareas RQ: wrapper sobre `analizar_pda` que persiste resultado y publica progreso.
 
 El worker importa este modulo. Para que el import funcione desde un proceso
-fresco, fuerza el `sys.path` a incluir `src/` (mismo truco que streamlit_app.py).
+fresco, fuerza el `sys.path` a incluir `src/`.
 """
 
 from __future__ import annotations
