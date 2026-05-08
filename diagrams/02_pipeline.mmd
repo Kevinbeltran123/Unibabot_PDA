@@ -1,0 +1,82 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#fef3c7', 'primaryBorderColor': '#d97706', 'background': '#f8fafc', 'fontSize': '14px'}}}%%
+flowchart TD
+    classDef det   fill:#fef3c7,stroke:#d97706,color:#78350f,font-weight:bold
+    classDef llm   fill:#fce7f3,stroke:#db2777,color:#831843,font-weight:bold
+    classDef out   fill:#dcfce7,stroke:#16a34a,color:#14532d,font-weight:bold
+    classDef opt   fill:#f0fdf4,stroke:#86efac,color:#166534,stroke-dasharray:6 3
+    classDef err   fill:#fee2e2,stroke:#ef4444,color:#991b1b
+
+    PDF[/"PDA.pdf — Plan de Desarrollo Academico"/]
+
+    CLASSIFY{"pda_classifier.py
+    ¿El documento es un PDA valido?
+    Clasificacion previa al encolado"}
+
+    REJECT["HTTP 422 Rechazado
+    Razon en lenguaje natural
+    Renderizado como mensaje en el chat"]:::err
+
+    P1["pdf_parser.py — Docling (IBM)
+    Extraccion layout-aware por deep learning
+    TableFormer para tablas de evaluacion
+    Output: dict seccion → contenido"]:::det
+
+    P2["estructural_checker.py
+    11 verificaciones deterministicas
+    EST-001..011 — 100% Python, sin LLM
+    ~100 ms por PDA"]:::det
+
+    P3["rule_dispatcher.py
+    168 reglas COMP mapeadas a secciones
+    Mapeo metadata-driven sin embeddings
+    Fallback: cross-encoder multilingue"]:::det
+
+    P4["declaracion_extractor.py
+    ★ UNA sola llamada Qwen 2.5 14B
+    Extrae codigos canonicos con evidencia
+    C1–C9 · 1a–1l · SP1–SP5 · D1–D6 · ABET X.Y
+    Valida snippet presente en texto del PDA"]:::llm
+
+    P5["declaracion_checker.py
+    Matcher 100% deterministico
+    Regex + Set intersection
+    Declarados vs Requeridos por regla"]:::det
+
+    REPORT["Reporte JSON consolidado
+    179 hallazgos por PDA
+    {regla_id, estado, evidencia, correccion}"]:::out
+
+    OPT{"Enriquecimiento
+    activado en la API?"}
+
+    CACHE{"Cache SHA-256
+    ¿Hit?"}
+
+    CW["correction_writer.py
+    1 llamada LLM por hallazgo NO CUMPLE
+    Correccion prescriptiva"]:::opt
+
+    SW["summary_writer.py
+    1 llamada LLM al finalizar
+    Resumen para oficina y docente"]:::opt
+
+    FINAL["Reporte Final Enriquecido
+    Disponible para descarga y enlaces publicos"]:::out
+
+    PDF     --> CLASSIFY
+    CLASSIFY -->|"No es un PDA"| REJECT
+    CLASSIFY -->|"PDA valido"| P1
+    P1      --> P2
+    P1      --> P3
+    P3      --> P4
+    P4      --> P5
+    P2      --> REPORT
+    P5      --> REPORT
+    REPORT  --> OPT
+    OPT     -->|"Si"| CACHE
+    CACHE   -->|"Miss"| CW
+    CACHE   -->|"Miss"| SW
+    CW      --> FINAL
+    SW      --> FINAL
+    CACHE   -->|"Hit"| FINAL
+    OPT     -->|"No"| FINAL

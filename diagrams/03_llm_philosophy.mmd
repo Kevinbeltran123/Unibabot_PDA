@@ -1,0 +1,52 @@
+%%{init: {'theme': 'default', 'fontSize': '14px'}}%%
+sequenceDiagram
+    autonumber
+    participant PDF  as PDA.pdf
+    participant PY   as Motor Python
+    participant LLM  as Qwen 2.5 14B
+    participant REP  as Reporte Final
+
+    Note over PDF,REP: Principio central — "El LLM extrae, Python decide"
+
+    PDF  ->> PY  : Texto bruto del PDF
+    Note over PY  : Docling extrae layout y tablas
+    PY   ->> PY  : Segmentar en secciones por nombre
+
+    rect rgb(254, 243, 199)
+        Note over PY  : EST-001..011 — Checks DETERMINISTICOS (sin LLM)
+        PY   ->> PY  : Verificar secciones presentes
+        PY   ->> PY  : Verificar tabla de evaluacion (%)
+        PY   ->> PY  : Verificar fechas y bibliografia
+        PY   -->> REP: 11 hallazgos estructurales
+    end
+
+    Note over PY,LLM : Preparacion del contexto — rule_dispatcher.py
+    PY   ->> PY  : Mapear 168 reglas COMP a secciones del PDA
+    PY   ->> PY  : Seleccionar secciones relevantes (keywords)
+    PY   ->> PY  : Construir prompt con codigos canonicos esperados
+
+    rect rgb(252, 231, 243)
+        Note over PY,LLM : UNA SOLA LLAMADA AL LLM (toda la extraccion)
+        PY   ->>+ LLM : Secciones relevantes del PDA
+        Note over LLM  : Extrae codigos encontrados con evidencia textual
+        Note over LLM  : {codigo, snippet, seccion, tipo: literal|nombre_canonico}
+        LLM -->>- PY  : JSON con declaraciones propuestas
+    end
+
+    rect rgb(254, 243, 199)
+        Note over PY  : VALIDACION DETERMINISTICA (bloquea alucinaciones)
+        PY   ->> PY  : Verificar snippet en texto real del PDF
+        PY   ->> PY  : Verificar codigo bien formado (regex)
+        PY   ->> PY  : Verificar consistencia tipo-snippet
+        PY   ->> PY  : Descartar declaraciones sin evidencia
+    end
+
+    rect rgb(220, 252, 231)
+        Note over PY  : MATCHING — declaracion_checker.py (sin LLM)
+        PY   ->> PY  : Extraer codigos requeridos por cada regla
+        PY   ->> PY  : Set intersection: declarados ∩ requeridos
+        PY   ->> PY  : Veredicto: CUMPLE / NO CUMPLE / N/A
+        PY   -->> REP: 168 hallazgos de competencias con evidencia
+    end
+
+    Note over REP  : accuracy 1.000 en train y test (55/55 entradas)

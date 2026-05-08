@@ -1,0 +1,72 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#dbeafe', 'background': '#f8fafc', 'fontSize': '14px'}}}%%
+graph LR
+    classDef web    fill:#dbeafe,stroke:#3b82f6,color:#1e40af,font-weight:bold
+    classDef api    fill:#dcfce7,stroke:#16a34a,color:#14532d,font-weight:bold
+    classDef queue  fill:#fef9c3,stroke:#ca8a04,color:#713f12,font-weight:bold
+    classDef worker fill:#fce7f3,stroke:#db2777,color:#831843,font-weight:bold
+    classDef store  fill:#f1f5f9,stroke:#64748b,color:#334155
+    classDef ext    fill:#f0fdf4,stroke:#86efac,color:#166534
+
+    subgraph FRONT["Proceso 1 — :3000"]
+        NX["Next.js 14
+        React 18 + TypeScript
+        Tailwind + shadcn/ui
+        TanStack Query"]:::web
+    end
+
+    subgraph BACK["Proceso 2 — :8000"]
+        FA["FastAPI
+        uvicorn --reload
+        JWT · CORS · Rate Limit"]:::api
+        R1["POST /api/analyses
+        GET  /api/analyses
+        GET  /api/analyses/id"]:::api
+        R2["GET  /api/analyses/id/events
+        SSE — EventSourceResponse"]:::api
+        R3["POST /api/shares
+        GET  /public/shares/token"]:::api
+        R4["POST /api/auth/register
+        POST /api/auth/login"]:::api
+    end
+
+    subgraph REDIS["Proceso 3 — :6379"]
+        RD["Redis
+        Queue: default
+        Pub/Sub: progress:job_id"]:::queue
+    end
+
+    subgraph WORKER["Proceso 4 — sin puerto"]
+        WK["RQ Worker
+        SimpleWorker (macOS/Win)
+        Worker (Linux)
+        run_analysis(analysis_id)"]:::worker
+        EN["Publica progreso
+        cada step del pipeline
+        {event, data, step}"]:::worker
+    end
+
+    DB[("SQLite
+    unibabot.db
+    User / Analysis / ShareToken")]:::store
+    CA[("Cache SHA-256
+    cache/enrichment/")]:::store
+    OL["Ollama
+    qwen2.5:14b
+    :11434"]:::ext
+
+    NX   -->|"multipart/form-data
+    file + metadata"| FA
+    NX   <-.->|"EventSource SSE
+    progreso streaming"| R2
+    FA   -->|"Encolar job RQ"| RD
+    FA   <-->|"SQL ORM"| DB
+    RD   -->|"Consumir job"| WK
+    WK   <-->|"Leer / Escribir"| DB
+    WK   -->|"Publicar evento"| RD
+    RD   -->|"Distribuir SSE"| R2
+    WK   -->|"Llamadas LLM"| OL
+    WK   <-->|"SHA-256 lookup"| CA
+    FA   --- R1
+    FA   --- R2
+    FA   --- R3
+    FA   --- R4

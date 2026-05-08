@@ -1,0 +1,72 @@
+%%{init: {'theme': 'base', 'themeVariables': {'background': '#f8fafc', 'fontSize': '14px'}}}%%
+graph TB
+    classDef discarded fill:#fee2e2,stroke:#ef4444,color:#991b1b,font-weight:bold
+    classDef adopted   fill:#dcfce7,stroke:#16a34a,color:#14532d,font-weight:bold
+    classDef neutral   fill:#f1f5f9,stroke:#64748b,color:#334151
+    classDef decision  fill:#fef3c7,stroke:#d97706,color:#78350f,font-weight:bold
+    classDef metric    fill:#dbeafe,stroke:#3b82f6,color:#1e40af,font-size:12px
+
+    subgraph RAG["Enfoque RAG — DESCARTADO"]
+        direction TB
+        R1["ChromaDB + Embeddings
+        all-MiniLM-L6-v2
+        Indexado semantico de reglas"]:::discarded
+        R2["Recuperacion top-k
+        similitud coseno
+        Query: texto de la seccion"]:::discarded
+        R3["Problema: techo semantico
+        13 entradas silenciadas
+        cobertura 69% en test"]:::discarded
+        R1 --> R2 --> R3
+    end
+
+    subgraph RULES["Enfoque Rule-Driven — PRODUCCION"]
+        direction TB
+        RU1["reglas.json
+        Metadatos: seccion_pda, aplica_a
+        Sin vectores, sin embeddings"]:::adopted
+        RU2["rule_dispatcher.py
+        Iteracion deterministicamente
+        sobre reglas aplicables al PDA"]:::adopted
+        RU3["Resultado: cobertura 100%
+        55/55 entradas en test
+        Veredicto reproducible"]:::adopted
+        RU1 --> RU2 --> RU3
+    end
+
+    subgraph FALLBACK["Fallback Semantico — PRESERVADO"]
+        direction TB
+        FB1["semantic_fallback.py
+        cross-encoder multilingue
+        Solo cuando nombre de seccion
+        NO coincide con mapeo"]:::neutral
+        FB2["Activa paso 2 de
+        encontrar_seccion_destino
+        Degradacion sin crash si
+        sentence-transformers ausente"]:::neutral
+        FB1 --> FB2
+    end
+
+    DEC["Benchmark
+    m10_test: RAG cubre 69%
+    m11_test: Rules cubre 100%
+    Diferencia: 31% de reglas
+    silenciadas por el retriever"]:::decision
+
+    M1["m10 test con RAG
+    accuracy: 0.974
+    matched: 38/55 (69%)"]:::metric
+    M2["m11 test con Rules
+    accuracy: 0.873
+    matched: 55/55 (100%)"]:::metric
+    M3["Nota: la caida de accuracy
+    en m11 es porque el problema
+    es MAS DIFICIL (17 nuevas
+    entradas que RAG ignoraba)"]:::neutral
+
+    DEC --> M1
+    DEC --> M2
+    M2 --> M3
+    RAG --> DEC
+    RULES --> DEC
+    RULES --> FALLBACK

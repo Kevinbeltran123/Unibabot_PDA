@@ -1,0 +1,86 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#dbeafe', 'primaryBorderColor': '#3b82f6', 'secondaryColor': '#dcfce7', 'tertiaryColor': '#fef3c7', 'background': '#f8fafc', 'fontSize': '14px'}}}%%
+graph TB
+    classDef web     fill:#dbeafe,stroke:#3b82f6,color:#1e40af,font-weight:bold
+    classDef infra   fill:#dcfce7,stroke:#16a34a,color:#14532d,font-weight:bold
+    classDef engine  fill:#fef3c7,stroke:#d97706,color:#78350f,font-weight:bold
+    classDef ai      fill:#fce7f3,stroke:#db2777,color:#831843,font-weight:bold
+    classDef store   fill:#f1f5f9,stroke:#64748b,color:#334155
+    classDef optNode fill:#f0fdf4,stroke:#86efac,color:#166534,stroke-dasharray:5 5
+
+    subgraph BROWSER["Capa de Presentacion — Next.js 14"]
+        B["React 18 · TypeScript · Tailwind · shadcn/ui
+        Chat UI · File Upload · Findings Table · SSE Progress
+        localhost:3000"]:::web
+    end
+
+    subgraph L2["Layer 2 — Stack de Produccion"]
+        direction LR
+        API["FastAPI
+        REST + SSE
+        JWT Auth
+        :8000"]:::infra
+        RD["Redis
+        Job Queue
+        Pub/Sub
+        :6379"]:::infra
+        W["RQ Worker
+        SimpleWorker (macOS/Win)
+        Worker (Linux)"]:::infra
+    end
+
+    subgraph L1["Layer 1 — Motor de Cumplimiento (Python)"]
+        AG["agent.py — Orquestador"]:::engine
+        S1["pdf_parser
+        Docling (IBM)
+        TableFormer"]:::engine
+        S2["estructural_checker
+        EST-001..011
+        100% Python"]:::engine
+        S3["rule_dispatcher
+        168 reglas COMP
+        Mapeo determinístico"]:::engine
+        S4["declaracion_extractor
+        Qwen 2.5 14B
+        UNA llamada LLM"]:::engine
+        S5["declaracion_checker
+        Regex + Set intersection
+        Veredicto Python puro"]:::engine
+        S6["Reporte JSON
+        179 hallazgos
+        CUMPLE / NO CUMPLE / N/A"]:::engine
+        EN["Enriquecimiento Opt-in
+        correction_writer
+        summary_writer"]:::optNode
+    end
+
+    subgraph AI["IA Local — sin conexion a internet"]
+        OL["Ollama
+        qwen2.5:14b
+        localhost:11434"]:::ai
+    end
+
+    DB[("SQLite
+    unibabot.db
+    Users · Analyses · Shares")]:::store
+    CA[("Cache SHA-256
+    cache/enrichment/
+    idempotencia LLM")]:::store
+
+    B     <-->|"HTTP · REST · file upload"| API
+    B     <-.->|"SSE — progreso en tiempo real"| API
+    API   <-->                              DB
+    API   -->|"Encolar job"| RD
+    RD    -->                              W
+    W     <-->                             DB
+    W     -->                              AG
+    AG    -->                              S1
+    S1    -->                              S2
+    S1    -->                              S3
+    S3    -->                              S4
+    S4    -->                              S5
+    S2    -->                              S6
+    S5    -->                              S6
+    S6    -->                              EN
+    S4    <-->|"HTTP POST /api/chat"| OL
+    EN    <-->|"HTTP POST /api/chat"| OL
+    EN    <-->                             CA

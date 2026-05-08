@@ -1,0 +1,109 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#f1f5f9', 'primaryBorderColor': '#64748b', 'background': '#f8fafc', 'fontSize': '13px'}}}%%
+graph TD
+    classDef root    fill:#1e293b,stroke:#0f172a,color:#f8fafc,font-weight:bold
+    classDef cat     fill:#3b82f6,stroke:#1d4ed8,color:#ffffff,font-weight:bold
+    classDef sub     fill:#dbeafe,stroke:#3b82f6,color:#1e40af
+    classDef estNode fill:#fef3c7,stroke:#d97706,color:#78350f,font-weight:bold
+    classDef compNode fill:#dcfce7,stroke:#16a34a,color:#14532d,font-weight:bold
+    classDef evalNode fill:#f3f4f6,stroke:#6b7280,color:#374151,font-size:11px
+
+    ROOT["179 Lineamientos Institucionales
+    Universidad de Ibague — PDA"]:::root
+
+    EST["11 Reglas Estructurales
+    EST-001 a EST-011
+    Verificacion deterministica
+    Python puro · 100 ms"]:::estNode
+
+    COMP["168 Reglas de Competencias
+    COMP-001 a COMP-168
+    LLM extrae · Python decide"]:::compNode
+
+    ROOT --> EST
+    ROOT --> COMP
+
+    CE["Competencias Especificas
+    Codigos C1 – C9
+    Disciplinares del programa"]:::cat
+
+    CG["Competencias Genericas
+    Codigos 1a – 1l
+    Transversales OCDE"]:::cat
+
+    SP["Competencias SABER PRO
+    Codigos SP1 – SP5
+    Prueba estatal Colombia"]:::cat
+
+    DIM["Dimensiones
+    Codigos D1 – D6
+    Ejes de formacion Unibague"]:::cat
+
+    ABET["Resultados ABET
+    Codigos X.Y
+    Acreditacion internacional"]:::cat
+
+    COMP --> CE
+    COMP --> CG
+    COMP --> SP
+    COMP --> DIM
+    COMP --> ABET
+
+    CE1["C1: Competencia especifica 1"]:::evalNode
+    CE2["C2: Competencia especifica 2"]:::evalNode
+    CE3["..."]:::evalNode
+    CE4["C9: Competencia especifica 9"]:::evalNode
+    CE --> CE1
+    CE --> CE2
+    CE --> CE3
+    CE --> CE4
+
+    CG1["1a: Instrumentales cognitivas"]:::evalNode
+    CG2["1b: Instrumentales metodologicas"]:::evalNode
+    CG3["..."]:::evalNode
+    CG4["1l: Sistémicas de habilidades"]:::evalNode
+    CG --> CG1
+    CG --> CG2
+    CG --> CG3
+    CG --> CG4
+
+    SP1n["SP1: Lectura critica"]:::evalNode
+    SP2n["SP2: Razonamiento cuantitativo"]:::evalNode
+    SP3n["SP3: Escritura"]:::evalNode
+    SP4n["SP4: Ciudadanas"]:::evalNode
+    SP5n["SP5: Ingles"]:::evalNode
+    SP --> SP1n
+    SP --> SP2n
+    SP --> SP3n
+    SP --> SP4n
+    SP --> SP5n
+
+    D1["D1: Transdisciplinar"]:::evalNode
+    D2["D2: Emprendimiento"]:::evalNode
+    D3["D3: TIC"]:::evalNode
+    D4["D4: Internacional"]:::evalNode
+    D5["D5: Espiritu emprendedor"]:::evalNode
+    D6["D6: Responsabilidad social"]:::evalNode
+    DIM --> D1
+    DIM --> D2
+    DIM --> D3
+    DIM --> D4
+    DIM --> D5
+    DIM --> D6
+
+    AB1["X.1: Ingenieria aplicada"]:::evalNode
+    AB2["X.2: Experimentos"]:::evalNode
+    AB3["..."]:::evalNode
+    ABET --> AB1
+    ABET --> AB2
+    ABET --> AB3
+
+    EST1["EST-001: Informacion general presente"]:::evalNode
+    EST2["EST-002: Estrategia pedagogica"]:::evalNode
+    EST3["EST-003: Resultados de aprendizaje"]:::evalNode
+    EST4["..."]:::evalNode
+    EST11["EST-011: Cronograma completo"]:::evalNode
+    EST --> EST1
+    EST --> EST2
+    EST --> EST3
+    EST --> EST4
+    EST --> EST11
