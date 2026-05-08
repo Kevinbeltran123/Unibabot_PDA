@@ -130,7 +130,6 @@ Docs/                 # IEEE technical report (drafts and slides are gitignored)
 scripts/              # setup.sh/ps1 (first-time), dev.sh/ps1 (start stack), smoke_api.sh (E2E)
 requirements.txt      # Production deps: docling, ollama, sentence-transformers, structlog
 requirements-api.txt  # requirements.txt + FastAPI, uvicorn, RQ, Redis, etc.
-requirements-rag.txt  # RAG-only deps: chromadb, torch (semantic RAG alternative, not used in prod)
 docker-compose.yml    # Alternative: runs the full stack in containers
 ```
 

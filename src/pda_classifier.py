@@ -15,7 +15,7 @@ de secciones ya parseado.
 
 from __future__ import annotations
 
-from rules.estructural_checker import verificar_estructurales
+from rules.estructural_checker import contains_any, find_seccion, verificar_estructurales
 
 
 # Umbrales (ajustables si la cobertura de PDAs nuevos cambia).
@@ -79,16 +79,18 @@ def clasificar_documento(secciones: dict[str, str]) -> tuple[bool, str | None, s
             "sea un Plan de Desarrollo Académico de la Universidad de Ibagué.",
         )
 
-    # EST-001 (Informacion general institucional) es requisito duro para
-    # categorizar como OLD_TEMPLATE. Sin ella el documento es casi
-    # seguramente un paper o syllabus que coincidio en algunos EST por
-    # casualidad (terminologia academica generica).
-    est_001_cumple = next(
-        (h["estado"] == "CUMPLE" for h in hallazgos_est if h["regla_id"] == "EST-001"),
-        False,
-    )
+    # La seccion "Informacion general" institucional es requisito duro para
+    # identificar el documento como PDA. Usamos una deteccion laxa (labels
+    # presentes, aunque los valores esten vacios) porque la pregunta aqui es
+    # "es un PDA?" no "cumple el PDA?". EST-001 responde la segunda pregunta
+    # y ya figura en hallazgos_est para el reporte de cumplimiento.
+    _INFO_LABELS = ["programa", "nombre de la asignatura", "tipo de asignatura", "modalidad"]
+    _info_seccion = find_seccion(secciones, ["informacion general", "general information"])
+    tiene_info_general = _info_seccion is not None and sum(
+        1 for lbl in _INFO_LABELS if contains_any(_info_seccion[1], [lbl])
+    ) >= 2
 
-    if n_cumple < EST_MIN_TEMPLATE_VIEJO or not est_001_cumple:
+    if n_cumple < EST_MIN_TEMPLATE_VIEJO or not tiene_info_general:
         return (
             False,
             "INSUFFICIENT_STRUCTURE",

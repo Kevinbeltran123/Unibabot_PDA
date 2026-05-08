@@ -65,6 +65,44 @@ def count_matches(texto: str, patrones: list[str]) -> int:
     return sum(1 for p in patrones if p in texto_norm)
 
 
+_CELDAS_VACIAS = frozenset({"nan", "none", "n/a", "-", "–", "—"})
+
+
+def _campo_tiene_valor(contenido: str, patrones_label: list[str]) -> bool:
+    """True si la fila de tabla que contiene el label del campo tiene un valor no vacio.
+
+    Docling convierte tablas a markdown (| label | valor |). Cuando la celda
+    de valor esta vacia, pandas exporta | label |  | — la etiqueta aparece en
+    el texto pero la celda de valor es solo espacios o 'nan'. Esta funcion
+    encuentra la fila del campo y verifica que haya contenido real en la celda
+    de valor, no solo el label.
+    """
+    patrones_norm = [normalizar(p) for p in patrones_label]
+
+    for linea in contenido.splitlines():
+        linea_norm = normalizar(linea)
+        if not any(p in linea_norm for p in patrones_norm):
+            continue
+
+        if "|" in linea:
+            celdas = [c.strip() for c in linea.split("|")]
+            celdas_utiles = [
+                c for c in celdas
+                if c and c.lower() not in _CELDAS_VACIAS
+            ]
+            # >= 2 celdas utiles => label + valor presentes en la fila
+            return len(celdas_utiles) >= 2
+
+        # Texto plano: verificar que hay contenido despues del label
+        for p_norm in patrones_norm:
+            idx = linea_norm.find(p_norm)
+            if idx >= 0:
+                resto = linea_norm[idx + len(p_norm):].strip(": \t")
+                return bool(resto and len(resto) > 2)
+
+    return False
+
+
 def hallazgo(regla_id: str, regla: str, cumple: bool, evidencia: str, correccion: str | None = None) -> dict:
     """Constructor de hallazgos con formato estandar."""
     return {
@@ -92,11 +130,22 @@ def check_EST_001(secciones: dict) -> dict:
         "tipo": ["tipo de asignatura", "subject type", "asignatura obligatoria", "mandatory"],
         "modalidad": ["modalidad", "modality", "presencial", "presential"],
     }
-    encontrados = sum(1 for _, patrones in campos.items() if contains_any(contenido, patrones))
+    faltantes = [campo for campo, patrones in campos.items() if not _campo_tiene_valor(contenido, patrones)]
+    encontrados = len(campos) - len(faltantes)
 
+    if not faltantes:
+        return hallazgo("EST-001", regla, True, f"Seccion '{nombre}' contiene {encontrados}/4 campos basicos con valores")
     if encontrados >= 3:
-        return hallazgo("EST-001", regla, True, f"Seccion '{nombre}' contiene {encontrados}/4 campos basicos de informacion general")
-    return hallazgo("EST-001", regla, False, f"Seccion '{nombre}' solo contiene {encontrados}/4 campos basicos", "Agregar campos faltantes: programa, nombre, tipo, modalidad")
+        return hallazgo(
+            "EST-001", regla, False,
+            f"Seccion '{nombre}': campo sin valor — {', '.join(faltantes)}",
+            f"Completar el campo vacio: {', '.join(faltantes)}",
+        )
+    return hallazgo(
+        "EST-001", regla, False,
+        f"Seccion '{nombre}' solo contiene {encontrados}/4 campos con valores — faltan: {', '.join(faltantes)}",
+        f"Agregar o completar: {', '.join(faltantes)}",
+    )
 
 
 def check_EST_002(secciones: dict) -> dict:
