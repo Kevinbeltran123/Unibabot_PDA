@@ -1,3 +1,4 @@
 docling>=2.9.0
 ollama>=0.3.0
+sentence-transformers>=3.0.0
 structlog>=24.1.0

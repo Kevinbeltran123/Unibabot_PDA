@@ -46,8 +46,11 @@ def reranker_disponible() -> bool:
 
 @lru_cache(maxsize=1)
 def _cargar_cross_encoder():
-    from sentence_transformers import CrossEncoder
-    return CrossEncoder(_resolver_modelo(), device=_resolver_device())
+    try:
+        from sentence_transformers import CrossEncoder
+        return CrossEncoder(_resolver_modelo(), device=_resolver_device())
+    except ImportError:
+        return None
 
 
 def rerank_candidatos(query: str, candidatos: list[dict], top_k: int = 5) -> list[dict]:
@@ -61,11 +64,14 @@ def rerank_candidatos(query: str, candidatos: list[dict], top_k: int = 5) -> lis
 
     Returns:
         Lista re-ordenada de dicts, cada uno con campo extra "rerank_score".
+        Lista vacia si sentence-transformers no esta instalado.
     """
     if not candidatos:
         return []
 
     model = _cargar_cross_encoder()
+    if model is None:
+        return []
     pares = [(query, c["descripcion"]) for c in candidatos]
     scores = model.predict(pares, show_progress_bar=False)
 

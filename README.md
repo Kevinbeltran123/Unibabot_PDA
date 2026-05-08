@@ -36,75 +36,71 @@ For the full architecture diagram, design decisions, and the comparison with the
 
 ## Quickstart
 
-The stack has four processes: Redis, FastAPI API, RQ worker, and the Next.js frontend. Run them directly — no Docker required.
+The stack has four processes: Redis, FastAPI API, RQ worker, and Next.js. All run locally — no Docker required.
 
-**Prerequisite — Ollama.** Install from [ollama.com](https://ollama.com), then:
+### Prerequisites
+
+| Dependency | macOS | Ubuntu/Debian | Windows |
+|------------|-------|---------------|---------|
+| Python 3.12+ | `brew install python@3.12` | `sudo apt install python3-venv python3-pip` | `winget install Python.Python.3.12` |
+| Node.js 18+ | `brew install node` | `sudo apt install nodejs npm` | `winget install nodejs-lts` |
+| Redis | `brew install redis` | `sudo apt install redis-server` | `winget install Redis.Redis` |
+| Ollama | `brew install ollama` | [ollama.com/download](https://ollama.com/download) | [ollama.com/download](https://ollama.com/download) |
+
+After installing Ollama, pull the model (this downloads ~9 GB once):
 
 ```bash
 ollama pull qwen2.5:14b
 ```
 
-### macOS
+> **Hardware:** the 14B model runs on CPU but is slow (~10 min/PDA). On a Mac with Apple Silicon (M1/M2/M3) or a machine with a dedicated GPU, inference uses Metal/CUDA automatically and takes ~5 min/PDA.
+
+### macOS / Linux
 
 ```bash
-brew install redis node python@3.12
-brew services start redis
+# 1. Start Redis
+brew services start redis          # macOS
+sudo systemctl start redis         # Linux
 
-python3 -m venv ~/.venvs/unibabot          # venv outside iCloud to avoid file eviction
-~/.venvs/unibabot/bin/pip install -r requirements-api.txt
-cd web && npm install && cd ..
+# 2. First-time setup: creates venv at ~/.venvs/unibabot, pip install, npm install
+bash scripts/setup.sh
+
+# 3. Start all four processes (Ctrl+C to stop everything)
+bash scripts/dev.sh
 ```
 
-Open four terminals (or use `scripts/dev.sh`):
+Open `http://localhost:3000`, register a user, and upload a PDA PDF.
 
-```bash
-~/.venvs/unibabot/bin/uvicorn src.api.main:app --reload --port 8000
-~/.venvs/unibabot/bin/python -m src.api.jobs.worker
-cd web && npm run dev
-```
-
-Open `http://localhost:3000` and register a user.
-
-### Linux (Ubuntu/Debian)
-
-```bash
-sudo apt install redis-server python3-venv python3-pip nodejs npm
-sudo systemctl start redis
-
-python3 -m venv ~/.venvs/unibabot
-~/.venvs/unibabot/bin/pip install -r requirements-api.txt
-cd web && npm install && cd ..
-
-# Then same four terminals as macOS
-```
+> The first analysis will take a few extra minutes while Docling downloads its layout and OCR models (~1 GB, cached after that).
 
 ### Windows
 
-**Option A — WSL2 (recommended):** install Ubuntu on WSL2, follow the Linux instructions. Ollama for Windows runs on the host and is reachable from WSL2 at `localhost:11434`.
+**Option A — WSL2 (recommended):** install Ubuntu on WSL2, follow the macOS/Linux steps above. Ollama for Windows runs on the host and is reachable from WSL2 at `localhost:11434`.
 
-**Option B — Native Windows:**
+**Option B — Native Windows (PowerShell as Administrator):**
 
 ```powershell
-winget install Ollama.Ollama Redis.Redis nodejs-lts Python.Python.3.12
+# 1. Start Redis (keep this terminal open, or run as a service)
+redis-server
 
-# venv outside OneDrive to avoid sync issues (same reason as iCloud on macOS)
-python -m venv "$env:USERPROFILE\.venvs\unibabot"
-& "$env:USERPROFILE\.venvs\unibabot\Scripts\pip" install -r requirements-api.txt
-cd web; npm install; cd ..
+# 2. First-time setup (venv goes to %USERPROFILE%\.venvs\unibabot, outside OneDrive)
+.\scripts\setup.ps1
 
-# Four terminals
-& "$env:USERPROFILE\.venvs\unibabot\Scripts\uvicorn" src.api.main:app --reload --port 8000
-& "$env:USERPROFILE\.venvs\unibabot\Scripts\python" -m src.api.jobs.worker
-cd web; npm run dev
+# 3. Start all four processes (Ctrl+C to stop)
+.\scripts\dev.ps1
 ```
 
-**Run the backend smoke test:**
+### Verify the installation
+
+With the stack running, execute the end-to-end smoke test (requires at least one PDF in `PDAs/`):
 
 ```bash
 bash scripts/smoke_api.sh
 ```
 
-**Run the test suite:**
+The script registers a user, uploads a PDA, polls until the analysis completes, and downloads the report. A final `[smoke] OK` confirms everything is working.
+
+**Run the unit/integration test suite** (stack must be running):
 
 ```bash
 pytest tests/api/ -v
@@ -131,10 +127,10 @@ tests/                # Pytest suite (classifier, API, auth)
 data/                 # Rules, gold labels, SQLite (PDAs and ChromaDB are gitignored)
 results/              # Tagged metrics + progression notes
 Docs/                 # IEEE technical report (drafts and slides are gitignored)
-scripts/              # dev.sh (Unix), dev.ps1 (Windows), smoke_api.sh (E2E test)
-requirements.txt      # Production deps: docling, ollama, structlog
+scripts/              # setup.sh/ps1 (first-time), dev.sh/ps1 (start stack), smoke_api.sh (E2E)
+requirements.txt      # Production deps: docling, ollama, sentence-transformers, structlog
 requirements-api.txt  # requirements.txt + FastAPI, uvicorn, RQ, Redis, etc.
-requirements-rag.txt  # RAG-only deps: chromadb, sentence-transformers, torch
+requirements-rag.txt  # RAG-only deps: chromadb, torch (semantic RAG alternative, not used in prod)
 docker-compose.yml    # Alternative: runs the full stack in containers
 ```
 

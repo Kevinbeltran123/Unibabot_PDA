@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Smoke test E2E del backend.
 # Asume:
-#   - El stack Docker esta arriba (docker compose up -d). Esto levanta api en :8000,
-#     worker, redis y web. Tambien funciona contra otra API si se exporta API=...
+#   - El stack esta arriba: local (bash scripts/dev.sh) o Docker (docker compose up -d).
+#     La API debe estar escuchando en :8000. Para apuntar a otro host: export API=...
 #   - Existe al menos un PDF en PDAs/
 #   - Ollama corre en el host con qwen2.5:14b para que el worker pueda procesar.
 #
