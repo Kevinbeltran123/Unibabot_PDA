@@ -6,10 +6,11 @@ metadata indexable y status del job.
 
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
+from .types import UtcDateTime
 
 
 def _utcnow() -> datetime:
@@ -22,7 +23,7 @@ class User(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=_utcnow, nullable=False)
 
     analyses: Mapped[list["Analysis"]] = relationship(
         back_populates="user",
@@ -56,9 +57,9 @@ class Analysis(Base):
 
     report_path: Mapped[str | None] = mapped_column(String(500), default=None)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, nullable=False)
-    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
-    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=_utcnow, nullable=False)
+    started_at: Mapped[datetime | None] = mapped_column(UtcDateTime(), default=None)
+    completed_at: Mapped[datetime | None] = mapped_column(UtcDateTime(), default=None)
     duration_s: Mapped[float | None] = mapped_column(Float, default=None)
 
     user: Mapped["User"] = relationship(back_populates="analyses")
@@ -90,12 +91,12 @@ class ShareToken(Base):
     audience: Mapped[str] = mapped_column(String(20), default="docente", nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=_utcnow, nullable=False
+        UtcDateTime(), default=_utcnow, nullable=False
     )
-    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
-    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    expires_at: Mapped[datetime | None] = mapped_column(UtcDateTime(), default=None)
+    revoked_at: Mapped[datetime | None] = mapped_column(UtcDateTime(), default=None)
 
-    last_accessed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    last_accessed_at: Mapped[datetime | None] = mapped_column(UtcDateTime(), default=None)
     access_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     analysis: Mapped["Analysis"] = relationship(back_populates="share_tokens")
