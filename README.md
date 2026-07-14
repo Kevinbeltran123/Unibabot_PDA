@@ -22,6 +22,10 @@ Intelligent agent that automates compliance verification of Academic Development
 
 NC = NO CUMPLE class (real non-compliance findings). The hold-out test set is the metric of record because it measures generalization to PDAs the system has never seen.
 
+**How much weight these numbers carry.** A perfect score deserves scrutiny rather than applause, so here is the honest reading. The hold-out set is small — 55 entries across 3 PDAs — so the confidence interval around 1.000 is wide, and a single additional failure mode would move it visibly. The PDAs also come from one faculty in one institution and share a common template, which is exactly the regularity a rule-driven dispatcher exploits; accuracy would very likely drop on PDAs written against a different template. What the result does establish is that the pipeline handles the guideline set it was designed for without hand-tuning per document, and that the errors it makes are recoverable rather than silent.
+
+The stronger evidence is the [rule-driven vs. semantic-RAG benchmark](results/rag_vs_rules_benchmark.md), which compares two dispatchers on the same corpus and is the part of this work that generalizes.
+
 The full narrative (methodology, per-iteration metric progression, related work, ablations, failure analysis) is in [Docs/UnibaBot_PDA.pdf](Docs/UnibaBot_PDA.pdf). For the head-to-head comparison between the rule-driven and semantic-RAG dispatchers, see [results/rag_vs_rules_benchmark.md](results/rag_vs_rules_benchmark.md).
 
 ## Architecture
